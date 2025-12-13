@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders - InventoryPro</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Same header & sidebar -->
+    <header class="header">
+        <div class="logo">InventoryPro</div>
+        <div class="search-bar">
+            <input type="text" placeholder="Search anything..." onkeyup="globalSearch(this.value)">
+        </div>
+        <div class="user-menu">
+            <span>Notifications (3)</span>
+            <span>Admin</span>
+        </div>
+    </header>
+
+    <nav class="sidebar">
+        <ul>
+            <li class="active"><a href="index.html">Dashboard</a></li>
+            <li><a href="inventory.html">Inventory</a></li>
+            <li><a href="orders.html">Orders</a></li>
+            <li><a href="reports.html">Reports</a></li>
+            <li><a href="settings.html">Settings</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <h1>Orders Management</h1>
+        <button class="btn btn-primary" onclick="openModal('newOrderModal')">+ New Order</button>
+
+        <div class="table-container" style="margin-top:1rem;">
+            <table id="ordersTable">
+                <thead>
+                    <tr>
+                        <th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- New Order Modal -->
+    <div id="newOrderModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('newOrderModal')">&times;</span>
+            <h2>Create New Order</h2>
+            <form id="orderForm">
+                <div class="form-group">
+                    <label>Customer Name</label>
+                    <input type="text" id="customerName" required>
+                </div>
+                <div class="form-group">
+                    <label>Number of Items</label>
+                    <input type="number" id="itemCount" value="1" min="1">
+                </div>
+                <div class="form-group">
+                    <label>Total Amount ($)</label>
+                    <input type="number" step="0.01" id="orderTotal" required>
+                </div>
+                <button type="submit" class="btn btn-success">Create Order</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        function loadOrders() {
+            const orders = InventoryData.getOrders();
+            const tbody = document.querySelector("#ordersTable tbody");
+            tbody.innerHTML = orders.map(o => `
+                <tr>
+                    <td>${o.orderId}</td>
+                    <td>${o.customer}</td>
+                    <td>${o.items}</td>
+                    <td>$${o.total}</td>
+                    <td>
+                        <select onchange="updateStatus(${o.id}, this.value)">
+                            <option ${o.status==='Pending'?'selected':''}>Pending</option>
+                            <option ${o.status==='Shipped'?'selected':''}>Shipped</option>
+                            <option ${o.status==='Delivered'?'selected':''}>Delivered</option>
+                        </select>
+                    </td>
+                    <td>${o.date}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deleteOrder(${o.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateStatus(id, status) {
+            const orders = InventoryData.getOrders().map(o => o.id === id ? {...o, status} : o);
+            InventoryData.saveOrders(orders);
+            loadOrders();
+        }
+
+        function deleteOrder(id) {
+            if (confirm("Delete this order?")) {
+                const orders = InventoryData.getOrders().filter(o => o.id !== id);
+                InventoryData.saveOrders(orders);
+                loadOrders();
+            }
+        }
+
+        document.getElementById("orderForm").onsubmit = function(e) {
+            e.preventDefault();
+            const orders = InventoryData.getOrders();
+            const newOrder = {
+                id: Date.now(),
+                orderId: "#ORD-" + (1000 + orders.length + 1),
+                customer: document.getElementById("customerName").value,
+                items: parseInt(document.getElementById("itemCount").value),
+                total: parseFloat(document.getElementById("orderTotal").value),
+                status: "Pending",
+                date: new Date().toISOString().split("T")[0]
+            };
+            orders.push(newOrder);
+            InventoryData.saveOrders(orders);
+            loadOrders();
+            closeModal("newOrderModal");
+        };
+
+        loadOrders();
+    </script>
+</body>
+</html>

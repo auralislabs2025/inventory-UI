@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard - InventoryPro</title>
+  <style>
+    :root{
+      --primary:#4361ee; --success:#06d6a0; --warning:#ff9f1c; --danger:#ef476f;
+      --dark:#2c3e50; --muted:#6c757d; --bg:#f8f9fa; --card:#ffffff;
+      --radius:12px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background:var(--bg); color:#222; -webkit-font-smoothing:antialiased;
+      line-height:1.45; font-size:15px;
+    }
+    .app{display:flex;min-height:100vh}
+    /* Sidebar */
+    .sidebar{width:240px;background:var(--dark);color:#fff;padding:18px 12px;flex-shrink:0}
+    .sidebar .logo{font-weight:700;font-size:1.4rem;padding:6px 14px;margin-bottom:12px}
+    .sidebar nav{margin-top:6px}
+    .sidebar a{display:block;color:#fff;text-decoration:none;padding:10px 14px;border-radius:8px;margin:4px 4px;font-weight:500}
+    .sidebar a.active, .sidebar a:hover{background:#34495e}
+    /* Main area */
+    .main{flex:1;display:flex;flex-direction:column}
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.06);z-index:10}
+    .menu-btn{background:none;border:none;font-size:1.2rem;cursor:pointer;color:#333}
+    .page-title{font-size:1.45rem;font-weight:700;color:var(--dark)}
+    .top-actions{display:flex;gap:12px;align-items:center}
+    .avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--primary);color:#fff;font-weight:700}
+    .content{padding:22px;overflow:auto}
+    /* Layout: two-column responsive */
+    .dashboard-grid{display:grid;grid-template-columns: 1fr 360px;gap:20px;align-items:start}
+    @media(max-width:1100px){ .dashboard-grid{grid-template-columns:1fr 320px} }
+    @media(max-width:880px){ .dashboard-grid{grid-template-columns:1fr} .right-col{order:2} }
+    /* Cards */
+    .card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:0 8px 28px rgba(31,41,55,0.06)}
+   /* FIX: chart-card was missing */
+.chart-card{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:18px;
+  box-shadow:0 8px 28px rgba(31,41,55,0.06);
+  margin-bottom:22px;
+}
+.content > section{
+  margin-bottom:26px;
+}
+
+    .card-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+    .card-title{font-size:1.05rem;font-weight:700;color:var(--dark)}
+    .muted{color:var(--muted);font-size:0.95rem}
+    /* Marketplace list */
+    .market-controls{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+    .search-input{flex:1;display:flex;gap:8px;align-items:center;background:#f4f6fb;padding:8px;border-radius:10px}
+    .search-input input{border:0;background:transparent;outline:none;padding:6px;font-size:0.95rem;width:100%}
+    .select{padding:8px 10px;border-radius:8px;border:1px solid #e6e9ef;background:white}
+    .market-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+    .prod-card{background:linear-gradient(180deg, #fff,#fbfdff);border-radius:10px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;transition:transform .18s,box-shadow .18s}
+    .prod-card:hover{transform:translateY(-6px);box-shadow:0 12px 30px rgba(20,30,60,0.08)}
+    .prod-media{height:140px;background:#f3f6fb;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .prod-media img{width:100%;height:100%;object-fit:cover}
+    .prod-body{padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+    .prod-title{font-weight:700;color:var(--dark);font-size:0.98rem}
+    .prod-meta{color:var(--muted);font-size:0.9rem}
+    .prod-footer{display:flex;justify-content:space-between;align-items:center;margin-top:auto}
+    .price{color:var(--primary);font-weight:800}
+    .badge{background:var(--primary);color:#fff;padding:6px 8px;border-radius:999px;font-size:0.78rem}
+    /* Right column: Vendors + activity */
+    .vendor-grid{display:grid;grid-template-columns:1fr;gap:10px}
+    .vendor-card{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;border:1px solid #f0f2f7;background:#fff}
+    .vendor-info{display:flex;flex-direction:column;gap:6px}
+    .vendor-name{font-weight:700;color:var(--dark)}
+    .vendor-contact{color:var(--muted);font-size:0.88rem}
+    .vendor-actions{display:flex;gap:8px}
+    .small-btn{padding:8px 10px;border-radius:8px;border:0;font-weight:600;cursor:pointer}
+    .small-btn.ghost{background:#fff;border:1px solid #e6e9ef}
+    /* Modal improvements */
+    .modal{display:none;position:fixed;inset:0;background:rgba(8,12,20,0.45);z-index:3000;align-items:center;justify-content:center;padding:20px}
+    .modal.open{display:flex}
+    .modal-card{background:#fff;border-radius:12px;padding:20px;max-width:980px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 20px 50px rgba(12,18,40,0.2)}
+    .modal-grid{display:grid;grid-template-columns:1fr 2fr;gap:18px}
+    .modal-media{background:#fbfdff;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:8px}
+    .offer-table{width:100%;border-collapse:collapse}
+    .offer-table th,.offer-table td{padding:10px;border-bottom:1px solid #f0f2f7;text-align:left;font-size:0.94rem}
+    .offer-table thead th{position:sticky;top:0;background:#fff}
+    .actions-row{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+    /* helper */
+    .muted-center{color:var(--muted);text-align:center;padding:18px}
+    @media(max-width:860px){
+      .modal-grid{grid-template-columns:1fr}
+      .dashboard-grid{grid-template-columns:1fr}
+      .right-col{order:2}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="logo">InventoryPro</div>
+      <nav>
+        <a class="active" href="#">Dashboard</a>
+        <a href="inventory.html">Inventory</a>
+        <a href="suppliers.html">Suppliers</a>
+        <a href="purchases.html">Purchases</a>
+        <a href="adjustments.html">Adjustments</a>
+        <a href="reports.html">Reports</a>
+        <a href="settings.html">Settings</a>
+      </nav>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div style="display:flex;gap:14px;align-items:center">
+          <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <div class="page-title">Dashboard</div>
+        </div>
+        <div class="top-actions">
+          <select onchange="document.body.className=this.value;localStorage.setItem('theme',this.value)" class="select">
+            <option value="">Light</option>
+            <option value="dark">Dark</option>
+            <option value="contrast">High Contrast</option>
+          </select>
+          <div class="avatar">AD</div>
+        </div>
+      </header>
+
+      <main class="content">
+        <!-- ================= DASHBOARD INSIGHTS ================= -->
+<section style="margin-bottom:28px;">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">
+
+    <!-- Today Sales -->
+    <div class="chart-card">
+      <div class="card-title">Today Sales</div>
+      <h2 style="color:var(--primary);margin-top:10px;">₹ 18,420</h2>
+      <div style="color:#6c757d;font-size:0.9rem;">+12% vs yesterday</div>
+    </div>
+
+    <!-- Gross Profit -->
+    <div class="chart-card">
+      <div class="card-title">Gross Profit</div>
+      <h2 style="color:var(--success);margin-top:10px;">₹ 4,680</h2>
+      <div style="color:#6c757d;font-size:0.9rem;">Avg Margin: 25.4%</div>
+    </div>
+
+    <!-- Low Stock -->
+    <div class="chart-card">
+      <div class="card-title">Low Stock Alerts</div>
+      <h2 style="color:var(--warning);margin-top:10px;">3 Items</h2>
+      <div style="color:#6c757d;font-size:0.9rem;">Needs reorder</div>
+    </div>
+
+    <!-- Open Orders -->
+    <div class="chart-card">
+      <div class="card-title">Open Purchase Orders</div>
+      <h2 style="color:var(--danger);margin-top:10px;">2</h2>
+      <div style="color:#6c757d;font-size:0.9rem;">Awaiting delivery</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================= INVENTORY HEALTH ================= -->
+<section class="chart-card">
+  <div class="card-title">Inventory Health</div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:15px;">
+
+    <div>
+      <strong>Total SKUs</strong>
+      <div style="font-size:1.4rem;margin-top:6px;">124</div>
+    </div>
+
+    <div>
+      <strong style="color:var(--warning)">Low Stock</strong>
+      <div style="font-size:1.4rem;margin-top:6px;">8</div>
+    </div>
+
+    <div>
+      <strong style="color:var(--danger)">Out of Stock</strong>
+      <div style="font-size:1.4rem;margin-top:6px;">3</div>
+    </div>
+
+    <div>
+      <strong>Dead Stock (30d)</strong>
+      <div style="font-size:1.4rem;margin-top:6px;">11</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================= SALES PERFORMANCE ================= -->
+<section class="chart-card">
+  <div class="card-title">Top Selling Products (This Week)</div>
+
+  <ul style="margin-top:14px;padding-left:18px;line-height:1.8;">
+    <li>Wireless Mouse Pro – 48 units</li>
+    <li>USB-C Hub 7-in-1 – 31 units</li>
+    <li>Mechanical Keyboard RGB – 19 units</li>
+  </ul>
+
+  <div style="margin-top:15px;color:#6c757d;">
+    Avg Order Value: <strong>₹ 920</strong>
+  </div>
+</section>
+
+<!-- ================= SMART ACTIONS ================= -->
+<section class="chart-card">
+  <div class="card-title">Smart Alerts & Suggestions</div>
+
+  <ul style="margin-top:14px;padding-left:18px;line-height:1.9;">
+    <li>🔁 Reorder <strong>Wireless Mouse Pro</strong> (stock below threshold)</li>
+    <li>💰 <strong>Alpha Supplies</strong> offers lower price for USB-C Hub today</li>
+    <li>📈 Demand for <strong>HDMI Cable 2m</strong> increased by 28% this week</li>
+  </ul>
+</section>
+<!-- ================= END DASHBOARD ================= -->
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <h2 style="font-size:1.25rem">Marketplace — Recommended purchases</h2>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="small-btn ghost" onclick="openMarketplaceModal()">Refresh</button>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <!-- LEFT: Marketplace -->
+          <div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Available Products</div>
+                <div class="muted">Best vendor offers, sorted by price</div>
+              </div>
+
+              <div class="market-controls" style="margin-bottom:12px">
+                <div class="search-input" style="min-width:250px">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="opacity:.6"><path d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm7-2-4.35-4.35" stroke="#666" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <input id="productSearch" placeholder="Search products, categories..." oninput="filterMarketplace()" />
+                </div>
+
+                <select id="categoryFilter" class="select" onchange="filterMarketplace()">
+                  <option value="">All categories</option>
+                </select>
+
+                <div style="margin-left:auto" class="muted">Showing <span id="marketCount">0</span> items</div>
+              </div>
+
+              <div id="marketList" class="market-list"></div>
+            </div>
+          </div>
+
+          <!-- RIGHT: Vendors & activity -->
+          <div class="right-col">
+            <div class="card" style="margin-bottom:14px">
+              <div class="card-header">
+                <div class="card-title">Vendors</div>
+                <div class="muted">Quick access to vendor catalogs</div>
+              </div>
+
+              <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+                <input id="vendorSearch" placeholder="Search vendor..." oninput="filterVendors()" style="flex:1;padding:8px;border-radius:8px;border:1px solid #eaeef7" />
+                <button class="small-btn ghost" onclick="renderVendors()">Refresh</button>
+              </div>
+
+              <div id="vendorGrid" class="vendor-grid"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Recent Activity</div>
+                <div class="muted">Latest vendor orders (local)</div>
+              </div>
+              <div id="activityList" class="muted-center">No recent activity</div>
+            </div>
+          </div>
+        </div> <!-- end grid -->
+
+        <!-- Marketplace Modal -->
+        <div id="marketplaceModal" class="modal" aria-hidden="true">
+          <div class="modal-card" role="dialog" aria-modal="true">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <h3 id="modalProductName" style="margin:0;color:var(--dark)"></h3>
+              <button onclick="closeModal()" class="small-btn ghost">Close</button>
+            </div>
+
+            <div class="modal-grid">
+              <div class="modal-media">
+                <img id="modalProductImage" src="" alt="product" style="width:100%;max-height:260px;object-fit:contain;border-radius:8px" />
+              </div>
+
+              <div>
+                <div style="margin-bottom:10px"><strong>Category:</strong> <span id="modalCategory"></span></div>
+                <div style="margin-bottom:12px"><strong>Needed by:</strong> <span id="modalNeededBy"></span></div>
+
+                <h4 style="margin:10px 0">Vendor Offers</h4>
+                <div style="max-height:350px;overflow:auto">
+                  <table class="offer-table">
+                    <thead>
+                      <tr><th>Vendor</th><th>Price/Unit</th><th>MOQ</th><th>Delivery</th><th>Rating</th><th></th></tr>
+                    </thead>
+                    <tbody id="vendorOffersBody"></tbody>
+                  </table>
+                </div>
+
+                <div class="actions-row">
+                  <button class="small-btn" onclick="closeModal()">Cancel</button>
+                  <button class="small-btn" style="background:var(--primary);color:white" id="createPOBtn" onclick="createPOFromOffer()">Create PO</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vendor Modal -->
+        <div id="vendorModal" class="modal" aria-hidden="true">
+          <div class="modal-card" role="dialog" aria-modal="true">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <h3 id="vendorModalTitle" style="margin:0;color:var(--dark)"></h3>
+              <button onclick="closeVendorModal()" class="small-btn ghost">Close</button>
+            </div>
+
+            <div id="vendorProductsContainer" style="display:grid;gap:10px;max-height:65vh;overflow:auto"></div>
+
+            <div style="display:flex;justify-content:flex-end;margin-top:12px">
+              <button class="small-btn ghost" onclick="closeVendorModal()">Close</button>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <div id="toast" style="position:fixed;right:24px;bottom:24px;background:#222;color:#fff;padding:12px 18px;border-radius:8px;opacity:0;transition:all .25s;z-index:5000"></div>
+
+  <script>
+    /* ===========================
+       Data & fallback vendors
+       =========================== */
+
+    // marketplaceProducts: keep as before, or fetch from your data.js
+    const marketplaceProducts = [
+      { id:1, name:"Wireless Mouse Pro", category:"Electronics",
+        img:"https://images.unsplash.com/photo-1527864550417-7fd4c7c1b8f7?w=800", neededBy:"2025-12-20",
+        offers:[
+          {vendor:"TechSupplier Inc", price:22.5, moq:100, delivery:"5 days", rating:4.8},
+          {vendor:"Global Electronics", price:21.9, moq:50, delivery:"7 days", rating:4.6},
+          {vendor:"Component World", price:23.2, moq:200, delivery:"3 days", rating:4.9}
+        ]},
+      { id:2, name:"USB-C Hub 7-in-1", category:"Accessories",
+        img:"https://images.unsplash.com/photo-1583394838336-acd977736f90?w=800", neededBy:"2025-12-18",
+        offers:[
+          {vendor:"Budget Parts Co", price:38.0, moq:30, delivery:"10 days", rating:4.2},
+          {vendor:"TechSupplier Inc", price:36.5, moq:50, delivery:"6 days", rating:4.8}
+        ]},
+      { id:3, name:"Mechanical Keyboard RGB", category:"Electronics",
+        img:"https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=800", neededBy:"2025-12-25",
+        offers:[
+          {vendor:"Component World", price:118.0, moq:20, delivery:"4 days", rating:4.9},
+          {vendor:"Global Electronics", price:122.5, moq:10, delivery:"8 days", rating:4.6}
+        ]},
+      { id:4, name:"HDMI Cable 2m", category:"Cables",
+        img:"https://images.unsplash.com/photo-1591395604231-0d9e2a5c89df?w=800", neededBy:"2025-12-22", offers:[]}
+    ];
+
+    const VENDORS_FALLBACK = [
+      { id:1, name:"Alpha Supplies", contact:"alpha@example.com", products:[
+        {id:101,name:"Notebook A4 (100pcs)",sku:"NB-A4-100",price:2500,stock:120},
+        {id:102,name:"Blue Ink Pen (Box of 50)",sku:"PEN-BX50",price:450,stock:400}
+      ]},
+      { id:2, name:"Best Industrial", contact:"sales@bestind.com", products:[
+        {id:201,name:"Industrial Tape 2in",sku:"TAPE-2IN",price:150,stock:600},
+        {id:202,name:"Safety Gloves (Pair)",sku:"GLOVE-SFT",price:120,stock:300}
+      ]},
+      { id:3, name:"OfficeMart", contact:"office@mart.com", products:[
+        {id:301,name:"A4 Copier Paper (500 sheets)",sku:"PPR-A4-500",price:420,stock:220},
+        {id:302,name:"Stapler Heavy Duty",sku:"STPL-HD",price:650,stock:50}
+      ]}
+    ];
+
+    // Use window.VENDORS if provided by your data.js; otherwise fallback
+    window.VENDORS = window.VENDORS || VENDORS_FALLBACK;
+
+    /* ===========================
+       Utilities
+       =========================== */
+    function showToast(msg){
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.opacity = '1';
+      t.style.transform = 'translateY(-6px)';
+      setTimeout(()=>{ t.style.opacity=''; t.style.transform = ''; }, 2500);
+    }
+    function escapeHtml(s){
+      if(s === null || s === undefined) return '';
+      return String(s).replace(/[&"'<>]/g, function(m){ return {'&':'&amp;','"':'&quot;',"'":'&#39;','<':'&lt;','>':'&gt;'}[m]; });
+    }
+
+    /* ===========================
+       Marketplace rendering & filters
+       =========================== */
+    const marketListEl = document.getElementById('marketList');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const productSearch = document.getElementById('productSearch');
+    const marketCount = document.getElementById('marketCount');
+
+    // Populate category filter
+    (function populateCategories(){
+      const cats = Array.from(new Set(marketplaceProducts.map(p=>p.category))).sort();
+      cats.forEach(c => {
+        const opt = document.createElement('option'); opt.value = c; opt.textContent = c;
+        categoryFilter.appendChild(opt);
+      });
+    })();
+
+    function renderMarketplace(items = marketplaceProducts){
+      marketListEl.innerHTML = '';
+      if(!items.length){
+        marketListEl.innerHTML = '<div class="muted-center">No products match your filters.</div>';
+        marketCount.textContent = 0;
+        return;
+      }
+      marketCount.textContent = items.length;
+      items.forEach(p => {
+        const card = document.createElement('div'); card.className = 'prod-card card-small';
+        card.innerHTML = `
+          <div class="prod-media"><img src="${p.img}" alt="${escapeHtml(p.name)}" onerror="this.style.objectFit='contain'"></div>
+          <div class="prod-body">
+            <div class="prod-title">${escapeHtml(p.name)}</div>
+            <div class="prod-meta">${escapeHtml(p.category)} • Need by ${p.neededBy}</div>
+            <div class="prod-footer">
+              <div class="price">From $${p.offers.length ? Math.min(...p.offers.map(o=>o.price)).toFixed(2) : 'N/A'}</div>
+              <div><span class="badge">${p.offers.length} offers</span></div>
+            </div>
+          </div>
+        `;
+        card.addEventListener('click', ()=>openProductModal(p.id));
+        marketListEl.appendChild(card);
+      });
+    }
+
+    function filterMarketplace(){
+      const q = (productSearch.value || '').toLowerCase().trim();
+      const cat = categoryFilter.value;
+      const filtered = marketplaceProducts.filter(p => {
+        if(cat && p.category !== cat) return false;
+        if(!q) return true;
+        return (p.name + ' ' + p.category).toLowerCase().includes(q);
+      });
+      renderMarketplace(filtered);
+    }
+
+    /* ===========================
+       Marketplace modal & PO
+       =========================== */
+    let selectedProduct = null;
+    function openProductModal(id){
+      selectedProduct = marketplaceProducts.find(x=>x.id===id);
+      if(!selectedProduct) return showToast('Product not found');
+      document.getElementById('modalProductName').textContent = selectedProduct.name;
+      document.getElementById('modalCategory').textContent = selectedProduct.category;
+      document.getElementById('modalNeededBy').textContent = selectedProduct.neededBy;
+      document.getElementById('modalProductImage').src = selectedProduct.img;
+
+      const tbody = document.getElementById('vendorOffersBody');
+      const offers = selectedProduct.offers.slice().sort((a,b)=>a.price-b.price);
+      if(!offers.length){
+        tbody.innerHTML = '<tr><td colspan="6" class="muted-center">No vendor offers available.</td></tr>';
+        document.getElementById('createPOBtn').style.display = 'none';
+      } else {
+        tbody.innerHTML = offers.map((o,i)=>`
+          <tr style="${i===0 ? 'background:#f7fff7' : ''}">
+            <td>${escapeHtml(o.vendor)}</td>
+            <td>$${o.price.toFixed(2)}</td>
+            <td>${o.moq}</td>
+            <td>${o.delivery}</td>
+            <td>${'★'.repeat(Math.floor(o.rating))}${'☆'.repeat(5-Math.floor(o.rating))}</td>
+            <td><input type="radio" name="selectedOffer" value="${i}" ${i===0 ? 'checked' : ''}></td>
+          </tr>
+        `).join('');
+        document.getElementById('createPOBtn').style.display = 'inline-block';
+      }
+
+      openModal('marketplaceModal');
+    }
+
+    function createPOFromOffer(){
+      const sel = document.querySelector('input[name="selectedOffer"]:checked');
+      if(!sel) return showToast('Please select an offer');
+      const offer = selectedProduct.offers[Number(sel.value)];
+      // Simulate save to localStorage and activity feed
+      const order = {
+        id: 'PO-' + Date.now(),
+        vendor: offer.vendor,
+        product: selectedProduct.name,
+        price: offer.price,
+        qty: offer.moq,
+        ts: new Date().toISOString()
+      };
+      const list = JSON.parse(localStorage.getItem('vendor_orders')||'[]'); list.push(order);
+      localStorage.setItem('vendor_orders', JSON.stringify(list));
+      refreshActivity();
+      showToast('Purchase order created with ' + offer.vendor);
+      closeModal();
+    }
+
+    /* ===========================
+       Vendors UI & actions
+       =========================== */
+    const vendorGrid = document.getElementById('vendorGrid');
+    const vendorSearch = document.getElementById('vendorSearch');
+
+    function renderVendors(list = window.VENDORS){
+      vendorGrid.innerHTML = '';
+      if(!list.length){ vendorGrid.innerHTML = '<div class="muted-center">No vendors</div>'; return; }
+      list.forEach(v => {
+        const el = document.createElement('div'); el.className = 'vendor-card';
+        el.innerHTML = `
+          <div class="vendor-info">
+            <div class="vendor-name">${escapeHtml(v.name)}</div>
+            <div class="vendor-contact">${escapeHtml(v.contact || '')}</div>
+          </div>
+          <div class="vendor-actions">
+            <button class="small-btn ghost" onclick="openVendorModal(${v.id})">View</button>
+            <button class="small-btn" style="background:var(--primary);color:#fff" onclick="openVendorModal(${v.id},{autoFocusFirst:true})">Order</button>
+          </div>
+        `;
+        vendorGrid.appendChild(el);
+      });
+    }
+
+    function filterVendors(){
+      const q = (vendorSearch.value||'').toLowerCase().trim();
+      const filtered = window.VENDORS.filter(v => (v.name + ' ' + (v.contact||'')).toLowerCase().includes(q));
+      renderVendors(filtered);
+    }
+
+    function openVendorModal(vendorId, opts = {}){
+      const v = window.VENDORS.find(x => x.id === vendorId);
+      if(!v) return showToast('Vendor not found');
+      document.getElementById('vendorModalTitle').textContent = v.name + (v.contact ? ' — ' + v.contact : '');
+      const container = document.getElementById('vendorProductsContainer');
+      container.innerHTML = '';
+      if(!v.products || !v.products.length) container.innerHTML = '<div class="muted-center">No products listed</div>';
+      else {
+        v.products.forEach(prod => {
+          const card = document.createElement('div');
+          card.style.display = 'flex'; card.style.justifyContent='space-between'; card.style.alignItems='center';
+          card.style.border='1px solid #f0f2f7'; card.style.padding='10px'; card.style.borderRadius='8px';
+          card.innerHTML = `
+            <div>
+              <div style="font-weight:700">${escapeHtml(prod.name)}</div>
+              <div style="color:var(--muted);font-size:0.9rem">SKU: ${escapeHtml(prod.sku||'-')} • Stock: ${prod.stock}</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center">
+              <div style="font-weight:800">₹ ${Number(prod.price).toLocaleString()}</div>
+              <input type="number" min="1" max="${prod.stock}" value="1" data-pid="${prod.id}" class="vendor-order-qty" style="width:80px;padding:6px;border-radius:8px;border:1px solid #eee">
+              <button class="small-btn" style="background:var(--success);color:#fff" onclick="placeOrder(${v.id},${prod.id})">Order</button>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      }
+      openModal('vendorModal');
+      if(opts.autoFocusFirst) setTimeout(()=> {
+        const first = container.querySelector('input.vendor-order-qty'); if(first) first.focus();
+      },80);
+    }
+
+    function closeVendorModal(){ closeModal(); }
+
+    function placeOrder(vendorId, productId){
+      const v = window.VENDORS.find(x=>x.id===vendorId);
+      const p = v.products.find(x=>x.id===productId);
+      const input = document.querySelector(`input.vendor-order-qty[data-pid='${productId}']`);
+      let qty = input ? Math.max(1, Number(input.value)||1) : 1;
+      if(qty > p.stock) return showToast('Quantity exceeds stock');
+      // save
+      const o = { id:'VO-'+Date.now(), vendor:v.name, product:p.name, qty, total: p.price*qty, ts:new Date().toISOString() };
+      const arr = JSON.parse(localStorage.getItem('vendor_orders')||'[]'); arr.push(o); localStorage.setItem('vendor_orders', JSON.stringify(arr));
+      p.stock = Math.max(0, p.stock-qty); // reflect
+      showToast('Order placed to ' + v.name);
+      refreshActivity();
+      // re-open to reflect stock
+      openVendorModal(vendorId, {});
+    }
+
+    /* ===========================
+       Activity feed (recent orders)
+       =========================== */
+    function refreshActivity(){
+      const list = JSON.parse(localStorage.getItem('vendor_orders')||'[]').slice(-6).reverse();
+      const el = document.getElementById('activityList');
+      if(!list.length){ el.innerHTML = 'No recent activity'; return; }
+      el.innerHTML = '<ul style="list-style:none;padding-left:0;margin:0;display:grid;gap:8px">'+ list.map(x=>`<li style="background:#fff;border-radius:8px;padding:10px;border:1px solid #f0f2f7"><strong style="display:block">${escapeHtml(x.product)}</strong><span style="color:var(--muted);font-size:0.9rem">${escapeHtml(x.vendor)} • ${x.qty} units • ${new Date(x.ts).toLocaleString()}</span></li>`).join('') + '</ul>';
+    }
+
+    /* ===========================
+       Modal helpers
+       =========================== */
+    function openModal(id){
+      document.getElementById(id).classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal(){
+      document.querySelectorAll('.modal').forEach(m=>m.classList.remove('open'));
+      document.body.style.overflow = '';
+    }
+    // clicking outside closes
+    document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click', e => { if(e.target===m) closeModal(); }));
+
+    /* ===========================
+       Init
+       =========================== */
+    renderMarketplace();
+    renderVendors();
+    refreshActivity();
+
+    // Expose small helpers if needed
+    window.refreshActivity = refreshActivity;
+    window.renderVendors = renderVendors;
+    window.openVendorModal = openVendorModal;
+    window.openMarketplaceModal = () => { showToast('Marketplace refreshed'); renderMarketplace(); };
+    window.createPOFromOffer = createPOFromOffer;
+  </script>
+</body>
+</html>

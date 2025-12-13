@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>InventoryPro – Smart Route Planning</title>
+  <link rel="stylesheet" href="style.css" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h2>InventoryPro</h2>
+    <ul>
+      <li class="active">Dashboard</li>
+      <li>Orders</li>
+      <li>Route Planner</li>
+      <li>Retailers</li>
+      <li>Inventory</li>
+      <li>Reports</li>
+      <li>Settings</li>
+    </ul>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <h1>Smart Route Planning – Today</h1>
+      <div class="user">Wholesaler Admin</div>
+    </header>
+
+    <!-- KPI ROW -->
+    <section class="kpis">
+      <div class="kpi">
+        <h3>Orders Ready</h3>
+        <p>12</p>
+      </div>
+      <div class="kpi">
+        <h3>Potential Revenue</h3>
+        <p>₹1,95,000</p>
+      </div>
+      <div class="kpi">
+        <h3>Estimated KM</h3>
+        <p id="kpiKm">–</p>
+      </div>
+      <div class="kpi">
+        <h3>Best ₹ / KM</h3>
+        <p id="kpiScore">–</p>
+      </div>
+    </section>
+
+    <!-- WAREHOUSE SELECTOR -->
+    <section class="warehouse">
+      <label>Start From Warehouse:</label>
+      <select id="warehouseSelect"></select>
+      <span id="warehouseInfo"></span>
+    </section>
+
+    <!-- PLANNING GRID -->
+    <section class="planning">
+
+      <!-- AREA CLUSTERS -->
+      <div class="panel">
+        <h2>Area Clusters</h2>
+        <div id="clusters"></div>
+      </div>
+
+      <!-- ROUTE DETAILS -->
+      <div class="panel">
+        <h2>Route Analysis</h2>
+        <div id="routeDetails">Select a cluster to analyze</div>
+        <button id="planRouteBtn">Plan Route on Map</button>
+      </div>
+
+      <!-- MAP -->
+      <div class="panel map-panel">
+        <h2>Route Map</h2>
+        <div id="map"></div>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

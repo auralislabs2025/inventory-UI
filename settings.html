@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings - InventoryPro</title>
+  <style>
+    :root {
+      --primary:#4361ee; --success:#06d6a0; --warning:#ff9f1c; --danger:#ef476f;
+      --dark:#2c3e50; --light:#f8f9fa; --gray:#adb5bd;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f8f9fa;color:#333;line-height:1.6}
+    .app{display:flex;min-height:100vh}
+    .sidebar{width:260px;background:#2c3e50;color:white;flex-shrink:0;transition:left .3s}
+    .sidebar .logo{padding:20px 25px;font-size:1.6rem;font-weight:bold}
+    .sidebar ul{list-style:none}
+    .sidebar li a{display:block;padding:15px 25px;color:white;text-decoration:none;transition:.2s}
+    .sidebar li.active,.sidebar li:hover{background:#34495e}
+    .main{flex:1;display:flex;flex-direction:column}
+    .topbar{display:flex;justify-content:space-between;align-items:center;padding:15px 30px;background:white;box-shadow:0 2px 15px rgba(0,0,0,.1);z-index:10}
+    .menu-btn{background:none;border:none;font-size:1.6rem;cursor:pointer;color:#333}
+    .content{flex:1;padding:30px;overflow-y:auto}
+    h1{color:#2c3e50;margin-bottom:30px;font-size:1.9rem}
+    .card{background:white;padding:30px;border-radius:12px;box-shadow:0 5px 20px rgba(0,0,0,.08);margin-bottom:30px}
+    .card h2{font-size:1.35rem;color:#2c3e50;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid #eee}
+    .setting-group{margin-bottom:25px}
+    .setting-group label{display:flex;justify-content:space-between;align-items:center;font-size:1.05rem;color:#444;cursor:pointer}
+    .setting-group input[type=checkbox]{width:22px;height:22px;cursor:pointer}
+    select,input[type=text]{width:100%;padding:12px 14px;border:1px solid #ddd;border-radius:8px;font-size:1rem;margin-top:8px}
+    .btn{padding:12px 28px;border:none;border-radius:8px;cursor:pointer;font-weight:500;font-size:1rem;transition:.2s}
+    .btn-danger{background:var(--danger);color:white}
+    .btn-danger:hover{opacity:.9;transform:translateY(-1px)}
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;justify-content:center;align-items:center}
+    .modal.open{display:flex}
+    .modal-content{background:white;padding:40px 30px;border-radius:12px;max-width:500px;width:90%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center}
+    .close-modal{position:absolute;top:15px;right:20px;background:none;border:none;font-size:32px;cursor:pointer;color:#999}
+    .close-modal:hover{color:#000}
+    .toast{position:fixed;bottom:30px;right:30px;background:#333;color:white;padding:16px 28px;border-radius:8px;opacity:0;transition:.3s;z-index:3000;box-shadow:0 8px 25px rgba(0,0,0,.3);font-size:1rem}
+    .toast.show{opacity:1;transform:translateY(-10px)}
+    @media(max-width:768px){
+      .sidebar{position:fixed;top:0;left:-260px;height:100vh;z-index:999}
+      .sidebar.open{left:0}
+      .topbar{padding:15px 20px}
+      .content{padding:20px}
+      h1{font-size:1.7rem}
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">InventoryPro</div>
+    <ul>
+      <li><a href="index.html">Dashboard</a></li>
+      <li><a href="inventory.html">Inventory</a></li>
+      <li><a href="suppliers.html">Suppliers</a></li>
+      <li><a href="purchases.html">Purchases</a></li>
+      <li><a href="adjustments.html">Adjustments</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li class="active"><a href="#">Settings</a></li>
+    </ul>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">Menu</button>
+      <div style="font-weight:600;font-size:1.4rem;color:#2c3e50">Settings</div>
+      <div style="display:flex;align-items:center;gap:15px">
+        <select id="themeSelect" onchange="setTheme(this.value)">
+          <option value="">Light</option>
+          <option value="dark">Dark</option>
+          <option value="contrast">High Contrast</option>
+        </select>
+        <div style="background:var(--primary);color:white;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:1.1rem">AD</div>
+      </div>
+    </header>
+
+    <main class="content">
+      <h1>Settings & Preferences</h1>
+
+      <div class="card">
+        <h2>Appearance</h2>
+        <div class="setting-group">
+          <label>Theme
+            <select id="themeSelectMain" onchange="setTheme(this.value)">
+              <option value="">Light (Default)</option>
+              <option value="dark">Dark Mode</option>
+              <option value="contrast">High Contrast</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Notifications & Alerts</h2>
+        <div class="setting-group">
+          <label>Low Stock Alerts <input type="checkbox" id="lowStockAlert" checked></label>
+        </div>
+        <div class="setting-group">
+          <label>Out of Stock Alerts <input type="checkbox" id="outOfStockAlert" checked></label>
+        </div>
+        <div class="setting-group">
+          <label>Email Notifications <input type="checkbox" id="emailNotif"></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Display Preferences</h2>
+        <div class="setting-group">
+          <label>Default Currency
+            <select id="currencySelect">
+              <option value="USD">USD (US Dollar)</option>
+              <option value="EUR">EUR (Euro)</option>
+              <option value="GBP">GBP (British Pound)</option>
+              <option value="INR">INR (Indian Rupee)</option>
+            </select>
+          </label>
+        </div>
+        <div class="setting-group">
+          <label>Unit of Measure
+            <select id="unitSelect">
+              <option value="pcs">Pieces (pcs)</option>
+              <option value="box">Boxes</option>
+              <option value="kg">Kilograms (kg)</option>
+              <option value="m">Meters (m</option>
+            </select>
+          </label>
+        </div>
+        <div class="setting-group">
+          <label>Auto-collapse Sidebar on Mobile <input type="checkbox" id="autoCollapse" checked></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Danger Zone</h2>
+        <p style="color:#721c24;margin-bottom:20px">These actions cannot be undone.</p>
+        <button class="btn btn-danger" onclick="openClearModal()">Clear All Data (Reset App)</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Clear Data Modal -->
+  <div class="modal" id="clearModal">
+    <div class="modal-content">
+      <button class="close-modal" onclick="closeModal()">X</button>
+      <h2>Clear All Data?</h2>
+      <p style="margin:20px 0;line-height:1.6">
+        This will permanently delete:<br>
+        • All inventory items<br>
+        • All suppliers & purchase orders<br>
+        • All settings and history
+      </p>
+      <button class="btn btn-danger" onclick="clearAllData()">Yes, Delete Everything</button>
+      <button class="btn" onclick="closeModal()" style="margin-left:15px">Cancel</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+</div>
+
+<script>
+  // Load settings
+  const settings = JSON.parse(localStorage.getItem('appSettings') || '{}');
+  const savedTheme = localStorage.getItem('theme') || '';
+
+  // Apply saved values
+  document.getElementById('themeSelect').value = savedTheme;
+  document.getElementById('themeSelectMain').value = savedTheme;
+  document.getElementById('lowStockAlert').checked = settings.lowStockAlert !== false;
+  document.getElementById('outOfStockAlert').checked = settings.outOfStockAlert !== false;
+  document.getElementById('emailNotif').checked = !!settings.emailNotif;
+  document.getElementById('autoCollapse').checked = settings.autoCollapse !== false;
+  document.getElementById('currencySelect').value = settings.currency || 'USD';
+  document.getElementById('unitSelect').value = settings.unit || 'pcs';
+
+  function setTheme(theme) {
+    document.body.className = theme;
+    localStorage.setItem('theme', theme);
+    document.getElementById('themeSelect').value = theme;
+    document.getElementById('themeSelectMain').value = theme;
+    showToast('Theme updated');
+  }
+
+  function saveSetting(key, value) {
+    const s = JSON.parse(localStorage.getItem('appSettings') || '{}');
+    s[key] = value;
+    localStorage.setItem('appSettings', JSON.stringify(s));
+    showToast('Setting saved');
+  }
+
+  // Auto-save all inputs
+  document.querySelectorAll('input, select').forEach(el => {
+    el.addEventListener('change', function() {
+      if(this.type === 'checkbox') {
+        saveSetting(this.id, this.checked);
+      } else {
+        saveSetting(this.id, this.value);
+      }
+    });
+  });
+
+  function openClearModal() {
+    document.getElementById('clearModal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.querySelectorAll('.modal').forEach(m => m.classList.remove('open'));
+  }
+
+  function clearAllData() {
+    if(confirm('FINAL CONFIRMATION: Delete ALL data permanently?')) {
+      localStorage.clear();
+      showToast('All data cleared! Page reloading...');
+      setTimeout(() => location.reload(), 1500);
+    }
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  // Close modal when clicking outside
+  document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('click', e => {
+      if (e.target === modal) closeModal();
+    });
+  });
+
+  // Apply theme on load
+  document.body.className = savedTheme;
+</script>
+</body>
+</html>
