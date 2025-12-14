@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>InventoryPro – Smart Route Planning</title>
+
   <link rel="stylesheet" href="style.css" />
   <link
     rel="stylesheet"
@@ -79,15 +80,29 @@
         <button id="planRouteBtn">Plan Route on Map</button>
       </div>
 
-      <!-- MAP -->
+      <!-- MAP PANEL -->
       <div class="panel map-panel">
-        <h2>Route Map</h2>
+        <div class="map-panel-header">
+          <h2>Route Map</h2>
+          <button id="expandMapBtn" class="expand-btn">
+            🔍 Expand
+          </button>
+        </div>
         <div id="map"></div>
       </div>
 
     </section>
 
   </main>
+</div>
+
+<!-- FULL SCREEN MAP OVERLAY -->
+<div id="mapOverlay" class="map-overlay hidden">
+  <div class="map-overlay-header">
+    <span>Route – Full View</span>
+    <button id="closeMapOverlay">✖</button>
+  </div>
+  <div id="mapFull"></div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
