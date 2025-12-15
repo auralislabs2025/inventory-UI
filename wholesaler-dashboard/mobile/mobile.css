@@ -1,0 +1,217 @@
+:root {
+  --primary: #4361ee;
+  --bg: #f5f7fb;
+  --card: #ffffff;
+  --muted: #6b7280;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--card);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+#hamburger {
+  font-size: 20px;
+  background: none;
+  border: none;
+}
+
+/* DRAWER */
+.drawer {
+  position: fixed;
+  top: 0;
+  left: -260px;
+  width: 260px;
+  height: 100%;
+  background: var(--card);
+  padding: 16px;
+  box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+  transition: left 0.3s;
+  z-index: 1000;
+}
+
+.drawer.open {
+  left: 0;
+}
+
+.drawer nav button {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background: none;
+  border: none;
+  text-align: left;
+}
+
+/* BEST ROUTE */
+.best-route {
+  margin: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #4361ee, #3a0ca3);
+  color: white;
+  border-radius: 16px;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 14px 0;
+}
+
+.primary-btn {
+  width: 100%;
+  height: 46px;
+  border-radius: 12px;
+  border: none;
+  background: white;
+  color: var(--primary);
+  font-weight: bold;
+}
+
+/* ROUTES */
+.routes {
+  margin: 16px;
+}
+
+.route-card {
+  background: var(--card);
+  padding: 14px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+  cursor: pointer;
+}
+
+/* MAP */
+.map-overlay {
+  position: fixed;
+  inset: 0;
+  background: white;
+  display: none;
+  flex-direction: column;
+  z-index: 2000;
+}
+
+.map-header {
+  background: var(--primary);
+  color: white;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+}
+
+#map {
+  flex: 1;
+}
+
+.map-actions {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+}
+
+.map-actions button {
+  flex: 1;
+  height: 44px;
+  border-radius: 10px;
+  border: none;
+  background: var(--primary);
+  color: white;
+}
+
+
+/* BACKDROP */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  z-index: 900;
+}
+
+/* DRAWER */
+.drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100%;
+  background: var(--card);
+  padding: 16px;
+
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+
+  box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+
+.drawer.open {
+  transform: translateX(0);
+}
+
+/* OPEN STATE */
+.drawer.open {
+  left: 0;
+}
+
+.drawer-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* HEADER */
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.drawer-header button {
+  background: none;
+  border: none;
+  font-size: 18px;
+}
+
+
+/* Warehouse selector */
+.warehouse-card {
+  background: var(--card);
+  margin: 16px;
+  padding: 14px;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+}
+
+.warehouse-card label {
+  font-size: 12px;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.warehouse-card select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+}

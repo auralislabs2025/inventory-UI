@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>InventoryPro – Mobile Route Planner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <link rel="stylesheet" href="mobile.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <button id="hamburger">☰</button>
+  <div>
+    <h2>Route Planner</h2>
+    <span id="activeWarehouseLabel">Warehouse</span>
+  </div>
+</header>
+
+<!-- WAREHOUSE SELECTOR (MAIN DASHBOARD) -->
+<section class="warehouse-card">
+  <label>Start From Warehouse</label>
+  <select id="warehouseSelect"></select>
+</section>
+
+<!-- BACKDROP -->
+<div id="drawerBackdrop" class="drawer-backdrop"></div>
+
+<!-- HAMBURGER DRAWER -->
+<aside id="drawer" class="drawer">
+  <div class="drawer-header">
+    <h3>Menu</h3>
+    <button id="closeDrawer">✖</button>
+  </div>
+
+  <hr/>
+
+  <nav>
+    <button>🏠 Dashboard</button>
+    <button>📦 Orders</button>
+    <button class="active">🧭 Routes</button>
+    <button>📊 Reports</button>
+    <button>⚙️ Settings</button>
+  </nav>
+</aside>
+
+
+<!-- BEST ROUTE -->
+<section class="best-route">
+  <div class="badge">⭐ BEST ROUTE</div>
+  <h3 id="bestRouteName">–</h3>
+
+  <div class="metrics">
+    <div>
+      <label>Revenue</label>
+      <strong id="bestRevenue">–</strong>
+    </div>
+    <div>
+      <label>Distance</label>
+      <strong id="bestKm">–</strong>
+    </div>
+    <div>
+      <label>₹ / KM</label>
+      <strong id="bestScore">–</strong>
+    </div>
+  </div>
+
+  <button id="openMapBtn" class="primary-btn">
+    View Route
+  </button>
+</section>
+
+<!-- ROUTES -->
+<section class="routes">
+  <h4>Delivery Clusters</h4>
+  <div id="routeList"></div>
+</section>
+
+<!-- MAP OVERLAY -->
+<div id="mapOverlay" class="map-overlay">
+  <div class="map-header">
+    <span id="mapTitle">Route</span>
+    <button id="closeMap">✖</button>
+  </div>
+  <div id="map"></div>
+
+  <div class="map-actions">
+    <button>▶ Start</button>
+    <button>📞 Call</button>
+    <button>✅ Complete</button>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="mobile.js"></script>
+</body>
+</html>
