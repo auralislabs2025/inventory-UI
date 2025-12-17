@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <title>InventoryPro – Mobile Route Planner</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
   <link rel="stylesheet" href="mobile.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 </head>
@@ -14,69 +13,185 @@
 <header class="header">
   <button id="hamburger">☰</button>
   <div>
-    <h2>Route Planner</h2>
-    <span id="activeWarehouseLabel">Warehouse</span>
+    <h2 id="pageTitle">Route Planner</h2>
+    <span id="activeWarehouseLabel">Trivandrum Central Godown</span>
   </div>
 </header>
 
-<!-- WAREHOUSE SELECTOR (MAIN DASHBOARD) -->
-<section class="warehouse-card">
-  <label>Start From Warehouse</label>
-  <select id="warehouseSelect"></select>
-</section>
+<!-- DASHBOARD VIEW -->
+<div id="dashboardView">
+  <!-- WAREHOUSE SELECTOR (MAIN DASHBOARD) -->
+  <section class="warehouse-card">
+    <label>Start From Warehouse</label>
+    <select id="warehouseSelect"></select>
+    <div id="warehouseInfo" class="warehouse-info"></div>
+  </section>
 
-<!-- BACKDROP -->
-<div id="drawerBackdrop" class="drawer-backdrop"></div>
+  <!-- BEST ROUTE CARD -->
+  <section class="best-route" id="bestRouteCard">
+    <div class="badge">⭐ BEST ROUTE</div>
+    <h3 id="bestRouteName">–</h3>
+    <div class="metrics">
+      <div>
+        <label>Revenue</label>
+        <strong id="bestRevenue">–</strong>
+      </div>
+      <div>
+        <label>Distance</label>
+        <strong id="bestKm">–</strong>
+      </div>
+      <div>
+        <label>₹ / KM</label>
+        <strong id="bestScore">–</strong>
+      </div>
+    </div>
+    <button id="openMapBtn" class="primary-btn">View Route</button>
+  </section>
+
+  <!-- FLEET STATUS (QUICK VIEW) -->
+  <section class="fleet-quick" id="fleetQuickView">
+    <div class="fleet-header">
+      <h4>Fleet Status</h4>
+      <button class="link-btn" onclick="navigateToPage('fleet')">Manage →</button>
+    </div>
+    <div class="fleet-stats">
+      <div>
+        <strong id="fleetAvailable">0</strong>
+        <span>Available</span>
+      </div>
+      <div>
+        <strong id="fleetAssigned">0</strong>
+        <span>Assigned</span>
+      </div>
+      <div>
+        <strong id="fleetOnRoute">0</strong>
+        <span>On Route</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROUTES LIST -->
+  <section class="routes">
+    <h4>Delivery Clusters</h4>
+    <div id="routeList"></div>
+  </section>
+</div>
+
+<!-- ROUTES VIEW -->
+<div id="routesView" style="display: none;">
+  <section class="routes">
+    <h4>All Routes</h4>
+    <div id="allRoutesList"></div>
+  </section>
+</div>
+
+<!-- FLEET VIEW -->
+<div id="fleetView" style="display: none;">
+  <section class="page-content">
+    <div class="fleet-stats">
+      <div>
+        <strong id="mobileFleetTotal">0</strong>
+        <span>Total</span>
+      </div>
+      <div>
+        <strong id="mobileFleetAvailable">0</strong>
+        <span>Available</span>
+      </div>
+      <div>
+        <strong id="mobileFleetAssigned">0</strong>
+        <span>Assigned</span>
+      </div>
+    </div>
+    <div id="fleetList"></div>
+  </section>
+</div>
+
+<!-- ORDERS VIEW -->
+<div id="ordersView" style="display: none;">
+  <section class="page-content">
+    <div style="margin: 16px;">
+      <input type="text" placeholder="Search orders..." id="ordersSearch" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border);">
+    </div>
+    <div id="ordersList"></div>
+  </section>
+</div>
+
+<!-- INVENTORY VIEW -->
+<div id="inventoryView" style="display: none;">
+  <section class="page-content">
+    <div style="margin: 16px;">
+      <input type="text" placeholder="Search products..." id="inventorySearch" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border);">
+    </div>
+    <div id="inventoryList"></div>
+  </section>
+</div>
+
+<!-- ANALYTICS VIEW -->
+<div id="analyticsView" style="display: none;">
+  <section class="page-content">
+    <div class="analytics-stats">
+      <div class="stat-card">
+        <label>Revenue</label>
+        <strong>₹45.2L</strong>
+      </div>
+      <div class="stat-card">
+        <label>Orders</label>
+        <strong>234</strong>
+      </div>
+      <div class="stat-card">
+        <label>Routes</label>
+        <strong>48</strong>
+      </div>
+    </div>
+    <div id="analyticsContent"></div>
+  </section>
+</div>
+
+<!-- SETTINGS VIEW -->
+<div id="settingsView" style="display: none;">
+  <section class="page-content">
+    <div id="settingsContent"></div>
+  </section>
+</div>
+
+<!-- BOTTOM ACTION BAR -->
+<div class="bottom-bar">
+  <button class="action-btn" onclick="navigateToPage('routes')">
+    <span>🧭</span>
+    <span>Routes</span>
+  </button>
+  <button class="action-btn active" onclick="navigateToPage('dashboard')">
+    <span>📊</span>
+    <span>Dashboard</span>
+  </button>
+  <button class="action-btn" onclick="navigateToPage('fleet')">
+    <span>🚚</span>
+    <span>Fleet</span>
+  </button>
+  <button class="action-btn" onclick="navigateToPage('analytics')">
+    <span>📈</span>
+    <span>Analytics</span>
+  </button>
+</div>
 
 <!-- HAMBURGER DRAWER -->
+<div id="drawerBackdrop" class="drawer-backdrop"></div>
 <aside id="drawer" class="drawer">
   <div class="drawer-header">
     <h3>Menu</h3>
     <button id="closeDrawer">✖</button>
   </div>
-
   <hr/>
-
   <nav>
-    <button>🏠 Dashboard</button>
-    <button>📦 Orders</button>
-    <button class="active">🧭 Routes</button>
-    <button>📊 Reports</button>
-    <button>⚙️ Settings</button>
+    <button onclick="navigateToPage('dashboard'); closeDrawer();">🏠 Dashboard</button>
+    <button onclick="navigateToPage('routes'); closeDrawer();">🧭 Routes</button>
+    <button onclick="navigateToPage('fleet'); closeDrawer();">🚚 Fleet</button>
+    <button onclick="navigateToPage('orders'); closeDrawer();">📦 Orders</button>
+    <button onclick="navigateToPage('inventory'); closeDrawer();">📋 Inventory</button>
+    <button onclick="navigateToPage('analytics'); closeDrawer();">📊 Analytics</button>
+    <button onclick="navigateToPage('settings'); closeDrawer();">⚙️ Settings</button>
   </nav>
 </aside>
-
-
-<!-- BEST ROUTE -->
-<section class="best-route">
-  <div class="badge">⭐ BEST ROUTE</div>
-  <h3 id="bestRouteName">–</h3>
-
-  <div class="metrics">
-    <div>
-      <label>Revenue</label>
-      <strong id="bestRevenue">–</strong>
-    </div>
-    <div>
-      <label>Distance</label>
-      <strong id="bestKm">–</strong>
-    </div>
-    <div>
-      <label>₹ / KM</label>
-      <strong id="bestScore">–</strong>
-    </div>
-  </div>
-
-  <button id="openMapBtn" class="primary-btn">
-    View Route
-  </button>
-</section>
-
-<!-- ROUTES -->
-<section class="routes">
-  <h4>Delivery Clusters</h4>
-  <div id="routeList"></div>
-</section>
 
 <!-- MAP OVERLAY -->
 <div id="mapOverlay" class="map-overlay">
@@ -85,11 +200,32 @@
     <button id="closeMap">✖</button>
   </div>
   <div id="map"></div>
-
   <div class="map-actions">
-    <button>▶ Start</button>
-    <button>📞 Call</button>
-    <button>✅ Complete</button>
+    <button id="assignVehicleBtn" class="action-btn-map">🚚 Assign Vehicle</button>
+    <button id="startRouteBtn" class="action-btn-map primary">▶ Start Delivery</button>
+  </div>
+</div>
+
+<!-- ROUTE EXECUTION OVERLAY -->
+<div id="executionOverlay" class="execution-overlay">
+  <div class="exec-header">
+    <span id="execRouteName">Route Name</span>
+    <button id="closeExec">✖</button>
+  </div>
+  <div class="exec-stops" id="execStopsList"></div>
+  <div class="exec-actions">
+    <button class="exec-btn" onclick="callRetailer()">📞 Call</button>
+    <button class="exec-btn primary" onclick="markStopComplete()">✅ Complete</button>
+  </div>
+</div>
+
+<!-- FLEET ASSIGNMENT MODAL -->
+<div id="fleetModal" class="modal">
+  <div class="modal-content">
+    <button class="close-modal" onclick="closeFleetModal()">✖</button>
+    <h3>Assign Vehicle</h3>
+    <div id="fleetSelectList"></div>
+    <button class="primary-btn" onclick="confirmFleetAssignment()">Assign</button>
   </div>
 </div>
 

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Retailers – InventoryPro</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .retailers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .retailer-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border-left: 4px solid #4361ee;
+    }
+    .retailer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .retailer-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+    .retailer-details {
+      display: grid;
+      gap: 8px;
+      margin: 12px 0;
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+    .retailer-detail {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .retailer-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .stats-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: #e3f2fd;
+      color: #1976d2;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <h2>InventoryPro</h2>
+    <ul>
+      <li><a href="index.html">Dashboard</a></li>
+      <li><a href="orders.html">Orders</a></li>
+      <li><a href="index.html">Route Planner</a></li>
+      <li class="active"><a href="retailers.html">Retailers</a></li>
+      <li><a href="inventory.html">Inventory</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li><a href="fleet.html">Fleet</a></li>
+      <li><a href="settings.html">Settings</a></li>
+    </ul>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h1>Retailers Management</h1>
+      <div class="user">Wholesaler Admin</div>
+    </header>
+
+    <section style="padding: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>Retailer Network</h2>
+        <button class="btn btn-primary" onclick="openAddRetailerModal()">+ Add Retailer</button>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <input type="text" placeholder="Search retailers..." id="searchInput" onkeyup="filterRetailers()" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+      </div>
+
+      <div class="retailers-grid" id="retailersGrid"></div>
+    </section>
+  </main>
+</div>
+
+<!-- Add Retailer Modal -->
+<div id="retailerModal" class="modal">
+  <div class="modal-content" style="max-width: 600px;">
+    <button class="close-modal" onclick="closeModal()">✖</button>
+    <h2 id="modalTitle">Add Retailer</h2>
+    <form onsubmit="saveRetailer(event)">
+      <input type="hidden" id="retailerId">
+      <div class="form-group">
+        <label>Retailer Name</label>
+        <input type="text" id="retailerName" required>
+      </div>
+      <div class="form-group">
+        <label>Contact Person</label>
+        <input type="text" id="contactPerson">
+      </div>
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="tel" id="retailerPhone" required>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="retailerEmail">
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <textarea id="retailerAddress" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Latitude</label>
+        <input type="number" step="0.0001" id="retailerLat" required>
+      </div>
+      <div class="form-group">
+        <label>Longitude</label>
+        <input type="number" step="0.0001" id="retailerLng" required>
+      </div>
+      <div class="form-group">
+        <label>Route/Cluster</label>
+        <select id="retailerRoute">
+          <option value="">None</option>
+          <option>Attingal Route</option>
+          <option>Varkala Route</option>
+          <option>Kilimanoor Route</option>
+          <option>Nedumangad Route</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Save Retailer</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Dummy Retailers Data
+  let retailers = JSON.parse(localStorage.getItem('wholesaler_retailers')) || [
+    { id: 1, name: "Retailer A1", contact: "John Doe", phone: "+91 98765 43210", email: "retailer1@example.com", address: "Attingal, Trivandrum", lat: 8.6961, lng: 76.8154, route: "Attingal Route", totalOrders: 45, totalValue: 1450000 },
+    { id: 2, name: "Retailer A2", contact: "Jane Smith", phone: "+91 98765 43211", email: "retailer2@example.com", address: "Kallambalam, Trivandrum", lat: 8.7148, lng: 76.8031, route: "Attingal Route", totalOrders: 32, totalValue: 980000 },
+    { id: 3, name: "Retailer A3", contact: "Mike Johnson", phone: "+91 98765 43212", email: "retailer3@example.com", address: "Navaikulam, Trivandrum", lat: 8.7353, lng: 76.7945, route: "Attingal Route", totalOrders: 28, totalValue: 850000 },
+    { id: 4, name: "Retailer B1", contact: "Sarah Williams", phone: "+91 98765 43213", email: "retailer4@example.com", address: "Varkala, Trivandrum", lat: 8.7379, lng: 76.7163, route: "Varkala Route", totalOrders: 52, totalValue: 1650000 },
+    { id: 5, name: "Retailer B2", contact: "David Brown", phone: "+91 98765 43214", email: "retailer5@example.com", address: "Edava, Trivandrum", lat: 8.7552, lng: 76.7012, route: "Varkala Route", totalOrders: 38, totalValue: 1120000 },
+    { id: 6, name: "Retailer C1", contact: "Emily Davis", phone: "+91 98765 43215", email: "retailer6@example.com", address: "Kilimanoor, Trivandrum", lat: 8.7526, lng: 76.8731, route: "Kilimanoor Route", totalOrders: 41, totalValue: 1280000 }
+  ];
+
+  function renderRetailers() {
+    const grid = document.getElementById("retailersGrid");
+    grid.innerHTML = "";
+    
+    retailers.forEach(r => {
+      const card = document.createElement("div");
+      card.className = "retailer-card";
+      
+      card.innerHTML = `
+        <div class="retailer-header">
+          <div class="retailer-name">${r.name}</div>
+        </div>
+        <div class="retailer-details">
+          <div class="retailer-detail">📞 ${r.phone}</div>
+          <div class="retailer-detail">✉️ ${r.email || 'N/A'}</div>
+          <div class="retailer-detail">📍 ${r.address}</div>
+          <div class="retailer-detail">🧭 ${r.route || 'No route assigned'}</div>
+        </div>
+        <div style="display: flex; gap: 16px; margin-top: 12px; font-size: 0.85rem;">
+          <div><strong>${r.totalOrders || 0}</strong> orders</div>
+          <div><strong>₹${(r.totalValue || 0).toLocaleString()}</strong> total</div>
+        </div>
+        <div class="retailer-actions">
+          <button class="btn-sm btn-primary" onclick="editRetailer(${r.id})">Edit</button>
+          <button class="btn-sm btn-success" onclick="viewRetailerOrders(${r.id})">Orders</button>
+          <button class="btn-sm btn-danger" onclick="deleteRetailer(${r.id})">Delete</button>
+        </div>
+      `;
+      
+      grid.appendChild(card);
+    });
+  }
+
+  function openAddRetailerModal() {
+    document.getElementById("modalTitle").textContent = "Add Retailer";
+    document.getElementById("retailerId").value = "";
+    document.querySelector("#retailerModal form").reset();
+    document.getElementById("retailerModal").classList.add("open");
+  }
+
+  function editRetailer(id) {
+    const r = retailers.find(ret => ret.id === id);
+    if (!r) return;
+    
+    document.getElementById("modalTitle").textContent = "Edit Retailer";
+    document.getElementById("retailerId").value = r.id;
+    document.getElementById("retailerName").value = r.name;
+    document.getElementById("contactPerson").value = r.contact || '';
+    document.getElementById("retailerPhone").value = r.phone;
+    document.getElementById("retailerEmail").value = r.email || '';
+    document.getElementById("retailerAddress").value = r.address || '';
+    document.getElementById("retailerLat").value = r.lat;
+    document.getElementById("retailerLng").value = r.lng;
+    document.getElementById("retailerRoute").value = r.route || '';
+    
+    document.getElementById("retailerModal").classList.add("open");
+  }
+
+  function saveRetailer(e) {
+    e.preventDefault();
+    const id = document.getElementById("retailerId").value;
+    const retailer = {
+      id: id ? parseInt(id) : Date.now(),
+      name: document.getElementById("retailerName").value,
+      contact: document.getElementById("contactPerson").value,
+      phone: document.getElementById("retailerPhone").value,
+      email: document.getElementById("retailerEmail").value,
+      address: document.getElementById("retailerAddress").value,
+      lat: parseFloat(document.getElementById("retailerLat").value),
+      lng: parseFloat(document.getElementById("retailerLng").value),
+      route: document.getElementById("retailerRoute").value,
+      totalOrders: id ? retailers.find(r => r.id === parseInt(id)).totalOrders : 0,
+      totalValue: id ? retailers.find(r => r.id === parseInt(id)).totalValue : 0
+    };
+    
+    if (id) {
+      retailers = retailers.map(r => r.id === retailer.id ? retailer : r);
+    } else {
+      retailers.push(retailer);
+    }
+    
+    localStorage.setItem('wholesaler_retailers', JSON.stringify(retailers));
+    renderRetailers();
+    closeModal();
+    alert("Retailer saved successfully!");
+  }
+
+  function deleteRetailer(id) {
+    if (confirm("Delete this retailer?")) {
+      retailers = retailers.filter(r => r.id !== id);
+      localStorage.setItem('wholesaler_retailers', JSON.stringify(retailers));
+      renderRetailers();
+    }
+  }
+
+  function viewRetailerOrders(id) {
+    alert("View retailer orders - to be implemented");
+  }
+
+  function filterRetailers() {
+    const term = document.getElementById("searchInput").value.toLowerCase();
+    const cards = document.querySelectorAll(".retailer-card");
+    cards.forEach(card => {
+      const text = card.textContent.toLowerCase();
+      card.style.display = text.includes(term) ? '' : 'none';
+    });
+  }
+
+  function closeModal() {
+    document.getElementById("retailerModal").classList.remove("open");
+  }
+
+  renderRetailers();
+  
+  // Close modal on backdrop click
+  document.getElementById('retailerModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeModal();
+    }
+  });
+</script>
+</body>
+</html>
+

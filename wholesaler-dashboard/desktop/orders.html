@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Orders – InventoryPro</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .orders-table {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 16px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #374151;
+    }
+    tr:hover {
+      background: #f9fafb;
+    }
+    .status-badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-processing { background: #d1ecf1; color: #0c5460; }
+    .status-ready { background: #d4edda; color: #155724; }
+    .status-shipped { background: #cfe2ff; color: #084298; }
+    .status-delivered { background: #d1e7dd; color: #0f5132; }
+    .filters {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .filters input, .filters select {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <h2>InventoryPro</h2>
+    <ul>
+      <li><a href="index.html">Dashboard</a></li>
+      <li class="active"><a href="orders.html">Orders</a></li>
+      <li><a href="index.html">Route Planner</a></li>
+      <li><a href="retailers.html">Retailers</a></li>
+      <li><a href="inventory.html">Inventory</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li><a href="fleet.html">Fleet</a></li>
+      <li><a href="settings.html">Settings</a></li>
+    </ul>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h1>Orders Management</h1>
+      <div class="user">Wholesaler Admin</div>
+    </header>
+
+    <section style="padding: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>Retailer Orders</h2>
+        <button class="btn btn-primary" onclick="openNewOrderModal()">+ New Order</button>
+      </div>
+
+      <div class="filters">
+        <input type="text" placeholder="Search orders..." id="searchInput" onkeyup="filterOrders()">
+        <select id="statusFilter" onchange="filterOrders()">
+          <option value="">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="processing">Processing</option>
+          <option value="ready">Ready</option>
+          <option value="shipped">Shipped</option>
+          <option value="delivered">Delivered</option>
+        </select>
+        <select id="warehouseFilter" onchange="filterOrders()">
+          <option value="">All Warehouses</option>
+          <option value="1">Trivandrum Central</option>
+          <option value="2">Attingal Depot</option>
+          <option value="3">Nedumangad Hub</option>
+        </select>
+      </div>
+
+      <div class="orders-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Retailer</th>
+              <th>Items</th>
+              <th>Value</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Route</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="ordersBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Order Modal -->
+<div id="orderModal" class="modal">
+  <div class="modal-content" style="max-width: 700px;">
+    <button class="close-modal" onclick="closeModal()">✖</button>
+    <h2 id="modalTitle">New Order</h2>
+    <form onsubmit="saveOrder(event)">
+      <input type="hidden" id="orderId">
+      <div class="form-group">
+        <label>Retailer</label>
+        <select id="retailerSelect" required></select>
+      </div>
+      <div class="form-group">
+        <label>Order Date</label>
+        <input type="date" id="orderDate" required>
+      </div>
+      <div class="form-group">
+        <label>Items (comma-separated)</label>
+        <textarea id="orderItems" placeholder="Item 1, Item 2, Item 3" required></textarea>
+      </div>
+      <div class="form-group">
+        <label>Total Value (₹)</label>
+        <input type="number" id="orderValue" required>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="orderStatus" required>
+          <option value="pending">Pending</option>
+          <option value="processing">Processing</option>
+          <option value="ready">Ready</option>
+          <option value="shipped">Shipped</option>
+          <option value="delivered">Delivered</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Save Order</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Dummy Orders Data
+  let orders = JSON.parse(localStorage.getItem('wholesaler_orders')) || [
+    { id: 1, orderId: "ORD-001", retailer: "Retailer A1", items: "Rice 50kg, Sugar 25kg, Oil 10L", value: 32000, status: "ready", date: "2025-12-09", route: "Attingal Route", warehouseId: 1 },
+    { id: 2, orderId: "ORD-002", retailer: "Retailer A2", items: "Wheat 40kg, Salt 20kg", value: 28000, status: "processing", date: "2025-12-09", route: "Attingal Route", warehouseId: 1 },
+    { id: 3, orderId: "ORD-003", retailer: "Retailer A3", items: "Pulses 30kg, Spices 5kg", value: 36000, status: "ready", date: "2025-12-08", route: "Attingal Route", warehouseId: 1 },
+    { id: 4, orderId: "ORD-004", retailer: "Retailer B1", items: "Rice 100kg, Oil 20L", value: 45000, status: "shipped", date: "2025-12-07", route: "Varkala Route", warehouseId: 1 },
+    { id: 5, orderId: "ORD-005", retailer: "Retailer B2", items: "Sugar 50kg, Tea 10kg", value: 33000, status: "delivered", date: "2025-12-06", route: "Varkala Route", warehouseId: 1 },
+    { id: 6, orderId: "ORD-006", retailer: "Retailer C1", items: "Wheat 60kg, Salt 30kg", value: 28000, status: "pending", date: "2025-12-09", route: "Kilimanoor Route", warehouseId: 1 }
+  ];
+
+  const retailers = [
+    { id: 1, name: "Retailer A1" },
+    { id: 2, name: "Retailer A2" },
+    { id: 3, name: "Retailer A3" },
+    { id: 4, name: "Retailer B1" },
+    { id: 5, name: "Retailer B2" },
+    { id: 6, name: "Retailer C1" }
+  ];
+
+  function renderOrders() {
+    const tbody = document.getElementById("ordersBody");
+    tbody.innerHTML = orders.map(o => `
+      <tr>
+        <td><strong>${o.orderId}</strong></td>
+        <td>${o.retailer}</td>
+        <td>${o.items}</td>
+        <td>₹${o.value.toLocaleString()}</td>
+        <td><span class="status-badge status-${o.status}">${o.status.toUpperCase()}</span></td>
+        <td>${o.date}</td>
+        <td>${o.route || '-'}</td>
+        <td>
+          <button class="btn-sm btn-primary" onclick="editOrder(${o.id})">Edit</button>
+          <button class="btn-sm btn-success" onclick="updateStatus(${o.id})">Update</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function openNewOrderModal() {
+    document.getElementById("modalTitle").textContent = "New Order";
+    document.getElementById("orderId").value = "";
+    document.querySelector("#orderModal form").reset();
+    document.getElementById("orderDate").value = new Date().toISOString().split('T')[0];
+    
+    const retailerSelect = document.getElementById("retailerSelect");
+    retailerSelect.innerHTML = "";
+    retailers.forEach(r => {
+      const opt = document.createElement("option");
+      opt.value = r.id;
+      opt.textContent = r.name;
+      retailerSelect.appendChild(opt);
+    });
+    
+    document.getElementById("orderModal").classList.add("open");
+  }
+
+  function editOrder(id) {
+    const o = orders.find(ord => ord.id === id);
+    if (!o) return;
+    
+    document.getElementById("modalTitle").textContent = "Edit Order";
+    document.getElementById("orderId").value = o.id;
+    document.getElementById("orderDate").value = o.date;
+    document.getElementById("orderItems").value = o.items;
+    document.getElementById("orderValue").value = o.value;
+    document.getElementById("orderStatus").value = o.status;
+    
+    const retailerSelect = document.getElementById("retailerSelect");
+    retailerSelect.innerHTML = "";
+    retailers.forEach(r => {
+      const opt = document.createElement("option");
+      opt.value = r.id;
+      opt.textContent = r.name;
+      opt.selected = r.name === o.retailer;
+      retailerSelect.appendChild(opt);
+    });
+    
+    document.getElementById("orderModal").classList.add("open");
+  }
+
+  function saveOrder(e) {
+    e.preventDefault();
+    const id = document.getElementById("orderId").value;
+    const retailerId = document.getElementById("retailerSelect").value;
+    const retailer = retailers.find(r => r.id == retailerId);
+    
+    const order = {
+      id: id ? parseInt(id) : Date.now(),
+      orderId: id ? orders.find(o => o.id === parseInt(id)).orderId : `ORD-${String(orders.length + 1).padStart(3, '0')}`,
+      retailer: retailer.name,
+      items: document.getElementById("orderItems").value,
+      value: parseInt(document.getElementById("orderValue").value),
+      status: document.getElementById("orderStatus").value,
+      date: document.getElementById("orderDate").value,
+      route: id ? orders.find(o => o.id === parseInt(id)).route : null,
+      warehouseId: 1
+    };
+    
+    if (id) {
+      orders = orders.map(o => o.id === order.id ? order : o);
+    } else {
+      orders.push(order);
+    }
+    
+    localStorage.setItem('wholesaler_orders', JSON.stringify(orders));
+    renderOrders();
+    closeModal();
+    alert("Order saved successfully!");
+  }
+
+  function updateStatus(id) {
+    const o = orders.find(ord => ord.id === id);
+    if (!o) return;
+    
+    const statuses = ["pending", "processing", "ready", "shipped", "delivered"];
+    const currentIndex = statuses.indexOf(o.status);
+    if (currentIndex < statuses.length - 1) {
+      o.status = statuses[currentIndex + 1];
+      localStorage.setItem('wholesaler_orders', JSON.stringify(orders));
+      renderOrders();
+      alert(`Order status updated to ${o.status}`);
+    }
+  }
+
+  function filterOrders() {
+    const term = document.getElementById("searchInput").value.toLowerCase();
+    const status = document.getElementById("statusFilter").value;
+    const warehouse = document.getElementById("warehouseFilter").value;
+    
+    const filtered = orders.filter(o => {
+      const matchTerm = !term || 
+        o.orderId.toLowerCase().includes(term) ||
+        o.retailer.toLowerCase().includes(term) ||
+        o.items.toLowerCase().includes(term);
+      const matchStatus = !status || o.status === status;
+      const matchWarehouse = !warehouse || o.warehouseId == warehouse;
+      return matchTerm && matchStatus && matchWarehouse;
+    });
+    
+    const tbody = document.getElementById("ordersBody");
+    tbody.innerHTML = filtered.map(o => `
+      <tr>
+        <td><strong>${o.orderId}</strong></td>
+        <td>${o.retailer}</td>
+        <td>${o.items}</td>
+        <td>₹${o.value.toLocaleString()}</td>
+        <td><span class="status-badge status-${o.status}">${o.status.toUpperCase()}</span></td>
+        <td>${o.date}</td>
+        <td>${o.route || '-'}</td>
+        <td>
+          <button class="btn-sm btn-primary" onclick="editOrder(${o.id})">Edit</button>
+          <button class="btn-sm btn-success" onclick="updateStatus(${o.id})">Update</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function closeModal() {
+    document.getElementById("orderModal").classList.remove("open");
+  }
+
+  renderOrders();
+  
+  // Close modal on backdrop click
+  document.getElementById('orderModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeModal();
+    }
+  });
+</script>
+</body>
+</html>
+

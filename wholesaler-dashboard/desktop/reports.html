@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Analytics & Reports – InventoryPro</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 10px 0;
+    }
+    .stat-label {
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+    .chart-container {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+    .chart-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+    .chart-placeholder {
+      height: 300px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6b7280;
+    }
+    .reports-table {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 16px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #374151;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <h2>InventoryPro</h2>
+    <ul>
+      <li><a href="index.html">Dashboard</a></li>
+      <li><a href="orders.html">Orders</a></li>
+      <li><a href="index.html">Route Planner</a></li>
+      <li><a href="retailers.html">Retailers</a></li>
+      <li><a href="inventory.html">Inventory</a></li>
+      <li class="active"><a href="reports.html">Reports</a></li>
+      <li><a href="fleet.html">Fleet</a></li>
+      <li><a href="settings.html">Settings</a></li>
+    </ul>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h1>Analytics & Reports</h1>
+      <div class="user">Wholesaler Admin</div>
+    </header>
+
+    <section style="padding: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>Performance Overview</h2>
+        <button class="btn btn-primary" onclick="exportReport()">Export Report</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Revenue (This Month)</div>
+          <div class="stat-value" style="color: #06d6a0;">₹45,20,000</div>
+          <div style="color: #06d6a0; font-size: 0.85rem;">+12% vs last month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Orders</div>
+          <div class="stat-value" style="color: #4361ee;">234</div>
+          <div style="color: #4361ee; font-size: 0.85rem;">+8% vs last month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Routes Completed</div>
+          <div class="stat-value" style="color: #ff9f1c;">48</div>
+          <div style="color: #ff9f1c; font-size: 0.85rem;">Avg ₹/KM: 1,250</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Fleet Utilization</div>
+          <div class="stat-value" style="color: #ef476f;">78%</div>
+          <div style="color: #ef476f; font-size: 0.85rem;">6/8 vehicles active</div>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <div class="chart-title">Revenue Trend (Last 6 Months)</div>
+        <div class="chart-placeholder">
+          <svg viewBox="0 0 600 250" style="width: 100%; height: 250px;">
+            <polyline fill="none" stroke="#4361ee" stroke-width="3" points="50,200 150,160 250,120 350,100 450,80 550,110"/>
+            <text x="50" y="220" fill="#666" font-size="12">Jul</text>
+            <text x="150" y="220" fill="#666" font-size="12">Aug</text>
+            <text x="250" y="220" fill="#666" font-size="12">Sep</text>
+            <text x="350" y="220" fill="#666" font-size="12">Oct</text>
+            <text x="450" y="220" fill="#666" font-size="12">Nov</text>
+            <text x="550" y="220" fill="#666" font-size="12">Dec</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <div class="chart-title">Top Performing Routes (₹/KM)</div>
+        <div class="reports-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Route</th>
+                <th>Revenue</th>
+                <th>Distance</th>
+                <th>₹/KM</th>
+                <th>Trips</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Nedumangad – Vattapara</strong></td>
+                <td>₹1,02,000</td>
+                <td>45 km</td>
+                <td style="color: #06d6a0; font-weight: 700;">₹2,267/km</td>
+                <td>12</td>
+              </tr>
+              <tr>
+                <td><strong>Attingal – Kallambalam</strong></td>
+                <td>₹96,000</td>
+                <td>52 km</td>
+                <td style="color: #06d6a0; font-weight: 700;">₹1,846/km</td>
+                <td>15</td>
+              </tr>
+              <tr>
+                <td><strong>Kilimanoor – Nagaroor</strong></td>
+                <td>₹88,000</td>
+                <td>48 km</td>
+                <td style="color: #4361ee; font-weight: 700;">₹1,833/km</td>
+                <td>10</td>
+              </tr>
+              <tr>
+                <td><strong>Varkala – Paravur</strong></td>
+                <td>₹78,000</td>
+                <td>55 km</td>
+                <td style="color: #ff9f1c; font-weight: 700;">₹1,418/km</td>
+                <td>11</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <div class="chart-title">Fleet Efficiency</div>
+        <div class="reports-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Vehicle</th>
+                <th>Type</th>
+                <th>Routes</th>
+                <th>KM Driven</th>
+                <th>Revenue</th>
+                <th>Efficiency</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Truck-004</strong></td>
+                <td>Truck</td>
+                <td>18</td>
+                <td>850 km</td>
+                <td>₹12,50,000</td>
+                <td style="color: #06d6a0; font-weight: 700;">₹1,471/km</td>
+              </tr>
+              <tr>
+                <td><strong>Van-001</strong></td>
+                <td>Van</td>
+                <td>15</td>
+                <td>620 km</td>
+                <td>₹8,90,000</td>
+                <td style="color: #06d6a0; font-weight: 700;">₹1,435/km</td>
+              </tr>
+              <tr>
+                <td><strong>Truck-002</strong></td>
+                <td>Mini Truck</td>
+                <td>12</td>
+                <td>580 km</td>
+                <td>₹7,20,000</td>
+                <td style="color: #4361ee; font-weight: 700;">₹1,241/km</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+  function exportReport() {
+    alert("Report exported successfully!");
+  }
+</script>
+</body>
+</html>
+

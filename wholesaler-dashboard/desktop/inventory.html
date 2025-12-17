@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Inventory – InventoryPro</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .inventory-table {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 16px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #374151;
+    }
+    tr:hover {
+      background: #f9fafb;
+    }
+    .stock-low { background: #fff8e1; }
+    .stock-out { background: #ffebee; color: #c62828; font-weight: 600; }
+    .filters {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .filters input, .filters select {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <h2>InventoryPro</h2>
+    <ul>
+      <li><a href="index.html">Dashboard</a></li>
+      <li><a href="orders.html">Orders</a></li>
+      <li><a href="index.html">Route Planner</a></li>
+      <li><a href="retailers.html">Retailers</a></li>
+      <li class="active"><a href="inventory.html">Inventory</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li><a href="fleet.html">Fleet</a></li>
+      <li><a href="settings.html">Settings</a></li>
+    </ul>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h1>Inventory Management</h1>
+      <div class="user">Wholesaler Admin</div>
+    </header>
+
+    <section style="padding: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>Product Inventory</h2>
+        <button class="btn btn-primary" onclick="openAddItemModal()">+ Add Item</button>
+      </div>
+
+      <div class="filters">
+        <input type="text" placeholder="Search products..." id="searchInput" onkeyup="filterInventory()">
+        <select id="categoryFilter" onchange="filterInventory()">
+          <option value="">All Categories</option>
+          <option>Food Grains</option>
+          <option>Spices</option>
+          <option>Oils</option>
+          <option>Beverages</option>
+          <option>Snacks</option>
+        </select>
+        <select id="warehouseFilter" onchange="filterInventory()">
+          <option value="">All Warehouses</option>
+          <option value="1">Trivandrum Central</option>
+          <option value="2">Attingal Depot</option>
+          <option value="3">Nedumangad Hub</option>
+        </select>
+      </div>
+
+      <div class="inventory-table">
+        <table>
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Product Name</th>
+              <th>Category</th>
+              <th>Quantity</th>
+              <th>Unit</th>
+              <th>Unit Price</th>
+              <th>Total Value</th>
+              <th>Warehouse</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Add Item Modal -->
+<div id="itemModal" class="modal">
+  <div class="modal-content" style="max-width: 600px;">
+    <button class="close-modal" onclick="closeModal()">✖</button>
+    <h2 id="modalTitle">Add Product</h2>
+    <form onsubmit="saveItem(event)">
+      <input type="hidden" id="itemId">
+      <div class="form-group">
+        <label>SKU</label>
+        <input type="text" id="itemSKU" required>
+      </div>
+      <div class="form-group">
+        <label>Product Name</label>
+        <input type="text" id="itemName" required>
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="itemCategory" required>
+          <option>Food Grains</option>
+          <option>Spices</option>
+          <option>Oils</option>
+          <option>Beverages</option>
+          <option>Snacks</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Quantity</label>
+        <input type="number" id="itemQuantity" required>
+      </div>
+      <div class="form-group">
+        <label>Unit</label>
+        <select id="itemUnit" required>
+          <option>kg</option>
+          <option>L</option>
+          <option>pcs</option>
+          <option>box</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Unit Price (₹)</label>
+        <input type="number" step="0.01" id="itemPrice" required>
+      </div>
+      <div class="form-group">
+        <label>Warehouse</label>
+        <select id="itemWarehouse" required>
+          <option value="1">Trivandrum Central</option>
+          <option value="2">Attingal Depot</option>
+          <option value="3">Nedumangad Hub</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Save Item</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Dummy Inventory Data
+  let inventory = JSON.parse(localStorage.getItem('wholesaler_inventory')) || [
+    { id: 1, sku: "SKU-001", name: "Basmati Rice 50kg", category: "Food Grains", quantity: 120, unit: "bag", price: 2500, warehouseId: 1 },
+    { id: 2, sku: "SKU-002", name: "Sugar 25kg", category: "Food Grains", quantity: 85, unit: "bag", price: 1200, warehouseId: 1 },
+    { id: 3, sku: "SKU-003", name: "Sunflower Oil 15L", category: "Oils", quantity: 200, unit: "can", price: 1800, warehouseId: 1 },
+    { id: 4, sku: "SKU-004", name: "Turmeric Powder 1kg", category: "Spices", quantity: 5, unit: "pack", price: 250, warehouseId: 1 },
+    { id: 5, sku: "SKU-005", name: "Tea Powder 1kg", category: "Beverages", quantity: 150, unit: "pack", price: 320, warehouseId: 1 },
+    { id: 6, sku: "SKU-006", name: "Wheat Flour 10kg", category: "Food Grains", quantity: 0, unit: "bag", price: 450, warehouseId: 2 }
+  ];
+
+  function renderInventory() {
+    const tbody = document.getElementById("inventoryBody");
+    tbody.innerHTML = inventory.map(item => {
+      const totalValue = item.quantity * item.price;
+      const rowClass = item.quantity === 0 ? 'stock-out' : item.quantity < 10 ? 'stock-low' : '';
+      
+      return `
+        <tr class="${rowClass}">
+          <td><strong>${item.sku}</strong></td>
+          <td>${item.name}</td>
+          <td>${item.category}</td>
+          <td>${item.quantity}</td>
+          <td>${item.unit}</td>
+          <td>₹${item.price.toLocaleString()}</td>
+          <td>₹${totalValue.toLocaleString()}</td>
+          <td>Warehouse ${item.warehouseId}</td>
+          <td>
+            <button class="btn-sm btn-primary" onclick="editItem(${item.id})">Edit</button>
+            <button class="btn-sm btn-success" onclick="adjustStock(${item.id})">Adjust</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function openAddItemModal() {
+    document.getElementById("modalTitle").textContent = "Add Product";
+    document.getElementById("itemId").value = "";
+    document.querySelector("#itemModal form").reset();
+    document.getElementById("itemModal").classList.add("open");
+  }
+
+  function editItem(id) {
+    const item = inventory.find(i => i.id === id);
+    if (!item) return;
+    
+    document.getElementById("modalTitle").textContent = "Edit Product";
+    document.getElementById("itemId").value = item.id;
+    document.getElementById("itemSKU").value = item.sku;
+    document.getElementById("itemName").value = item.name;
+    document.getElementById("itemCategory").value = item.category;
+    document.getElementById("itemQuantity").value = item.quantity;
+    document.getElementById("itemUnit").value = item.unit;
+    document.getElementById("itemPrice").value = item.price;
+    document.getElementById("itemWarehouse").value = item.warehouseId;
+    
+    document.getElementById("itemModal").classList.add("open");
+  }
+
+  function saveItem(e) {
+    e.preventDefault();
+    const id = document.getElementById("itemId").value;
+    const item = {
+      id: id ? parseInt(id) : Date.now(),
+      sku: document.getElementById("itemSKU").value,
+      name: document.getElementById("itemName").value,
+      category: document.getElementById("itemCategory").value,
+      quantity: parseInt(document.getElementById("itemQuantity").value),
+      unit: document.getElementById("itemUnit").value,
+      price: parseFloat(document.getElementById("itemPrice").value),
+      warehouseId: parseInt(document.getElementById("itemWarehouse").value)
+    };
+    
+    if (id) {
+      inventory = inventory.map(i => i.id === item.id ? item : i);
+    } else {
+      inventory.push(item);
+    }
+    
+    localStorage.setItem('wholesaler_inventory', JSON.stringify(inventory));
+    renderInventory();
+    closeModal();
+    alert("Item saved successfully!");
+  }
+
+  function adjustStock(id) {
+    const item = inventory.find(i => i.id === id);
+    if (!item) return;
+    
+    const adjustment = prompt(`Current stock: ${item.quantity}\nEnter adjustment (+/-):`, "0");
+    if (adjustment !== null) {
+      const change = parseInt(adjustment);
+      item.quantity = Math.max(0, item.quantity + change);
+      localStorage.setItem('wholesaler_inventory', JSON.stringify(inventory));
+      renderInventory();
+      alert(`Stock adjusted. New quantity: ${item.quantity}`);
+    }
+  }
+
+  function filterInventory() {
+    const term = document.getElementById("searchInput").value.toLowerCase();
+    const category = document.getElementById("categoryFilter").value;
+    const warehouse = document.getElementById("warehouseFilter").value;
+    
+    const filtered = inventory.filter(item => {
+      const matchTerm = !term || 
+        item.sku.toLowerCase().includes(term) ||
+        item.name.toLowerCase().includes(term);
+      const matchCategory = !category || item.category === category;
+      const matchWarehouse = !warehouse || item.warehouseId == warehouse;
+      return matchTerm && matchCategory && matchWarehouse;
+    });
+    
+    const tbody = document.getElementById("inventoryBody");
+    tbody.innerHTML = filtered.map(item => {
+      const totalValue = item.quantity * item.price;
+      const rowClass = item.quantity === 0 ? 'stock-out' : item.quantity < 10 ? 'stock-low' : '';
+      
+      return `
+        <tr class="${rowClass}">
+          <td><strong>${item.sku}</strong></td>
+          <td>${item.name}</td>
+          <td>${item.category}</td>
+          <td>${item.quantity}</td>
+          <td>${item.unit}</td>
+          <td>₹${item.price.toLocaleString()}</td>
+          <td>₹${totalValue.toLocaleString()}</td>
+          <td>Warehouse ${item.warehouseId}</td>
+          <td>
+            <button class="btn-sm btn-primary" onclick="editItem(${item.id})">Edit</button>
+            <button class="btn-sm btn-success" onclick="adjustStock(${item.id})">Adjust</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function closeModal() {
+    document.getElementById("itemModal").classList.remove("open");
+  }
+
+  renderInventory();
+  
+  // Close modal on backdrop click
+  document.getElementById('itemModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeModal();
+    }
+  });
+</script>
+</body>
+</html>
+

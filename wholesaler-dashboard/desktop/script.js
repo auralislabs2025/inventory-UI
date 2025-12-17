@@ -180,7 +180,7 @@ function analyzeCluster(cluster) {
   document.getElementById("kpiKm").innerText =
     cluster.estimatedKm.toFixed(1);
 
-  document.getElementById("kpiEfficiency").innerText =
+  document.getElementById("kpiScore").innerText =
     `₹${cluster.efficiency.toFixed(0)} / km`;
 }
 

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Settings – InventoryPro</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .settings-section {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+    .settings-section h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #2c3e50;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .setting-item:last-child {
+      border-bottom: none;
+    }
+    .setting-label {
+      flex: 1;
+    }
+    .setting-label strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #374151;
+    }
+    .setting-label span {
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+    .setting-control {
+      flex-shrink: 0;
+    }
+    .setting-control select,
+    .setting-control input {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    .danger-zone {
+      background: #fff5f5;
+      border: 2px solid #fecaca;
+    }
+    .danger-zone h3 {
+      color: #dc2626;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <h2>InventoryPro</h2>
+    <ul>
+      <li><a href="index.html">Dashboard</a></li>
+      <li><a href="orders.html">Orders</a></li>
+      <li><a href="index.html">Route Planner</a></li>
+      <li><a href="retailers.html">Retailers</a></li>
+      <li><a href="inventory.html">Inventory</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li><a href="fleet.html">Fleet</a></li>
+      <li class="active"><a href="settings.html">Settings</a></li>
+    </ul>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h1>Settings</h1>
+      <div class="user">Wholesaler Admin</div>
+    </header>
+
+    <section style="padding: 20px;">
+      <div class="settings-section">
+        <h3>General Settings</h3>
+        <div class="setting-item">
+          <div class="setting-label">
+            <strong>Company Name</strong>
+            <span>Your business name</span>
+          </div>
+          <div class="setting-control">
+            <input type="text" value="InventoryPro Wholesaler" style="width: 250px;">
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-label">
+            <strong>Default Currency</strong>
+            <span>Currency for all transactions</span>
+          </div>
+          <div class="setting-control">
+            <select>
+              <option>INR (₹)</option>
+              <option>USD ($)</option>
+              <option>EUR (€)</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-label">
+            <strong>Time Zone</strong>
+            <span>Your local time zone</span>
+          </div>
+          <div class="setting-control">
+            <select>
+              <option>Asia/Kolkata (IST)</option>
+              <option>UTC</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Route Planning</h3>
+        <div class="setting-item">
+          <div class="setting-label">
+            <strong>Default Warehouse</strong>
+            <span>Starting point for route planning</span>
+          </div>
+          <div class="setting-control">
+            <select>
+              <option>Trivandrum Central Godown</option>
+              <option>Attingal Depot</option>
+              <option>Nedumangad Hub</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-label">
+            <strong>Route Optimization</strong>
+            <span>Enable automatic route optimization</span>
+          </div>
+          <div class="setting-control">
+            <input type="checkbox" checked>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-label">
+            <strong>Minimum ₹/KM Threshold</strong>
+            <span>Routes below this will be flagged</span>
+          </div>
+          <div class="setting-control">
+            <input type="number" value="1000" style="width: 100px;">
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Notifications</h3>
+        <div class="setting-item">
+          <div class="setting-label">
+            <strong>Low Stock Alerts</strong>
+            <span>Get notified when inventory is low</span>
+          </div>
+          <div class="setting-control">
+            <input type="checkbox" checked>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-label">
+            <strong>Route Completion Alerts</strong>
+            <span>Notifications when routes are completed</span>
+          </div>
+          <div class="setting-control">
+            <input type="checkbox" checked>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-label">
+            <strong>Email Notifications</strong>
+            <span>Receive email updates</span>
+          </div>
+          <div class="setting-control">
+            <input type="checkbox">
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section danger-zone">
+        <h3>Danger Zone</h3>
+        <div class="setting-item">
+          <div class="setting-label">
+            <strong>Reset All Data</strong>
+            <span>Permanently delete all data (cannot be undone)</span>
+          </div>
+          <div class="setting-control">
+            <button class="btn btn-danger" onclick="resetData()">Reset Data</button>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-label">
+            <strong>Export Data</strong>
+            <span>Download all data as JSON</span>
+          </div>
+          <div class="setting-control">
+            <button class="btn btn-primary" onclick="exportData()">Export</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+  function resetData() {
+    if (confirm("Are you sure you want to reset all data? This cannot be undone!")) {
+      if (confirm("FINAL CONFIRMATION: Delete ALL data?")) {
+        localStorage.clear();
+        alert("All data has been reset. Page will reload...");
+        setTimeout(() => location.reload(), 1000);
+      }
+    }
+  }
+
+  function exportData() {
+    const data = {
+      fleet: JSON.parse(localStorage.getItem('wholesaler_fleet') || '[]'),
+      orders: JSON.parse(localStorage.getItem('wholesaler_orders') || '[]'),
+      retailers: JSON.parse(localStorage.getItem('wholesaler_retailers') || '[]'),
+      inventory: JSON.parse(localStorage.getItem('wholesaler_inventory') || '[]')
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `inventorypro-export-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    alert("Data exported successfully!");
+  }
+</script>
+</body>
+</html>
+
