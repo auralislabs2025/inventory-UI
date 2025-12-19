@@ -38,18 +38,79 @@
     .close-modal:hover{color:#000}
     .toast{position:fixed;bottom:30px;right:30px;background:#333;color:white;padding:16px 28px;border-radius:8px;opacity:0;transition:.3s;z-index:3000;box-shadow:0 8px 25px rgba(0,0,0,.3);font-size:1rem}
     .toast.show{opacity:1;transform:translateY(-10px)}
+    .sidebar-backdrop{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.5);
+      z-index:998;
+      opacity:0;
+      transition:opacity .3s;
+      pointer-events:none;
+    }
+    .sidebar-backdrop.show{
+      display:block;
+      opacity:1;
+      pointer-events:auto;
+    }
     @media(max-width:768px){
-      .sidebar{position:fixed;top:0;left:-260px;height:100vh;z-index:999}
+      .sidebar{
+        position:fixed;
+        top:0;
+        left:-260px;
+        height:100vh;
+        z-index:999;
+        box-shadow:2px 0 20px rgba(0,0,0,.2);
+      }
       .sidebar.open{left:0}
-      .topbar{padding:15px 20px}
-      .content{padding:20px}
-      h1{font-size:1.7rem}
+      .topbar{
+        padding:12px 16px;
+        flex-wrap:wrap;
+        gap:10px;
+      }
+      .content{padding:16px}
+      h1{font-size:1.5rem;margin-bottom:20px}
+      .card{
+        padding:20px;
+        margin-bottom:20px;
+      }
+      .setting-group{
+        margin-bottom:20px;
+      }
+      .setting-group label{
+        font-size:1rem;
+      }
+      select,input[type=text]{
+        padding:14px;
+        font-size:1rem;
+        min-height:44px;
+      }
+      .btn{
+        padding:12px 16px;
+        min-height:44px;
+        font-size:1rem;
+        width:100%;
+      }
+      .modal-content{
+        width:100%;
+        max-width:100%;
+        height:100vh;
+        max-height:100vh;
+        border-radius:0;
+        padding:20px 16px;
+      }
+    }
+    @media(max-width:480px){
+      .content{padding:12px}
+      h1{font-size:1.3rem}
+      .card{padding:16px}
     }
   </style>
 </head>
 <body>
 
 <div class="app">
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
   <aside class="sidebar" id="sidebar">
     <div class="logo">InventoryPro</div>
     <ul>
@@ -65,7 +126,7 @@
 
   <div class="main">
     <header class="topbar">
-      <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">Menu</button>
+      <button class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle menu">☰</button>
       <div style="font-weight:600;font-size:1.4rem;color:#2c3e50">Settings</div>
       <div style="display:flex;align-items:center;gap:15px">
         <select id="themeSelect" onchange="setTheme(this.value)">
@@ -231,6 +292,31 @@
     });
   });
 
+  // Sidebar functions
+  function toggleSidebar(){
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if(sidebar && backdrop){
+      sidebar.classList.toggle('open');
+      backdrop.classList.toggle('show');
+    }
+  }
+  function closeSidebar(){
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if(sidebar && backdrop){
+      sidebar.classList.remove('open');
+      backdrop.classList.remove('show');
+    }
+  }
+  
+  // Close sidebar on nav click
+  document.querySelectorAll('.sidebar a').forEach(link => {
+    link.addEventListener('click', () => {
+      if(window.innerWidth <= 768) closeSidebar();
+    });
+  });
+  
   // Apply theme on load
   document.body.className = savedTheme;
 </script>

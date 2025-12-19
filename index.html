@@ -89,15 +89,93 @@
     .actions-row{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
     /* helper */
     .muted-center{color:var(--muted);text-align:center;padding:18px}
+    /* Sidebar backdrop */
+    .sidebar-backdrop{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.5);
+      z-index:998;
+      opacity:0;
+      transition:opacity .3s;
+      pointer-events:none;
+    }
+    .sidebar-backdrop.show{
+      display:block;
+      opacity:1;
+      pointer-events:auto;
+    }
+    /* Mobile Responsive Styles */
     @media(max-width:860px){
       .modal-grid{grid-template-columns:1fr}
       .dashboard-grid{grid-template-columns:1fr}
       .right-col{order:2}
     }
+    @media(max-width:768px){
+      /* Sidebar becomes drawer on mobile */
+      .sidebar{
+        position:fixed;
+        top:0;
+        left:-240px;
+        height:100vh;
+        z-index:999;
+        transition:left .3s ease;
+        box-shadow:2px 0 20px rgba(0,0,0,.2);
+      }
+      .sidebar.open{left:0}
+      /* Main content adjustments */
+      .main{width:100%}
+      .topbar{padding:12px 16px;flex-wrap:wrap;gap:10px}
+      .page-title{font-size:1.2rem}
+      .content{padding:16px}
+      /* Stats cards stack on mobile */
+      .dashboard-grid{grid-template-columns:1fr;gap:16px}
+      .market-list{grid-template-columns:1fr;gap:12px}
+      .prod-card{margin-bottom:0}
+      /* Marketplace controls stack */
+      .market-controls{flex-direction:column;gap:10px}
+      .search-input{min-width:100%}
+      .select{width:100%}
+      /* Vendor cards full width */
+      .vendor-grid{grid-template-columns:1fr}
+      .vendor-card{padding:12px}
+      .vendor-actions{flex-direction:column;gap:8px;width:100%}
+      .vendor-actions .small-btn{width:100%}
+      /* Modal full screen on mobile */
+      .modal{padding:0}
+      .modal-card{
+        max-width:100%;
+        width:100%;
+        height:100vh;
+        max-height:100vh;
+        border-radius:0;
+        padding:20px 16px;
+      }
+      .modal-grid{grid-template-columns:1fr;gap:16px}
+      .offer-table{font-size:0.85rem}
+      .offer-table th,.offer-table td{padding:8px 6px}
+      /* Chart cards responsive */
+      .chart-card{padding:16px;margin-bottom:16px}
+      /* Touch-friendly buttons */
+      .small-btn,.btn{padding:12px 16px;min-height:44px;font-size:1rem}
+      /* Better spacing */
+      section{margin-bottom:20px}
+    }
+    @media(max-width:480px){
+      .topbar{flex-direction:column;align-items:stretch}
+      .top-actions{width:100%;justify-content:space-between}
+      .page-title{font-size:1.1rem}
+      .content{padding:12px}
+      .chart-card{padding:12px}
+      .card{padding:14px}
+      .prod-media{height:120px}
+      .metrics{grid-template-columns:1fr;gap:10px}
+    }
   </style>
 </head>
 <body>
   <div class="app">
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
     <aside class="sidebar" id="sidebar">
       <div class="logo">InventoryPro</div>
       <nav>
@@ -114,7 +192,7 @@
     <div class="main">
       <header class="topbar">
         <div style="display:flex;gap:14px;align-items:center">
-          <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <button class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle menu">☰</button>
           <div class="page-title">Dashboard</div>
         </div>
         <div class="top-actions">
@@ -619,12 +697,33 @@
     renderVendors();
     refreshActivity();
 
+    // Sidebar toggle for mobile
+    function toggleSidebar(){
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      sidebar.classList.toggle('open');
+      backdrop.classList.toggle('show');
+    }
+    function closeSidebar(){
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      sidebar.classList.remove('open');
+      backdrop.classList.remove('show');
+    }
+    // Close sidebar when clicking nav links on mobile
+    document.querySelectorAll('.sidebar a').forEach(link => {
+      link.addEventListener('click', () => {
+        if(window.innerWidth <= 768) closeSidebar();
+      });
+    });
     // Expose small helpers if needed
     window.refreshActivity = refreshActivity;
     window.renderVendors = renderVendors;
     window.openVendorModal = openVendorModal;
     window.openMarketplaceModal = () => { showToast('Marketplace refreshed'); renderMarketplace(); };
     window.createPOFromOffer = createPOFromOffer;
+    window.toggleSidebar = toggleSidebar;
+    window.closeSidebar = closeSidebar;
   </script>
 </body>
 </html>

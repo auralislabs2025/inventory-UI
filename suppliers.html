@@ -104,6 +104,21 @@
     .toast.show { opacity:1; transform:translateY(-10px); }
 
     /* Responsive */
+    .sidebar-backdrop{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.5);
+      z-index:998;
+      opacity:0;
+      transition:opacity .3s;
+      pointer-events:none;
+    }
+    .sidebar-backdrop.show{
+      display:block;
+      opacity:1;
+      pointer-events:auto;
+    }
     @media (max-width:768px) {
       .sidebar { position:fixed; left:-260px; z-index:999; transition:0.3s; }
       .sidebar.open { left:0; }
@@ -116,7 +131,7 @@
 <body>
 
 <div class="app">
-  <!-- Sidebar - Same as inventory.html -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
   <aside class="sidebar" id="sidebar">
     <div class="logo">InventoryPro</div>
     <ul>
@@ -132,7 +147,7 @@
 
   <div class="main">
     <header class="topbar">
-      <button onclick="document.getElementById('sidebar').classList.toggle('open')">Menu</button>
+      <button class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle menu">☰</button>
       <input type="text" placeholder="Search suppliers..." class="global-search" />
       <div>
         <select onchange="document.body.className=this.value; localStorage.setItem('theme',this.value)">
@@ -338,6 +353,31 @@
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 3000);
   }
+  
+  // Sidebar functions
+  function toggleSidebar(){
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if(sidebar && backdrop){
+      sidebar.classList.toggle('open');
+      backdrop.classList.toggle('show');
+    }
+  }
+  function closeSidebar(){
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if(sidebar && backdrop){
+      sidebar.classList.remove('open');
+      backdrop.classList.remove('show');
+    }
+  }
+  
+  // Close sidebar on nav click
+  document.querySelectorAll('.sidebar a').forEach(link => {
+    link.addEventListener('click', () => {
+      if(window.innerWidth <= 768) closeSidebar();
+    });
+  });
 
   // Close modal on outside click
   document.querySelectorAll('.modal').forEach(m => {

@@ -1,4 +1,97 @@
 /* =========================
+   SEARCH UTILITIES
+========================= */
+
+// Debounced search function
+function createSearchHandler(callback, delay = 300) {
+  let timeout;
+  return (e) => {
+    const value = e.target ? e.target.value : e;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => callback(value), delay);
+  };
+}
+
+// Create modern search input component
+function createSearchInput(containerId, options = {}) {
+  const {
+    placeholder = "Search...",
+    onSearch = () => {},
+    onClear = () => {},
+    showFilters = false,
+    filterButtonText = "Filters"
+  } = options;
+
+  const container = document.getElementById(containerId);
+  if (!container) return null;
+
+  const searchHTML = `
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        <input type="search" 
+               class="search-input" 
+               placeholder="${placeholder}"
+               inputmode="search"
+               autocomplete="off"
+               aria-label="${placeholder}">
+        <button class="search-clear" aria-label="Clear search" style="display: none;">×</button>
+      </div>
+      ${showFilters ? `<button class="filter-toggle" aria-label="Show filters">${filterButtonText}</button>` : ''}
+    </div>
+  `;
+
+  container.innerHTML = searchHTML;
+
+  const input = container.querySelector('.search-input');
+  const clearBtn = container.querySelector('.search-clear');
+  const searchHandler = createSearchHandler(onSearch);
+
+  // Input event with debouncing
+  input.addEventListener('input', (e) => {
+    const value = e.target.value;
+    searchHandler(e);
+    
+    // Show/hide clear button
+    if (value.length > 0) {
+      clearBtn.style.display = 'flex';
+    } else {
+      clearBtn.style.display = 'none';
+    }
+  });
+
+  // Clear button
+  clearBtn.addEventListener('click', () => {
+    input.value = '';
+    clearBtn.style.display = 'none';
+    onClear();
+    onSearch('');
+  });
+
+  // Enter key to search immediately
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      onSearch(input.value);
+    }
+  });
+
+  return {
+    input,
+    clear: () => {
+      input.value = '';
+      clearBtn.style.display = 'none';
+      onClear();
+      onSearch('');
+    },
+    getValue: () => input.value
+  };
+}
+
+/* =========================
    DATA MODELS
 ========================= */
 
@@ -123,10 +216,65 @@ let currentRouteData = null;
 let selectedVehicleId = null;
 
 /* =========================
+   DEMO DATA SEEDING
+========================= */
+
+function seedDemoData() {
+  // Seed Orders Data
+  if (!localStorage.getItem('wholesaler_orders')) {
+    const demoOrders = [
+      { id: 1, orderId: "ORD-001", retailer: "Krishna Stores", items: "15 items", value: 45000, status: "pending", date: "2025-01-27", address: "Attingal, Kerala" },
+      { id: 2, orderId: "ORD-002", retailer: "Lakshmi Supermarket", items: "22 items", value: 32000, status: "pending", date: "2025-01-27", address: "Kallambalam, Kerala" },
+      { id: 3, orderId: "ORD-003", retailer: "Devi Trading Co", items: "18 items", value: 36000, status: "shipped", date: "2025-01-26", address: "Attingal, Kerala" },
+      { id: 4, orderId: "ORD-004", retailer: "Ganesh Provisions", items: "25 items", value: 45000, status: "shipped", date: "2025-01-26", address: "Varkala, Kerala" },
+      { id: 5, orderId: "ORD-005", retailer: "Sai Enterprises", items: "12 items", value: 33000, status: "delivered", date: "2025-01-25", address: "Paravur, Kerala" },
+      { id: 6, orderId: "ORD-006", retailer: "Balaji Stores", items: "20 items", value: 28000, status: "pending", date: "2025-01-27", address: "Kilimanoor, Kerala" },
+      { id: 7, orderId: "ORD-007", retailer: "Murugan Traders", items: "16 items", value: 35000, status: "shipped", date: "2025-01-26", address: "Nagaroor, Kerala" },
+      { id: 8, orderId: "ORD-008", retailer: "Venkateshwara Mart", items: "14 items", value: 25000, status: "delivered", date: "2025-01-25", address: "Kilimanoor, Kerala" },
+      { id: 9, orderId: "ORD-009", retailer: "Mahalakshmi Stores", items: "28 items", value: 42000, status: "pending", date: "2025-01-27", address: "Nedumangad, Kerala" },
+      { id: 10, orderId: "ORD-010", retailer: "Padmanabha Trading", items: "19 items", value: 38000, status: "shipped", date: "2025-01-26", address: "Vattapara, Kerala" },
+      { id: 11, orderId: "ORD-011", retailer: "Anjaneya Provisions", items: "17 items", value: 22000, status: "delivered", date: "2025-01-25", address: "Nedumangad, Kerala" },
+      { id: 12, orderId: "ORD-012", retailer: "Radha Supermarket", items: "24 items", value: 41000, status: "pending", date: "2025-01-27", address: "Trivandrum, Kerala" }
+    ];
+    localStorage.setItem('wholesaler_orders', JSON.stringify(demoOrders));
+  }
+
+  // Seed Inventory Data
+  if (!localStorage.getItem('wholesaler_inventory')) {
+    const demoInventory = [
+      { id: 1, sku: "PROD-001", name: "Rice 1kg Premium", category: "Food Grains", quantity: 150, unit: "bags", price: 450, reorderLevel: 50 },
+      { id: 2, sku: "PROD-002", name: "Wheat Flour 1kg", category: "Food Grains", quantity: 8, unit: "bags", price: 380, reorderLevel: 20 },
+      { id: 3, sku: "PROD-003", name: "Sugar 1kg", category: "Food Grains", quantity: 0, unit: "bags", price: 420, reorderLevel: 30 },
+      { id: 4, sku: "PROD-004", name: "Cooking Oil 1L", category: "Oils", quantity: 85, unit: "bottles", price: 180, reorderLevel: 40 },
+      { id: 5, sku: "PROD-005", name: "Mustard Oil 500ml", category: "Oils", quantity: 120, unit: "bottles", price: 95, reorderLevel: 50 },
+      { id: 6, sku: "PROD-006", name: "Turmeric Powder 500g", category: "Spices", quantity: 45, unit: "packets", price: 120, reorderLevel: 25 },
+      { id: 7, sku: "PROD-007", name: "Chilli Powder 500g", category: "Spices", quantity: 6, unit: "packets", price: 110, reorderLevel: 20 },
+      { id: 8, sku: "PROD-008", name: "Coriander Powder 500g", category: "Spices", quantity: 38, unit: "packets", price: 85, reorderLevel: 25 },
+      { id: 9, sku: "PROD-009", name: "Tea Powder 500g", category: "Beverages", quantity: 95, unit: "packets", price: 250, reorderLevel: 40 },
+      { id: 10, sku: "PROD-010", name: "Coffee Powder 200g", category: "Beverages", quantity: 72, unit: "packets", price: 180, reorderLevel: 30 },
+      { id: 11, sku: "PROD-011", name: "Salt 1kg", category: "Food Grains", quantity: 200, unit: "packets", price: 25, reorderLevel: 50 },
+      { id: 12, sku: "PROD-012", name: "Dal Toor 1kg", category: "Pulses", quantity: 55, unit: "packets", price: 140, reorderLevel: 30 },
+      { id: 13, sku: "PROD-013", name: "Dal Moong 1kg", category: "Pulses", quantity: 42, unit: "packets", price: 150, reorderLevel: 25 },
+      { id: 14, sku: "PROD-014", name: "Dal Urad 1kg", category: "Pulses", quantity: 5, unit: "packets", price: 160, reorderLevel: 20 },
+      { id: 15, sku: "PROD-015", name: "Soap Bar", category: "Personal Care", quantity: 180, unit: "pieces", price: 35, reorderLevel: 50 },
+      { id: 16, sku: "PROD-016", name: "Shampoo 200ml", category: "Personal Care", quantity: 65, unit: "bottles", price: 120, reorderLevel: 30 },
+      { id: 17, sku: "PROD-017", name: "Toothpaste 100g", category: "Personal Care", quantity: 90, unit: "tubes", price: 75, reorderLevel: 40 },
+      { id: 18, sku: "PROD-018", name: "Detergent Powder 1kg", category: "Cleaning", quantity: 110, unit: "packets", price: 95, reorderLevel: 50 },
+      { id: 19, sku: "PROD-019", name: "Biscuits 200g", category: "Snacks", quantity: 75, unit: "packets", price: 45, reorderLevel: 30 },
+      { id: 20, sku: "PROD-020", name: "Namkeen 250g", category: "Snacks", quantity: 48, unit: "packets", price: 55, reorderLevel: 25 }
+    ];
+    localStorage.setItem('wholesaler_inventory', JSON.stringify(demoInventory));
+  }
+}
+
+/* =========================
    INITIALIZATION
 ========================= */
 
 function init() {
+  // Seed demo data first
+  seedDemoData();
+  
   // Initialize page views
   pageViews = {
     dashboard: document.getElementById('dashboardView'),
@@ -621,14 +769,40 @@ function loadPageData(page) {
 }
 
 function renderAllRoutes() {
+  // Get or create search container
+  let searchContainer = document.getElementById("routesSearchContainer");
+  if (!searchContainer) {
+    const routesSection = document.getElementById("routesView").querySelector('.routes');
+    searchContainer = document.createElement('div');
+    searchContainer.id = 'routesSearchContainer';
+    searchContainer.className = 'search-wrapper';
+    searchContainer.style.margin = '16px 16px 0';
+    const h4 = routesSection.querySelector('h4');
+    routesSection.insertBefore(searchContainer, h4);
+  }
+  
+  // Clear and create modern search input
+  if (!searchContainer.querySelector('.search-container')) {
+    const searchInput = createSearchInput('routesSearchContainer', {
+      placeholder: "Search routes by name...",
+      showFilters: false
+    });
+  }
+  
   const list = document.getElementById("allRoutesList");
   list.innerHTML = "";
-  clusters.forEach(c => {
-    const div = document.createElement("div");
-    div.className = "route-card";
-    if (c === activeCluster) div.classList.add("highlighted");
-    
-    const statusBadge = getStatusBadge(c.status);
+  
+  let filteredClusters = clusters;
+  
+  // Render routes
+  function renderRoutesList(clusterList) {
+    list.innerHTML = "";
+    clusterList.forEach(c => {
+      const div = document.createElement("div");
+      div.className = "route-card";
+      if (c === activeCluster) div.classList.add("highlighted");
+      
+      const statusBadge = getStatusBadge(c.status);
     
     div.innerHTML = `
       <div class="route-header">
@@ -655,7 +829,21 @@ function renderAllRoutes() {
     };
     
     list.appendChild(div);
-  });
+    });
+  }
+  
+  // Search handler
+  const searchInput = searchContainer?.querySelector('.search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', createSearchHandler((term) => {
+      filteredClusters = clusters.filter(c => {
+        return c.name.toLowerCase().includes(term.toLowerCase());
+      });
+      renderRoutesList(filteredClusters);
+    }));
+  }
+  
+  renderRoutesList(filteredClusters);
 }
 
 /* =========================
@@ -663,13 +851,31 @@ function renderAllRoutes() {
 ========================= */
 
 function openDrawer() {
-  document.getElementById("drawer").classList.add("open");
-  document.getElementById("drawerBackdrop").classList.add("open");
+  const drawer = document.getElementById("drawer");
+  const backdrop = document.getElementById("drawerBackdrop");
+  
+  // Prevent body scroll when drawer is open
+  document.body.style.overflow = 'hidden';
+  
+  // Add classes with slight delay for smoother animation
+  backdrop.classList.add("open");
+  setTimeout(() => {
+    drawer.classList.add("open");
+  }, 10);
 }
 
 function closeDrawer() {
-  document.getElementById("drawer").classList.remove("open");
-  document.getElementById("drawerBackdrop").classList.remove("open");
+  const drawer = document.getElementById("drawer");
+  const backdrop = document.getElementById("drawerBackdrop");
+  
+  // Re-enable body scroll
+  document.body.style.overflow = '';
+  
+  // Remove classes
+  drawer.classList.remove("open");
+  setTimeout(() => {
+    backdrop.classList.remove("open");
+  }, 200);
 }
 
 /* =========================
@@ -731,31 +937,91 @@ function renderFleetView() {
   document.getElementById("mobileFleetAvailable").textContent = warehouseFleet.filter(v => v.status === "available").length;
   document.getElementById("mobileFleetAssigned").textContent = warehouseFleet.filter(v => v.status === "assigned" || v.status === "on_route").length;
   
+  // Get or create search container
+  let searchContainer = document.getElementById("fleetSearchContainer");
+  if (!searchContainer) {
+    const pageContent = document.getElementById("fleetView").querySelector('.page-content');
+    searchContainer = document.createElement('div');
+    searchContainer.id = 'fleetSearchContainer';
+    searchContainer.className = 'search-wrapper';
+    searchContainer.style.margin = '16px';
+    const fleetList = document.getElementById("fleetList");
+    pageContent.insertBefore(searchContainer, fleetList);
+  }
+  
+  // Clear and create modern search input
+  if (!searchContainer.querySelector('.search-container')) {
+    const searchInput = createSearchInput('fleetSearchContainer', {
+      placeholder: "Search vehicles by name or type...",
+      showFilters: false
+    });
+  }
+  
   const list = document.getElementById("fleetList");
   list.innerHTML = "";
-  warehouseFleet.forEach(v => {
-    const div = document.createElement("div");
-    div.className = "route-card";
-    div.innerHTML = `
-      <div class="route-header">
-        <strong>${v.name}</strong>
-        <span class="badge badge-${v.status}">${v.status.replace('_', ' ').toUpperCase()}</span>
-      </div>
-      <div class="route-metrics">
-        <span>${v.type}</span>
-        <span>•</span>
-        <span>${v.capacity}kg</span>
-        <span>•</span>
-        <span>₹${v.costPerKm}/km</span>
-      </div>
-      ${v.assignedRoute ? `<div style="margin-top: 8px; font-size: 0.85rem; color: var(--muted);">Route: ${v.assignedRoute}</div>` : ''}
-    `;
-    list.appendChild(div);
-  });
+  
+  let filteredFleet = warehouseFleet;
+  
+  // Render fleet
+  function renderFleetList(fleetList) {
+    list.innerHTML = "";
+    fleetList.forEach(v => {
+      const div = document.createElement("div");
+      div.className = "route-card";
+      div.innerHTML = `
+        <div class="route-header">
+          <strong>${v.name}</strong>
+          <span class="badge badge-${v.status}">${v.status.replace('_', ' ').toUpperCase()}</span>
+        </div>
+        <div class="route-metrics">
+          <span>${v.type}</span>
+          <span>•</span>
+          <span>${v.capacity}kg</span>
+          <span>•</span>
+          <span>₹${v.costPerKm}/km</span>
+        </div>
+        ${v.assignedRoute ? `<div style="margin-top: 8px; font-size: 0.85rem; color: var(--muted);">Route: ${v.assignedRoute}</div>` : ''}
+      `;
+      list.appendChild(div);
+    });
+  }
+  
+  // Search handler
+  const searchInput = searchContainer?.querySelector('.search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', createSearchHandler((term) => {
+      filteredFleet = warehouseFleet.filter(v => {
+        const searchText = `${v.name} ${v.type} ${v.status}`.toLowerCase();
+        return searchText.includes(term.toLowerCase());
+      });
+      renderFleetList(filteredFleet);
+    }));
+  }
+  
+  renderFleetList(filteredFleet);
 }
 
 function renderOrdersView() {
   const orders = JSON.parse(localStorage.getItem('wholesaler_orders')) || [];
+  const container = document.getElementById("ordersView").querySelector('.page-content');
+  
+  // Get or create search container
+  let searchContainer = document.getElementById('ordersSearchContainer');
+  if (!searchContainer) {
+    searchContainer = document.createElement('div');
+    searchContainer.id = 'ordersSearchContainer';
+    searchContainer.className = 'search-wrapper';
+    container.insertBefore(searchContainer, container.firstChild);
+  }
+  
+  // Clear and create modern search input
+  searchContainer.innerHTML = '';
+  const searchInput = createSearchInput('ordersSearchContainer', {
+    placeholder: "Search orders by ID, retailer, or address...",
+    showFilters: true,
+    filterButtonText: "Filter"
+  });
+  
   const list = document.getElementById("ordersList");
   list.innerHTML = "";
   
@@ -764,31 +1030,63 @@ function renderOrdersView() {
     return;
   }
   
-  orders.forEach(o => {
-    const div = document.createElement("div");
-    div.className = "route-card";
-    div.innerHTML = `
-      <div class="route-header">
-        <strong>${o.orderId}</strong>
-        <span class="badge badge-${o.status}">${o.status.toUpperCase()}</span>
-      </div>
-      <div style="margin-top: 8px; font-size: 0.9rem; color: var(--text);">${o.retailer}</div>
-      <div style="margin-top: 4px; font-size: 0.85rem; color: var(--muted);">${o.items}</div>
-      <div style="margin-top: 8px; font-size: 1rem; font-weight: 700; color: var(--primary);">₹${o.value.toLocaleString()}</div>
-    `;
-    list.appendChild(div);
-  });
+  let filteredOrders = orders;
   
-  document.getElementById("ordersSearch").oninput = (e) => {
-    const term = e.target.value.toLowerCase();
-    document.querySelectorAll("#ordersList .route-card").forEach(card => {
-      card.style.display = card.textContent.toLowerCase().includes(term) ? '' : 'none';
+  // Render orders
+  function renderOrdersList(orderList) {
+    list.innerHTML = "";
+    orderList.forEach(o => {
+      const div = document.createElement("div");
+      div.className = "route-card";
+      div.innerHTML = `
+        <div class="route-header">
+          <strong>${o.orderId}</strong>
+          <span class="badge badge-${o.status}">${o.status.toUpperCase()}</span>
+        </div>
+        <div style="margin-top: 8px; font-size: 0.9rem; color: var(--text);">${o.retailer}</div>
+        <div style="margin-top: 4px; font-size: 0.85rem; color: var(--muted);">${o.items} • ${o.date}</div>
+        <div style="margin-top: 4px; font-size: 0.85rem; color: var(--muted);">${o.address}</div>
+        <div style="margin-top: 8px; font-size: 1rem; font-weight: 700; color: var(--primary);">₹${o.value.toLocaleString()}</div>
+      `;
+      list.appendChild(div);
     });
-  };
+  }
+  
+  // Search handler
+  if (searchInput) {
+    searchInput.input.addEventListener('input', createSearchHandler((term) => {
+      filteredOrders = orders.filter(o => {
+        const searchText = `${o.orderId} ${o.retailer} ${o.address} ${o.status}`.toLowerCase();
+        return searchText.includes(term.toLowerCase());
+      });
+      renderOrdersList(filteredOrders);
+    }));
+  }
+  
+  renderOrdersList(filteredOrders);
 }
 
 function renderInventoryView() {
   const inventory = JSON.parse(localStorage.getItem('wholesaler_inventory')) || [];
+  const container = document.getElementById("inventoryView").querySelector('.page-content');
+  
+  // Get or create search container
+  let searchContainer = document.getElementById('inventorySearchContainer');
+  if (!searchContainer) {
+    searchContainer = document.createElement('div');
+    searchContainer.id = 'inventorySearchContainer';
+    searchContainer.className = 'search-wrapper';
+    container.insertBefore(searchContainer, container.firstChild);
+  }
+  
+  // Clear and create modern search input
+  searchContainer.innerHTML = '';
+  const searchInput = createSearchInput('inventorySearchContainer', {
+    placeholder: "Search products by SKU, name, or category...",
+    showFilters: true,
+    filterButtonText: "Filter"
+  });
+  
   const list = document.getElementById("inventoryList");
   list.innerHTML = "";
   
@@ -797,31 +1095,43 @@ function renderInventoryView() {
     return;
   }
   
-  inventory.forEach(item => {
-    const div = document.createElement("div");
-    div.className = "route-card";
-    const totalValue = item.quantity * item.price;
-    div.innerHTML = `
-      <div class="route-header">
-        <strong>${item.sku}</strong>
-        ${item.quantity === 0 ? '<span class="badge badge-danger">OUT</span>' : item.quantity < 10 ? '<span class="badge badge-warning">LOW</span>' : ''}
-      </div>
-      <div style="margin-top: 8px; font-size: 0.9rem; color: var(--text);">${item.name}</div>
-      <div style="margin-top: 4px; font-size: 0.85rem; color: var(--muted);">${item.category}</div>
-      <div style="margin-top: 8px; display: flex; justify-content: space-between;">
-        <span>Qty: <strong>${item.quantity} ${item.unit}</strong></span>
-        <span style="font-weight: 700; color: var(--primary);">₹${totalValue.toLocaleString()}</span>
-      </div>
-    `;
-    list.appendChild(div);
-  });
+  let filteredInventory = inventory;
   
-  document.getElementById("inventorySearch").oninput = (e) => {
-    const term = e.target.value.toLowerCase();
-    document.querySelectorAll("#inventoryList .route-card").forEach(card => {
-      card.style.display = card.textContent.toLowerCase().includes(term) ? '' : 'none';
+  // Render inventory
+  function renderInventoryList(invList) {
+    list.innerHTML = "";
+    invList.forEach(item => {
+      const div = document.createElement("div");
+      div.className = "route-card";
+      const totalValue = item.quantity * item.price;
+      div.innerHTML = `
+        <div class="route-header">
+          <strong>${item.sku}</strong>
+          ${item.quantity === 0 ? '<span class="badge badge-danger">OUT</span>' : item.quantity < item.reorderLevel ? '<span class="badge badge-warning">LOW</span>' : ''}
+        </div>
+        <div style="margin-top: 8px; font-size: 0.9rem; color: var(--text);">${item.name}</div>
+        <div style="margin-top: 4px; font-size: 0.85rem; color: var(--muted);">${item.category}</div>
+        <div style="margin-top: 8px; display: flex; justify-content: space-between;">
+          <span>Qty: <strong>${item.quantity} ${item.unit}</strong> @ ₹${item.price}/${item.unit}</span>
+        </div>
+        <div style="margin-top: 4px; font-size: 0.9rem; font-weight: 700; color: var(--primary);">Total: ₹${totalValue.toLocaleString()}</div>
+      `;
+      list.appendChild(div);
     });
-  };
+  }
+  
+  // Search handler
+  if (searchInput) {
+    searchInput.input.addEventListener('input', createSearchHandler((term) => {
+      filteredInventory = inventory.filter(item => {
+        const searchText = `${item.sku} ${item.name} ${item.category}`.toLowerCase();
+        return searchText.includes(term.toLowerCase());
+      });
+      renderInventoryList(filteredInventory);
+    }));
+  }
+  
+  renderInventoryList(filteredInventory);
 }
 
 function renderAnalyticsView() {

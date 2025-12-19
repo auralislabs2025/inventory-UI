@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <title>InventoryPro – Mobile Route Planner</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <meta name="theme-color" content="#4361ee"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="InventoryPro"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/>
   <link rel="stylesheet" href="mobile.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 </head>
@@ -11,7 +17,7 @@
 
 <!-- HEADER -->
 <header class="header">
-  <button id="hamburger">☰</button>
+  <button id="hamburger" aria-label="Open menu">☰</button>
   <div>
     <h2 id="pageTitle">Route Planner</h2>
     <span id="activeWarehouseLabel">Trivandrum Central Godown</span>
@@ -80,7 +86,10 @@
 <!-- ROUTES VIEW -->
 <div id="routesView" style="display: none;">
   <section class="routes">
-    <h4>All Routes</h4>
+    <div style="margin: 16px 16px 0;">
+      <div id="routesSearchContainer" class="search-wrapper"></div>
+    </div>
+    <h4 style="margin: 16px;">All Routes</h4>
     <div id="allRoutesList"></div>
   </section>
 </div>
@@ -102,6 +111,7 @@
         <span>Assigned</span>
       </div>
     </div>
+    <div id="fleetSearchContainer" class="search-wrapper" style="margin: 16px;"></div>
     <div id="fleetList"></div>
   </section>
 </div>
@@ -109,9 +119,7 @@
 <!-- ORDERS VIEW -->
 <div id="ordersView" style="display: none;">
   <section class="page-content">
-    <div style="margin: 16px;">
-      <input type="text" placeholder="Search orders..." id="ordersSearch" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border);">
-    </div>
+    <div id="ordersSearchContainer" class="search-wrapper"></div>
     <div id="ordersList"></div>
   </section>
 </div>
@@ -119,9 +127,7 @@
 <!-- INVENTORY VIEW -->
 <div id="inventoryView" style="display: none;">
   <section class="page-content">
-    <div style="margin: 16px;">
-      <input type="text" placeholder="Search products..." id="inventorySearch" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border);">
-    </div>
+    <div id="inventorySearchContainer" class="search-wrapper"></div>
     <div id="inventoryList"></div>
   </section>
 </div>
@@ -178,18 +184,39 @@
 <div id="drawerBackdrop" class="drawer-backdrop"></div>
 <aside id="drawer" class="drawer">
   <div class="drawer-header">
-    <h3>Menu</h3>
-    <button id="closeDrawer">✖</button>
+    <h3>InventoryPro</h3>
+    <button id="closeDrawer" aria-label="Close menu">✖</button>
   </div>
   <hr/>
   <nav>
-    <button onclick="navigateToPage('dashboard'); closeDrawer();">🏠 Dashboard</button>
-    <button onclick="navigateToPage('routes'); closeDrawer();">🧭 Routes</button>
-    <button onclick="navigateToPage('fleet'); closeDrawer();">🚚 Fleet</button>
-    <button onclick="navigateToPage('orders'); closeDrawer();">📦 Orders</button>
-    <button onclick="navigateToPage('inventory'); closeDrawer();">📋 Inventory</button>
-    <button onclick="navigateToPage('analytics'); closeDrawer();">📊 Analytics</button>
-    <button onclick="navigateToPage('settings'); closeDrawer();">⚙️ Settings</button>
+    <button onclick="navigateToPage('dashboard'); closeDrawer();">
+      <span>🏠</span>
+      <span>Dashboard</span>
+    </button>
+    <button onclick="navigateToPage('routes'); closeDrawer();">
+      <span>🧭</span>
+      <span>Routes</span>
+    </button>
+    <button onclick="navigateToPage('fleet'); closeDrawer();">
+      <span>🚚</span>
+      <span>Fleet</span>
+    </button>
+    <button onclick="navigateToPage('orders'); closeDrawer();">
+      <span>📦</span>
+      <span>Orders</span>
+    </button>
+    <button onclick="navigateToPage('inventory'); closeDrawer();">
+      <span>📋</span>
+      <span>Inventory</span>
+    </button>
+    <button onclick="navigateToPage('analytics'); closeDrawer();">
+      <span>📊</span>
+      <span>Analytics</span>
+    </button>
+    <button onclick="navigateToPage('settings'); closeDrawer();">
+      <span>⚙️</span>
+      <span>Settings</span>
+    </button>
   </nav>
 </aside>
 
@@ -197,7 +224,7 @@
 <div id="mapOverlay" class="map-overlay">
   <div class="map-header">
     <span id="mapTitle">Route</span>
-    <button id="closeMap">✖</button>
+    <button id="closeMap" aria-label="Close map">✖</button>
   </div>
   <div id="map"></div>
   <div class="map-actions">
@@ -210,7 +237,7 @@
 <div id="executionOverlay" class="execution-overlay">
   <div class="exec-header">
     <span id="execRouteName">Route Name</span>
-    <button id="closeExec">✖</button>
+    <button id="closeExec" aria-label="Close route execution">✖</button>
   </div>
   <div class="exec-stops" id="execStopsList"></div>
   <div class="exec-actions">
@@ -222,7 +249,7 @@
 <!-- FLEET ASSIGNMENT MODAL -->
 <div id="fleetModal" class="modal">
   <div class="modal-content">
-    <button class="close-modal" onclick="closeFleetModal()">✖</button>
+    <button class="close-modal" onclick="closeFleetModal()" aria-label="Close modal">✖</button>
     <h3>Assign Vehicle</h3>
     <div id="fleetSelectList"></div>
     <button class="primary-btn" onclick="confirmFleetAssignment()">Assign</button>
@@ -231,5 +258,19 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="mobile.js"></script>
+<script>
+  // Register Service Worker for PWA
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js')
+        .then((registration) => {
+          console.log('Service Worker registered:', registration);
+        })
+        .catch((error) => {
+          console.log('Service Worker registration failed:', error);
+        });
+    });
+  }
+</script>
 </body>
 </html>

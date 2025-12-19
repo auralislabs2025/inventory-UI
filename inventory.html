@@ -67,20 +67,155 @@
     .toast{position:fixed;bottom:30px;right:30px;background:#333;color:white;padding:16px 28px;border-radius:8px;opacity:0;transition:.3s;z-index:3000;box-shadow:0 8px 25px rgba(0,0,0,.3);font-size:1rem}
     .toast.show{opacity:1;transform:translateY(-10px)}
 
+    /* Sidebar backdrop */
+    .sidebar-backdrop{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.5);
+      z-index:998;
+      opacity:0;
+      transition:opacity .3s;
+      pointer-events:none;
+    }
+    .sidebar-backdrop.show{
+      display:block;
+      opacity:1;
+      pointer-events:auto;
+    }
+    /* Mobile card view for table */
+    .mobile-card-view{display:none}
+    .mobile-card{
+      background:white;
+      padding:16px;
+      border-radius:12px;
+      margin-bottom:12px;
+      box-shadow:0 2px 8px rgba(0,0,0,.1);
+      border-left:4px solid var(--primary);
+    }
+    .mobile-card-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:start;
+      margin-bottom:12px;
+    }
+    .mobile-card-title{font-weight:700;color:var(--dark);font-size:1rem}
+    .mobile-card-row{
+      display:flex;
+      justify-content:space-between;
+      padding:8px 0;
+      border-bottom:1px solid #f0f0f0;
+    }
+    .mobile-card-row:last-child{border-bottom:none}
+    .mobile-card-label{color:var(--muted);font-size:0.9rem}
+    .mobile-card-value{font-weight:600;color:var(--dark)}
+    .mobile-card-actions{
+      display:flex;
+      gap:8px;
+      margin-top:12px;
+      flex-wrap:wrap;
+    }
+    .mobile-card-actions .btn{flex:1;min-width:80px}
     @media(max-width:768px){
-      .sidebar{position:fixed;top:0;left:-260px;height:100vh;z-index:999}
+      .sidebar{
+        position:fixed;
+        top:0;
+        left:-260px;
+        height:100vh;
+        z-index:999;
+        transition:left .3s;
+        box-shadow:2px 0 20px rgba(0,0,0,.2);
+      }
       .sidebar.open{left:0}
-      .topbar{flex-wrap:wrap;gap:10px}
-      .global-search{width:100%}
-      .page-header{flex-direction:column;align-items:stretch}
-      .filters{flex-direction:column}
+      .topbar{
+        flex-wrap:wrap;
+        gap:10px;
+        padding:12px 16px;
+      }
+      .global-search{width:100%;margin-bottom:8px}
+      .content{padding:16px}
+      .page-header{
+        flex-direction:column;
+        align-items:stretch;
+        gap:12px;
+        margin-bottom:20px;
+      }
+      .page-header > div{
+        display:flex;
+        flex-direction:column;
+        gap:10px;
+      }
+      .page-header .btn{width:100%}
+      h1{font-size:1.5rem;margin-bottom:20px}
+      .filters{
+        flex-direction:column;
+        gap:10px;
+      }
       .filters > *{width:100%}
+      .filters input,.filters select{
+        padding:14px;
+        font-size:1rem;
+        min-height:44px;
+      }
+      /* Hide table, show cards */
+      .table-container{display:none}
+      .mobile-card-view{display:block}
+      /* Drawer full screen on mobile */
+      .drawer{
+        width:100%;
+        max-width:100%;
+      }
+      .drawer-header{padding:16px 20px}
+      /* Modal full screen */
+      .modal-content{
+        width:100%;
+        max-width:100%;
+        height:100vh;
+        max-height:100vh;
+        border-radius:0;
+        padding:20px 16px;
+      }
+      .form-group input,.form-group select,.form-group textarea{
+        padding:14px;
+        font-size:1rem;
+        min-height:44px;
+      }
+      /* Bulk bar mobile */
+      .bulk-bar{
+        flex-direction:column;
+        gap:12px;
+        padding:16px;
+      }
+      .bulk-bar > div{
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+        width:100%;
+      }
+      .bulk-bar .btn{width:100%}
+      /* Touch-friendly buttons */
+      .btn{
+        padding:12px 16px;
+        min-height:44px;
+        font-size:1rem;
+      }
+      .btn-sm{
+        padding:10px 14px;
+        min-height:40px;
+      }
+    }
+    @media(max-width:480px){
+      .content{padding:12px}
+      h1{font-size:1.3rem}
+      .mobile-card{padding:12px}
+      .mobile-card-actions .btn{min-width:70px;font-size:0.9rem}
     }
   </style>
 </head>
 <body>
 
 <div class="app">
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
   <aside class="sidebar" id="sidebar">
     <div class="logo">InventoryPro</div>
     <ul>
@@ -96,7 +231,7 @@
 
   <div class="main">
     <header class="topbar">
-      <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">Menu</button>
+      <button class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle menu">☰</button>
       <input type="text" placeholder="Search items..." class="global-search" id="globalSearch" onkeyup="filterTable()">
       <div style="display:flex;align-items:center;gap:15px">
         <select onchange="document.body.className=this.value;localStorage.setItem('theme',this.value)">
@@ -164,6 +299,9 @@
             <!-- Filled by JS -->
           </tbody>
         </table>
+      </div>
+      <div class="mobile-card-view" id="mobileCardView">
+        <!-- Filled by JS for mobile -->
       </div>
     </main>
   </div>
@@ -234,6 +372,10 @@
 
   function renderTable(){
     const tbody = document.getElementById('inventoryBody');
+    const mobileView = document.getElementById('mobileCardView');
+    const isMobile = window.innerWidth <= 768;
+    
+    // Desktop table view
     tbody.innerHTML = inventory.map(item=>`
       <tr class="${item.qty===0?'out-of-stock':item.qty<item.reorder?'low-stock':''}">
         <td><input type="checkbox" class="row-check" onchange="updateBulk()"></td>
@@ -253,7 +395,77 @@
         </td>
       </tr>
     `).join('');
+    
+    // Mobile card view
+    if(mobileView){
+      mobileView.innerHTML = inventory.map(item=>`
+        <div class="mobile-card ${item.qty===0?'out-of-stock':item.qty<item.reorder?'low-stock':''}">
+          <div class="mobile-card-header">
+            <div>
+              <div class="mobile-card-title">${item.name}</div>
+              <div style="color:var(--muted);font-size:0.85rem;margin-top:4px">${item.sku}</div>
+            </div>
+            <input type="checkbox" class="row-check" onchange="updateBulk()">
+          </div>
+          <div class="mobile-card-row">
+            <span class="mobile-card-label">Category</span>
+            <span class="mobile-card-value">${item.category}</span>
+          </div>
+          <div class="mobile-card-row">
+            <span class="mobile-card-label">Quantity</span>
+            <span class="mobile-card-value ${item.qty===0?'change-negative':item.qty<item.reorder?'change-positive':''}">${item.qty}</span>
+          </div>
+          <div class="mobile-card-row">
+            <span class="mobile-card-label">Reorder Point</span>
+            <span class="mobile-card-value">${item.reorder}</span>
+          </div>
+          <div class="mobile-card-row">
+            <span class="mobile-card-label">Location</span>
+            <span class="mobile-card-value">${item.location}</span>
+          </div>
+          <div class="mobile-card-row">
+            <span class="mobile-card-label">Unit Cost</span>
+            <span class="mobile-card-value">$${item.cost.toFixed(2)}</span>
+          </div>
+          <div class="mobile-card-row">
+            <span class="mobile-card-label">Total Value</span>
+            <span class="mobile-card-value">$${(item.qty*item.cost).toFixed(2)}</span>
+          </div>
+          <div class="mobile-card-actions">
+            <button class="btn btn-sm btn-primary" onclick="openDrawer('${item.sku}')">View</button>
+            <button class="btn btn-sm">Edit</button>
+            <button class="btn btn-sm btn-success">Adjust</button>
+          </div>
+        </div>
+      `).join('');
+    }
   }
+  
+  // Sidebar functions
+  function toggleSidebar(){
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    sidebar.classList.toggle('open');
+    backdrop.classList.toggle('show');
+  }
+  function closeSidebar(){
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    sidebar.classList.remove('open');
+    backdrop.classList.remove('show');
+  }
+  
+  // Close sidebar on nav click
+  document.querySelectorAll('.sidebar a').forEach(link => {
+    link.addEventListener('click', () => {
+      if(window.innerWidth <= 768) closeSidebar();
+    });
+  });
+  
+  // Re-render on resize
+  window.addEventListener('resize', () => {
+    renderTable();
+  });
 
   function openDrawer(sku){
     const item = inventory.find(i=>i.sku===sku);
