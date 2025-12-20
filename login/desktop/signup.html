@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
   <title>Sign Up - InventoryPro</title>
   <style>
     :root {
@@ -24,15 +24,26 @@
       box-sizing: border-box;
     }
 
+    html {
+      height: 100%;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-attachment: fixed;
       min-height: 100vh;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 40px;
+      padding: 20px;
+      padding-top: 40px;
+      padding-bottom: 40px;
       color: var(--text);
+      overflow-x: hidden;
+      scroll-behavior: smooth;
     }
 
     .signup-container {
@@ -40,12 +51,13 @@
       border-radius: 20px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       width: 100%;
-      max-width: 700px;
+      max-width: min(900px, 90vw);
       padding: 40px;
       position: relative;
-      overflow: hidden;
-      max-height: 95vh;
-      overflow-y: auto;
+      overflow: visible;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
     }
 
     .signup-container::before {
@@ -56,6 +68,12 @@
       right: 0;
       height: 4px;
       background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+      z-index: 10;
+    }
+    
+    .signup-container form {
+      width: 100%;
+      display: block;
     }
 
     .signup-header {
@@ -148,11 +166,13 @@
     /* Form Steps */
     .form-step {
       display: none;
-      animation: fadeIn 0.3s;
+      animation: fadeIn 0.3s ease-out;
+      padding-bottom: 20px;
     }
 
     .form-step.active {
       display: block;
+      animation: fadeIn 0.3s ease-out;
     }
 
     @keyframes fadeIn {
@@ -302,8 +322,11 @@
 
     .form-actions {
       display: flex;
-      gap: 12px;
+      gap: 16px;
       margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
     }
 
     .btn {
@@ -879,7 +902,16 @@
       if (currentStep < totalSteps) {
         currentStep++;
         updateStepDisplay();
-        window.scrollTo(0, 0);
+        // Smooth scroll to form container
+        setTimeout(() => {
+          const container = document.querySelector('.signup-container');
+          if (container) {
+            const containerTop = container.getBoundingClientRect().top + window.pageYOffset;
+            window.scrollTo({ top: containerTop - 20, behavior: 'smooth' });
+          } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }, 100);
         // Clear any error messages when moving forward
         document.getElementById('errorMessage').classList.remove('show');
       }
@@ -889,7 +921,16 @@
       if (currentStep > 1) {
         currentStep--;
         updateStepDisplay();
-        window.scrollTo(0, 0);
+        // Smooth scroll to form container
+        setTimeout(() => {
+          const container = document.querySelector('.signup-container');
+          if (container) {
+            const containerTop = container.getBoundingClientRect().top + window.pageYOffset;
+            window.scrollTo({ top: containerTop - 20, behavior: 'smooth' });
+          } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }, 100);
         // Clear any error messages when moving back
         document.getElementById('errorMessage').classList.remove('show');
       }
@@ -962,7 +1003,16 @@
         showError('Please select your role');
         currentStep = 1;
         updateStepDisplay();
-        window.scrollTo(0, 0);
+          // Smooth scroll to form container
+          setTimeout(() => {
+            const container = document.querySelector('.signup-container');
+            if (container) {
+              const containerTop = container.getBoundingClientRect().top + window.pageYOffset;
+              window.scrollTo({ top: containerTop - 20, behavior: 'smooth' });
+            } else {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          }, 100);
         return;
       }
 
@@ -982,7 +1032,9 @@
             if (!field.files || field.files.length === 0) {
               hasErrors = true;
               if (!firstErrorStep) firstErrorStep = stepNumber;
-              field.closest('.form-group')?.querySelector('label')?.style.color = 'var(--danger)';
+              const formGroup = field.closest('.form-group');
+              const label = formGroup ? formGroup.querySelector('label') : null;
+              if (label) label.style.color = 'var(--danger)';
             }
           } else if (!field.value.trim()) {
             hasErrors = true;
@@ -990,7 +1042,9 @@
             field.style.borderColor = 'var(--danger)';
           } else {
             field.style.borderColor = '';
-            field.closest('.form-group')?.querySelector('label')?.style.color = '';
+            const formGroup = field.closest('.form-group');
+            const label = formGroup ? formGroup.querySelector('label') : null;
+            if (label) label.style.color = '';
           }
         });
       });
@@ -1000,7 +1054,16 @@
         if (firstErrorStep) {
           currentStep = firstErrorStep;
           updateStepDisplay();
-          window.scrollTo(0, 0);
+          // Smooth scroll to form container
+          setTimeout(() => {
+            const container = document.querySelector('.signup-container');
+            if (container) {
+              const containerTop = container.getBoundingClientRect().top + window.pageYOffset;
+              window.scrollTo({ top: containerTop - 20, behavior: 'smooth' });
+            } else {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          }, 100);
         }
         return;
       }

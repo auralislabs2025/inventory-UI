@@ -25,19 +25,50 @@
       -webkit-tap-highlight-color: rgba(67, 97, 238, 0.2);
     }
 
+    /* Hide scrollbars on mobile to prevent flashing */
+    html {
+      height: 100%;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      /* Hide scrollbar but keep functionality */
+      -ms-overflow-style: none; /* IE and Edge */
+      scrollbar-width: none; /* Firefox */
+    }
+    
+    html::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+      width: 0;
+      height: 0;
+      background: transparent;
+    }
+    
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       background-attachment: fixed;
       min-height: 100vh;
+      height: 100%;
       display: block;
       padding: 16px;
       padding-top: calc(16px + env(safe-area-inset-top));
       padding-bottom: calc(16px + env(safe-area-inset-bottom));
       color: var(--text);
       overflow-y: auto;
+      overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
       line-height: 1.6;
+      position: relative;
+      /* Hide scrollbar but keep functionality */
+      -ms-overflow-style: none; /* IE and Edge */
+      scrollbar-width: none; /* Firefox */
+    }
+    
+    body::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+      width: 0;
+      height: 0;
+      background: transparent;
     }
 
     .signup-container {
@@ -47,16 +78,22 @@
       width: 100%;
       max-width: 100%;
       padding: 28px 20px;
+      padding-bottom: calc(28px + env(safe-area-inset-bottom));
       position: relative;
       overflow: visible;
       margin: 0 auto;
+      margin-bottom: 20px;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
+      min-height: auto;
+      /* Prevent scrollbar flash */
+      overflow-x: hidden;
     }
 
     .signup-container form {
       overflow: visible;
       width: 100%;
+      position: relative;
     }
 
     .signup-container::before {
@@ -181,23 +218,152 @@
     /* Form Steps */
     .form-step {
       display: none;
-      animation: fadeIn 0.3s;
+      animation: fadeIn 0.3s ease-out;
       width: 100%;
       opacity: 0;
       visibility: hidden;
-      min-height: 200px;
+      min-height: auto;
+      position: relative;
+      padding-bottom: 20px;
+      /* Prevent layout shift during transition */
+      will-change: opacity, transform;
     }
 
     .form-step.active {
-      display: block;
-      width: 100%;
-      opacity: 1;
-      visibility: visible;
+      display: block !important;
+      width: 100% !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      position: relative !important;
+      z-index: 10 !important;
+      height: auto !important;
+      overflow: visible !important;
+      max-height: none !important;
+      min-height: auto !important;
+      animation: fadeIn 0.3s ease-out;
+      /* Prevent layout shift */
+      will-change: auto;
+    }
+    
+    /* Special handling for Step 4 (Location) */
+    .form-step[data-step="4"].active,
+    #step4Location.active {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      position: relative !important;
+      z-index: 10 !important;
+    }
+    
+    /* Special handling for Step 6 (File Uploads) */
+    .form-step[data-step="6"].active,
+    #step6FileUploads.active {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      position: relative !important;
+      z-index: 10 !important;
+    }
+    
+    /* Ensure form steps don't get hidden by parent containers */
+    .signup-container form {
+      position: relative;
+      overflow: visible;
+    }
+    
+    /* Ensure all form groups in Step 6 are visible */
+    .form-step[data-step="6"].active .form-group,
+    #step6FileUploads.active .form-group {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      margin-bottom: 22px !important;
+    }
+    
+    /* Ensure all form groups in Step 6 are visible */
+    .form-step[data-step="6"].active .form-group,
+    #step6FileUploads.active .form-group {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from { 
+        opacity: 0; 
+        transform: translateY(8px);
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0);
+      }
+    }
+    
+    /* Smooth scrolling for better UX - prevent weird jumps */
+    .form-step.active {
+      scroll-margin-top: 20px;
+      scroll-margin-bottom: 20px;
+    }
+    
+    /* Prevent horizontal scroll on mobile */
+    body, html, .signup-container, .signup-container form, .form-step {
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+    
+    /* Better mobile scrolling with momentum */
+    @supports (-webkit-overflow-scrolling: touch) {
+      body {
+        -webkit-overflow-scrolling: touch;
+      }
+    }
+    
+    /* Prevent scroll chaining issues */
+    .signup-container {
+      overscroll-behavior: contain;
+    }
+    
+    /* Smooth scrolling for better UX - prevent weird jumps */
+    .form-step.active {
+      scroll-margin-top: 20px;
+      scroll-margin-bottom: 20px;
+    }
+    
+    /* Prevent horizontal scroll on mobile */
+    body, html, .signup-container, .signup-container form, .form-step {
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+    
+    /* Better mobile scrolling with momentum */
+    @supports (-webkit-overflow-scrolling: touch) {
+      body {
+        -webkit-overflow-scrolling: touch;
+      }
+    }
+    
+    /* Prevent scroll chaining issues */
+    .signup-container {
+      overscroll-behavior: contain;
+    }
+
+    /* Hide all scrollbars on mobile to prevent flashing during step transitions */
+    * {
+      -ms-overflow-style: none; /* IE and Edge */
+      scrollbar-width: none; /* Firefox */
+    }
+    
+    *::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+      width: 0;
+      height: 0;
+      background: transparent;
+    }
+    
+    /* Exception: Keep progress steps scrollbar visible but thin */
+    .progress-steps::-webkit-scrollbar {
+      display: block;
+      height: 4px;
     }
 
     .step-title {
@@ -214,7 +380,11 @@
     }
 
     .form-group {
-      margin-bottom: 18px;
+      margin-bottom: 20px;
+    }
+    
+    .form-group:last-child {
+      margin-bottom: 0;
     }
 
     .form-group label {
@@ -251,6 +421,8 @@
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+      scroll-margin-top: 120px;
+      scroll-margin-bottom: 40px;
     }
 
     .form-group textarea {
@@ -273,6 +445,11 @@
       pointer-events: auto;
       -webkit-touch-callout: none;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      min-height: 120px;
+      margin-bottom: 16px;
     }
 
     .file-upload:active,
@@ -286,6 +463,15 @@
     
     .file-upload * {
       pointer-events: none;
+    }
+    
+    /* Ensure file upload section is always visible when step 6 is active */
+    .form-step[data-step="6"].active .file-upload,
+    #step6FileUploads.active .file-upload,
+    .form-step[data-step="6"] .file-upload {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
     }
 
     .file-upload input[type="file"] {
@@ -356,7 +542,14 @@
     .form-actions {
       display: flex;
       gap: 12px;
-      margin-top: 24px;
+      margin-top: 28px;
+      margin-bottom: 10px;
+      padding-top: 20px;
+      position: sticky;
+      bottom: 0;
+      background: var(--card);
+      z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom, 0);
     }
 
     .btn {
@@ -722,7 +915,7 @@
       </div>
 
       <!-- Step 4: Location Information -->
-      <div class="form-step" data-step="4">
+      <div class="form-step" data-step="4" id="step4Location">
         <h2 class="step-title">Location Details</h2>
         <p class="step-description">Where is your business located?</p>
         
@@ -799,7 +992,7 @@
       </div>
 
       <!-- Step 6: Document Uploads -->
-      <div class="form-step" data-step="6">
+      <div class="form-step" data-step="6" id="step6FileUploads">
         <h2 class="step-title">Upload Documents</h2>
         <p class="step-description">Upload required documents for verification</p>
         
@@ -968,27 +1161,99 @@
 
     // Step Navigation
     function updateStepDisplay() {
-      document.querySelectorAll('.form-step').forEach((step, index) => {
-        const isActive = index + 1 === currentStep;
-        step.classList.toggle('active', isActive);
-        if (isActive) {
-          // Ensure active step is visible
-          step.style.display = 'block';
-          step.style.opacity = '1';
-          step.style.visibility = 'visible';
-        } else {
+      const allSteps = document.querySelectorAll('.form-step');
+      console.log('=== updateStepDisplay() called ===');
+      console.log('Current step:', currentStep, 'Total steps found:', allSteps.length);
+      
+      // First, hide all steps
+      allSteps.forEach((step) => {
+        const stepNumber = parseInt(step.getAttribute('data-step'), 10);
+        if (!isNaN(stepNumber)) {
+          step.classList.remove('active');
           step.style.display = 'none';
           step.style.opacity = '0';
           step.style.visibility = 'hidden';
         }
       });
-      document.querySelectorAll('.step').forEach((step, index) => {
-        step.classList.toggle('active', index + 1 === currentStep);
-        step.classList.toggle('completed', index + 1 < currentStep);
+      
+      // Then, show the active step
+      const activeStep = document.querySelector(`.form-step[data-step="${currentStep}"]`);
+      if (activeStep) {
+        console.log(`✓ Step ${currentStep} found, making it visible`);
+        activeStep.classList.add('active');
+        activeStep.style.display = 'block';
+        activeStep.style.opacity = '1';
+        activeStep.style.visibility = 'visible';
+        activeStep.style.position = 'relative';
+        activeStep.style.zIndex = '10';
+        activeStep.style.height = 'auto';
+        activeStep.style.overflow = 'visible';
+        activeStep.style.maxHeight = 'none';
+        
+        // Special handling for Step 4 (Location)
+        if (currentStep === 4) {
+          const step4ById = document.getElementById('step4Location');
+          if (step4ById) {
+            step4ById.classList.add('active');
+            step4ById.style.display = 'block';
+            step4ById.style.opacity = '1';
+            step4ById.style.visibility = 'visible';
+          }
+          // Ensure all form fields are visible
+          const formGroups = activeStep.querySelectorAll('.form-group');
+          formGroups.forEach(group => {
+            group.style.display = 'block';
+            group.style.visibility = 'visible';
+            group.style.opacity = '1';
+          });
+        }
+        
+        // Special handling for Step 6 (File Uploads)
+        if (currentStep === 6) {
+          const step6ById = document.getElementById('step6FileUploads');
+          if (step6ById) {
+            step6ById.classList.add('active');
+            step6ById.style.display = 'block';
+            step6ById.style.opacity = '1';
+            step6ById.style.visibility = 'visible';
+          }
+          // Ensure all file uploads are visible
+          const fileUploads = activeStep.querySelectorAll('.file-upload');
+          console.log(`  → Found ${fileUploads.length} file upload areas`);
+          fileUploads.forEach((upload, index) => {
+            upload.style.display = 'block';
+            upload.style.visibility = 'visible';
+            upload.style.opacity = '1';
+            upload.style.minHeight = '120px';
+          });
+          // Ensure all form groups are visible
+          const formGroups = activeStep.querySelectorAll('.form-group');
+          formGroups.forEach(group => {
+            group.style.display = 'block';
+            group.style.visibility = 'visible';
+            group.style.opacity = '1';
+          });
+        }
+      } else {
+        console.error(`✗ Step ${currentStep} NOT FOUND in DOM!`);
+      }
+      
+      // Update progress indicators
+      document.querySelectorAll('.step').forEach((step) => {
+        const stepNumber = parseInt(step.getAttribute('data-step'), 10);
+        if (!isNaN(stepNumber)) {
+          step.classList.toggle('active', stepNumber === currentStep);
+          step.classList.toggle('completed', stepNumber < currentStep);
+        }
       });
+      
+      console.log('=== updateStepDisplay() complete ===');
     }
 
     function nextStep() {
+      console.log('=== nextStep() called ===');
+      console.log('Current step before:', currentStep);
+      
       // Only validate role selection on step 1
       if (currentStep === 1) {
         if (!selectedRole) {
@@ -1000,38 +1265,87 @@
       // Allow free navigation through all other steps
       if (currentStep < totalSteps) {
         currentStep++;
+        console.log('Moving to step:', currentStep);
         updateStepDisplay();
-        // Scroll to top of container smoothly
-        const container = document.querySelector('.signup-container');
-        if (container) {
-          container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-        // Also scroll window to top
-        setTimeout(() => {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }, 100);
-        // Clear any error messages when moving forward
+        
+        // Smooth scroll to form start - prevent scrollbar flash
+        requestAnimationFrame(() => {
+          // First, ensure step is visible
+          const activeStep = document.querySelector(`.form-step[data-step="${currentStep}"]`);
+          if (activeStep) {
+            // Use requestAnimationFrame to prevent scrollbar flash
+            requestAnimationFrame(() => {
+              // Scroll to top immediately to prevent flash
+              window.scrollTo({ top: 0, behavior: 'instant' });
+              
+              // Then smooth scroll after a brief delay
+              setTimeout(() => {
+                const form = document.getElementById('signupForm');
+                if (form) {
+                  form.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start',
+                    inline: 'nearest'
+                  });
+                }
+              }, 50);
+            });
+          } else {
+            // Fallback: just scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        });
+        
+        // Clear any error messages
         const errorMsg = document.getElementById('errorMessage');
         if (errorMsg) errorMsg.classList.remove('show');
+      } else {
+        console.log('Already at last step');
       }
     }
 
     function prevStep() {
+      console.log('=== prevStep() called ===');
+      console.log('Current step before:', currentStep);
+      
       if (currentStep > 1) {
         currentStep--;
+        console.log('Moving back to step:', currentStep);
         updateStepDisplay();
-        // Scroll to top of container smoothly
-        const container = document.querySelector('.signup-container');
-        if (container) {
-          container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-        // Also scroll window to top
-        setTimeout(() => {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }, 100);
-        // Clear any error messages when moving back
+        
+        // Smooth scroll to form start - prevent scrollbar flash
+        requestAnimationFrame(() => {
+          // First, ensure step is visible
+          const activeStep = document.querySelector(`.form-step[data-step="${currentStep}"]`);
+          if (activeStep) {
+            // Use requestAnimationFrame to prevent scrollbar flash
+            requestAnimationFrame(() => {
+              // Scroll to top immediately to prevent flash
+              window.scrollTo({ top: 0, behavior: 'instant' });
+              
+              // Then smooth scroll after a brief delay
+              setTimeout(() => {
+                const form = document.getElementById('signupForm');
+                if (form) {
+                  form.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start',
+                    inline: 'nearest'
+                  });
+                }
+              }, 50);
+            });
+          } else {
+            // Fallback: just scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        });
+        
+        // Clear any error messages
         const errorMsg = document.getElementById('errorMessage');
         if (errorMsg) errorMsg.classList.remove('show');
+      } else {
+        console.log('Already at first step');
       }
     }
 
@@ -1260,33 +1574,64 @@
 
     // Setup button event listeners for touch support
     function setupButtonListeners() {
-      // Use event delegation for better reliability
-      document.body.addEventListener('click', (e) => {
-        if (e.target.classList.contains('btn-next') || e.target.closest('.btn-next')) {
+      console.log('Setting up button listeners...');
+      
+      // Use event delegation on document for better reliability
+      // Remove any existing listeners first by using a flag
+      if (window.buttonListenersSetup) {
+        console.log('Button listeners already set up, skipping...');
+        return;
+      }
+      
+      // Click handlers
+      document.addEventListener('click', (e) => {
+        const target = e.target;
+        const btnNext = target.classList.contains('btn-next') || target.closest('.btn-next');
+        const btnPrev = target.classList.contains('btn-prev') || target.closest('.btn-prev');
+        
+        if (btnNext) {
           e.preventDefault();
           e.stopPropagation();
+          console.log('Next button clicked');
           nextStep();
+          return false;
         }
-        if (e.target.classList.contains('btn-prev') || e.target.closest('.btn-prev')) {
+        if (btnPrev) {
           e.preventDefault();
           e.stopPropagation();
+          console.log('Prev button clicked');
           prevStep();
+          return false;
         }
       }, true);
       
-      // Touch events
-      document.body.addEventListener('touchend', (e) => {
-        if (e.target.classList.contains('btn-next') || e.target.closest('.btn-next')) {
+      // Touch handlers
+      document.addEventListener('touchend', (e) => {
+        const target = e.target;
+        const btnNext = target.classList.contains('btn-next') || target.closest('.btn-next');
+        const btnPrev = target.classList.contains('btn-prev') || target.closest('.btn-prev');
+        
+        if (btnNext) {
           e.preventDefault();
           e.stopPropagation();
+          console.log('Next button touched');
           nextStep();
+          return false;
         }
-        if (e.target.classList.contains('btn-prev') || e.target.closest('.btn-prev')) {
+        if (btnPrev) {
           e.preventDefault();
           e.stopPropagation();
+          console.log('Prev button touched');
           prevStep();
+          return false;
         }
       }, true);
+      
+      window.buttonListenersSetup = true;
+      
+      const nextButtons = document.querySelectorAll('.btn-next');
+      const prevButtons = document.querySelectorAll('.btn-prev');
+      console.log(`Button listeners set up: ${nextButtons.length} next buttons, ${prevButtons.length} prev buttons`);
     }
 
     // Setup file upload touch handlers
@@ -1321,16 +1666,67 @@
 
     // Initialize
     function initializeApp() {
+      // Ensure all steps exist
+      const allSteps = document.querySelectorAll('.form-step');
+      console.log('Total form steps found:', allSteps.length);
+      
+      // Verify all steps exist
+      for (let i = 1; i <= totalSteps; i++) {
+        const step = document.querySelector(`.form-step[data-step="${i}"]`);
+        if (step) {
+          console.log(`Step ${i} found:`, step);
+        } else {
+          console.error(`Step ${i} NOT FOUND!`);
+        }
+      }
+      
+      // Verify Step 4 specifically
+      const step4 = document.getElementById('step4Location') || document.querySelector('.form-step[data-step="4"]');
+      if (step4) {
+        console.log('Step 4 (Location) found:', step4);
+      } else {
+        console.error('Step 4 (Location) NOT FOUND!');
+      }
+      
+      // Verify Step 6 exists and is accessible
+      const step6 = document.getElementById('step6FileUploads') || document.querySelector('.form-step[data-step="6"]');
+      if (step6) {
+        console.log('Step 6 (File Uploads) found:', step6);
+        // Verify file upload elements exist
+        const fileUploads = step6.querySelectorAll('.file-upload');
+        console.log('File upload areas found:', fileUploads.length);
+        fileUploads.forEach((upload, index) => {
+          console.log(`File upload ${index + 1}:`, upload);
+          // Ensure they're visible
+          upload.style.display = 'block';
+          upload.style.visibility = 'visible';
+          upload.style.opacity = '1';
+        });
+      } else {
+        console.error('Step 6 (File Uploads) NOT FOUND!');
+      }
+      
       updateStepDisplay();
       setupButtonListeners();
       setupFileUploadHandlers();
       
-      const firstStep = document.querySelector('.form-step[data-step="1"]');
-      if (firstStep) {
-        firstStep.style.display = 'block';
-        firstStep.style.opacity = '1';
-        firstStep.style.visibility = 'visible';
+      // Ensure first step is visible
+      currentStep = 1;
+      updateStepDisplay();
+      
+      // Final verification: Test all steps can be accessed
+      console.log('=== FINAL STEP VERIFICATION ===');
+      for (let i = 1; i <= totalSteps; i++) {
+        const step = document.querySelector(`.form-step[data-step="${i}"]`);
+        if (step) {
+          const stepTitle = step.querySelector('.step-title');
+          const titleText = stepTitle ? stepTitle.textContent : 'No title';
+          console.log(`✓ Step ${i}: ${titleText} - FOUND`);
+        } else {
+          console.error(`✗ Step ${i}: NOT FOUND`);
+        }
       }
+      console.log('=== VERIFICATION COMPLETE ===');
     }
     
     // Run initialization
@@ -1344,6 +1740,7 @@
     window.addEventListener('load', () => {
       setupButtonListeners();
       setupFileUploadHandlers();
+      updateStepDisplay();
     });
   </script>
 </body>
