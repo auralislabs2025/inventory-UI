@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up - InventoryPro Desktop</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-dark: #3a0ca3;
+      --success: #06d6a0;
+      --warning: #ff9f1c;
+      --danger: #ef476f;
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --text: #1f2937;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      margin: 0;
+      color: var(--text);
+    }
+
+    .signup-container {
+      background: var(--card);
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 600px;
+      padding: 50px;
+      position: relative;
+      overflow: hidden;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .signup-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+    }
+
+    .signup-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .signup-header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .signup-header p {
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    .form-group label .required {
+      color: var(--danger);
+      margin-left: 4px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.2s;
+      background: var(--card);
+      color: var(--text);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+    }
+
+    .form-group input::placeholder {
+      color: var(--muted);
+    }
+
+    .password-toggle {
+      position: relative;
+    }
+
+    .password-toggle-btn {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+
+    .password-toggle-btn:hover {
+      color: var(--primary);
+    }
+
+    .password-strength {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .password-strength.weak {
+      color: var(--danger);
+    }
+
+    .password-strength.medium {
+      color: var(--warning);
+    }
+
+    .password-strength.strong {
+      color: var(--success);
+    }
+
+    .terms-checkbox {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 30px;
+      font-size: 0.9rem;
+    }
+
+    .terms-checkbox input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      accent-color: var(--primary);
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .terms-checkbox label {
+      cursor: pointer;
+      line-height: 1.5;
+    }
+
+    .terms-link {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .terms-link:hover {
+      text-decoration: underline;
+    }
+
+    .signup-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .signup-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .signup-btn:hover::before {
+      left: 100%;
+    }
+
+    .signup-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+    }
+
+    .signup-btn:active {
+      transform: translateY(0);
+    }
+
+    .signup-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 30px 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .divider span {
+      padding: 0 16px;
+    }
+
+    .error-message {
+      background: #fee2e2;
+      color: #dc2626;
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+      display: none;
+      border-left: 4px solid var(--danger);
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .success-message {
+      background: #d1fae5;
+      color: #065f46;
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+      display: none;
+      border-left: 4px solid var(--success);
+    }
+
+    .success-message.show {
+      display: block;
+    }
+
+    .login-link {
+      width: 100%;
+      padding: 14px;
+      background: var(--bg);
+      color: var(--text);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: block;
+      text-align: center;
+    }
+
+    .login-link:hover {
+      background: var(--border);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="signup-container">
+    <div class="signup-header">
+      <h1>Create Account</h1>
+      <p>Sign up for your Wholesaler account</p>
+    </div>
+
+    <div id="errorMessage" class="error-message"></div>
+    <div id="successMessage" class="success-message"></div>
+
+    <form id="signupForm">
+      <!-- Business Information -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="businessName">Business Name <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="businessName" 
+            name="businessName" 
+            placeholder="Enter business name"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="businessType">Business Type <span class="required">*</span></label>
+          <select id="businessType" name="businessType" required>
+            <option value="">Select type</option>
+            <option value="wholesaler">Wholesaler</option>
+            <option value="distributor">Distributor</option>
+            <option value="supplier">Supplier</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Personal Information -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">First Name <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="firstName" 
+            name="firstName" 
+            placeholder="Enter first name"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="lastName" 
+            name="lastName" 
+            placeholder="Enter last name"
+            required
+          />
+        </div>
+      </div>
+
+      <!-- Contact Information -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email Address <span class="required">*</span></label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            placeholder="Enter email address"
+            required
+            autocomplete="email"
+          />
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number <span class="required">*</span></label>
+          <input 
+            type="tel" 
+            id="phone" 
+            name="phone" 
+            placeholder="Enter phone number"
+            required
+            autocomplete="tel"
+          />
+        </div>
+      </div>
+
+      <!-- Address -->
+      <div class="form-group full-width">
+        <label for="address">Business Address <span class="required">*</span></label>
+        <input 
+          type="text" 
+          id="address" 
+          name="address" 
+          placeholder="Enter business address"
+          required
+        />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="city">City <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="city" 
+            name="city" 
+            placeholder="Enter city"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="state">State <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="state" 
+            name="state" 
+            placeholder="Enter state"
+            required
+          />
+        </div>
+      </div>
+
+      <!-- Account Credentials -->
+      <div class="form-group full-width">
+        <label for="username">Username <span class="required">*</span></label>
+        <input 
+          type="text" 
+          id="username" 
+          name="username" 
+          placeholder="Choose a username"
+          required
+          autocomplete="username"
+        />
+      </div>
+
+      <div class="form-group password-toggle">
+        <label for="password">Password <span class="required">*</span></label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          placeholder="Create a password"
+          required
+          autocomplete="new-password"
+        />
+        <button type="button" class="password-toggle-btn" id="togglePassword" aria-label="Toggle password visibility">
+          👁️
+        </button>
+        <div id="passwordStrength" class="password-strength"></div>
+      </div>
+
+      <div class="form-group password-toggle">
+        <label for="confirmPassword">Confirm Password <span class="required">*</span></label>
+        <input 
+          type="password" 
+          id="confirmPassword" 
+          name="confirmPassword" 
+          placeholder="Confirm your password"
+          required
+          autocomplete="new-password"
+        />
+        <button type="button" class="password-toggle-btn" id="toggleConfirmPassword" aria-label="Toggle password visibility">
+          👁️
+        </button>
+      </div>
+
+      <!-- Terms and Conditions -->
+      <div class="terms-checkbox">
+        <input type="checkbox" id="terms" name="terms" required />
+        <label for="terms">
+          I agree to the <a href="#" class="terms-link" onclick="showTerms(); return false;">Terms and Conditions</a> and <a href="#" class="terms-link" onclick="showPrivacy(); return false;">Privacy Policy</a> <span class="required">*</span>
+        </label>
+      </div>
+
+      <!-- Sign Up Button -->
+      <button type="submit" class="signup-btn" id="signupBtn">
+        Create Account
+      </button>
+    </form>
+
+    <div class="divider">
+      <span>Already have an account?</span>
+    </div>
+
+    <a href="login.html" class="login-link">
+      Sign In
+    </a>
+  </div>
+
+  <script>
+    // Password Toggle
+    const togglePassword = document.getElementById('togglePassword');
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    
+    togglePassword.addEventListener('click', () => {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      togglePassword.textContent = type === 'password' ? '👁️' : '🙈';
+    });
+
+    toggleConfirmPassword.addEventListener('click', () => {
+      const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      confirmPasswordInput.setAttribute('type', type);
+      toggleConfirmPassword.textContent = type === 'password' ? '👁️' : '🙈';
+    });
+
+    // Password Strength Checker
+    const passwordStrength = document.getElementById('passwordStrength');
+    passwordInput.addEventListener('input', () => {
+      const password = passwordInput.value;
+      let strength = '';
+      let strengthClass = '';
+
+      if (password.length === 0) {
+        strength = '';
+      } else if (password.length < 6) {
+        strength = 'Weak - At least 6 characters required';
+        strengthClass = 'weak';
+      } else if (password.length < 8 || !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+        strength = 'Medium - Add uppercase, lowercase, and numbers';
+        strengthClass = 'medium';
+      } else {
+        strength = 'Strong password';
+        strengthClass = 'strong';
+      }
+
+      passwordStrength.textContent = strength;
+      passwordStrength.className = `password-strength ${strengthClass}`;
+    });
+
+    // Form Submission
+    const signupForm = document.getElementById('signupForm');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+    const signupBtn = document.getElementById('signupBtn');
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.classList.add('show');
+      successMessage.classList.remove('show');
+      setTimeout(() => {
+        errorMessage.classList.remove('show');
+      }, 5000);
+    }
+
+    function showSuccess(message) {
+      successMessage.textContent = message;
+      successMessage.classList.add('show');
+      errorMessage.classList.remove('show');
+      setTimeout(() => {
+        successMessage.classList.remove('show');
+      }, 3000);
+    }
+
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const password = passwordInput.value;
+      const confirmPassword = confirmPasswordInput.value;
+
+      // Password validation
+      if (password !== confirmPassword) {
+        showError('Passwords do not match');
+        return;
+      }
+
+      if (password.length < 6) {
+        showError('Password must be at least 6 characters long');
+        return;
+      }
+
+      // Get form data
+      const formData = {
+        businessName: document.getElementById('businessName').value.trim(),
+        businessType: document.getElementById('businessType').value,
+        firstName: document.getElementById('firstName').value.trim(),
+        lastName: document.getElementById('lastName').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        address: document.getElementById('address').value.trim(),
+        city: document.getElementById('city').value.trim(),
+        state: document.getElementById('state').value.trim(),
+        username: document.getElementById('username').value.trim(),
+        password: password,
+        role: 'wholesaler',
+        createdAt: new Date().toISOString()
+      };
+
+      // Basic validation
+      if (!formData.businessName || !formData.email || !formData.username) {
+        showError('Please fill in all required fields');
+        return;
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        showError('Please enter a valid email address');
+        return;
+      }
+
+      // Disable button during processing
+      signupBtn.disabled = true;
+      signupBtn.textContent = 'Creating account...';
+
+      // Simulate signup (replace with actual API call)
+      setTimeout(() => {
+        // Store user data
+        const users = JSON.parse(localStorage.getItem('wholesaler_users') || '[]');
+        users.push(formData);
+        localStorage.setItem('wholesaler_users', JSON.stringify(users));
+
+        // Auto-login after signup
+        const loginData = {
+          username: formData.username,
+          role: 'wholesaler',
+          rememberMe: false,
+          timestamp: new Date().toISOString()
+        };
+        
+        localStorage.setItem('user', JSON.stringify(loginData));
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userRole', 'wholesaler');
+
+        showSuccess('Account created successfully! Redirecting...');
+
+        // Redirect to dashboard
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1500);
+      }, 2000);
+    });
+
+    function showTerms() {
+      alert('Terms and Conditions\n\nBy using InventoryPro, you agree to our terms of service. This is a demo application.');
+    }
+
+    function showPrivacy() {
+      alert('Privacy Policy\n\nWe respect your privacy. Your data is stored locally in this demo application.');
+    }
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <title>Login - InventoryPro</title>
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-dark: #3a0ca3;
+      --success: #06d6a0;
+      --warning: #ff9f1c;
+      --danger: #ef476f;
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --text: #1f2937;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: var(--text);
+    }
+
+    .login-container {
+      background: var(--card);
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 450px;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .login-header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .login-header p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .role-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .role-option {
+      padding: 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: var(--card);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .role-option::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--primary);
+      transform: scaleX(0);
+      transition: transform 0.3s;
+    }
+
+    .role-option:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.15);
+    }
+
+    .role-option.selected {
+      border-color: var(--primary);
+      background: linear-gradient(135deg, rgba(67, 97, 238, 0.05) 0%, rgba(67, 97, 238, 0.02) 100%);
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+    }
+
+    .role-option.selected::before {
+      transform: scaleX(1);
+    }
+
+    .role-icon {
+      font-size: 2.5rem;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .role-label {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .role-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.2s;
+      background: var(--card);
+      color: var(--text);
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+    }
+
+    .form-group input::placeholder {
+      color: var(--muted);
+    }
+
+    .password-toggle {
+      position: relative;
+    }
+
+    .password-toggle-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+
+    .password-toggle-btn:hover {
+      color: var(--primary);
+    }
+
+    .remember-forgot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+    }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .remember-me input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--primary);
+    }
+
+    .forgot-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .forgot-link:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .login-btn:hover::before {
+      left: 100%;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+    }
+
+    .login-btn:active {
+      transform: translateY(0);
+    }
+
+    .login-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 24px 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .divider span {
+      padding: 0 12px;
+    }
+
+    .error-message {
+      background: #fee2e2;
+      color: #dc2626;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      display: none;
+      border-left: 4px solid var(--danger);
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .success-message {
+      background: #d1fae5;
+      color: #065f46;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      display: none;
+      border-left: 4px solid var(--success);
+    }
+
+    .success-message.show {
+      display: block;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      body {
+        padding: 16px;
+        align-items: flex-start;
+        padding-top: 40px;
+      }
+
+      .login-container {
+        padding: 32px 24px;
+        border-radius: 16px;
+        max-width: 100%;
+      }
+
+      .login-header h1 {
+        font-size: 1.75rem;
+      }
+
+      .role-selector {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .role-option {
+        padding: 14px;
+      }
+
+      .role-icon {
+        font-size: 2rem;
+      }
+
+      .form-group input {
+        padding: 12px 14px;
+        font-size: 16px; /* Prevents zoom on iOS */
+      }
+
+      .login-btn {
+        padding: 14px;
+      }
+
+      .remember-forgot {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .login-container {
+        padding: 24px 20px;
+      }
+
+      .login-header h1 {
+        font-size: 1.5rem;
+      }
+
+      .role-icon {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-header">
+      <h1>InventoryPro</h1>
+      <p>Sign in to continue</p>
+    </div>
+
+    <div id="errorMessage" class="error-message"></div>
+    <div id="successMessage" class="success-message"></div>
+
+    <form id="loginForm">
+      <!-- Role Selection -->
+      <div class="role-selector">
+        <div class="role-option" data-role="wholesaler">
+          <span class="role-icon">🏢</span>
+          <div class="role-label">Wholesaler</div>
+          <div class="role-desc">Manage inventory & routes</div>
+        </div>
+        <div class="role-option" data-role="retailer">
+          <span class="role-icon">🏪</span>
+          <div class="role-label">Retailer</div>
+          <div class="role-desc">View orders & products</div>
+        </div>
+      </div>
+
+      <!-- Email/Username -->
+      <div class="form-group">
+        <label for="username">Email or Username</label>
+        <input 
+          type="text" 
+          id="username" 
+          name="username" 
+          placeholder="Enter your email or username"
+          required
+          autocomplete="username"
+        />
+      </div>
+
+      <!-- Password -->
+      <div class="form-group password-toggle">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          placeholder="Enter your password"
+          required
+          autocomplete="current-password"
+        />
+        <button type="button" class="password-toggle-btn" id="togglePassword" aria-label="Toggle password visibility">
+          👁️
+        </button>
+      </div>
+
+      <!-- Remember Me & Forgot Password -->
+      <div class="remember-forgot">
+        <label class="remember-me">
+          <input type="checkbox" id="rememberMe" name="rememberMe" />
+          <span>Remember me</span>
+        </label>
+        <a href="#" class="forgot-link" onclick="showForgotPassword(); return false;">Forgot Password?</a>
+      </div>
+
+      <!-- Login Button -->
+      <button type="submit" class="login-btn" id="loginBtn">
+        Sign In
+      </button>
+    </form>
+
+    <div class="divider">
+      <span>New to InventoryPro?</span>
+    </div>
+
+    <button type="button" class="login-btn" style="background: var(--bg); color: var(--text); box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onclick="showSignUp()">
+      Create Account
+    </button>
+  </div>
+
+  <script>
+    // Role Selection
+    let selectedRole = null;
+    const roleOptions = document.querySelectorAll('.role-option');
+    
+    roleOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        roleOptions.forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+        selectedRole = option.dataset.role;
+      });
+    });
+
+    // Password Toggle
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    
+    togglePassword.addEventListener('click', () => {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      togglePassword.textContent = type === 'password' ? '👁️' : '🙈';
+    });
+
+    // Form Submission
+    const loginForm = document.getElementById('loginForm');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+    const loginBtn = document.getElementById('loginBtn');
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.classList.add('show');
+      successMessage.classList.remove('show');
+      setTimeout(() => {
+        errorMessage.classList.remove('show');
+      }, 5000);
+    }
+
+    function showSuccess(message) {
+      successMessage.textContent = message;
+      successMessage.classList.add('show');
+      errorMessage.classList.remove('show');
+      setTimeout(() => {
+        successMessage.classList.remove('show');
+      }, 3000);
+    }
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Validate role selection
+      if (!selectedRole) {
+        showError('Please select your role (Wholesaler or Retailer)');
+        return;
+      }
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const rememberMe = document.getElementById('rememberMe').checked;
+
+      // Basic validation
+      if (!username || !password) {
+        showError('Please fill in all fields');
+        return;
+      }
+
+      // Disable button during processing
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Signing in...';
+
+      // Simulate login (replace with actual API call)
+      setTimeout(() => {
+        // Store login info
+        const loginData = {
+          username,
+          role: selectedRole,
+          rememberMe,
+          timestamp: new Date().toISOString()
+        };
+        
+        localStorage.setItem('user', JSON.stringify(loginData));
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userRole', selectedRole);
+
+        showSuccess('Login successful! Redirecting...');
+
+        // Redirect based on role
+        setTimeout(() => {
+          if (selectedRole === 'wholesaler') {
+            // Check if mobile or desktop
+            if (window.innerWidth <= 768) {
+              window.location.href = 'wholesaler-dashboard/mobile/index.html';
+            } else {
+              window.location.href = 'wholesaler-dashboard/desktop/index.html';
+            }
+          } else {
+            // Retailer dashboard (to be created)
+            window.location.href = 'retailer-dashboard/index.html';
+          }
+        }, 1000);
+      }, 1500);
+    });
+
+    function showForgotPassword() {
+      alert('Forgot password functionality - Coming soon!\n\nPlease contact your administrator to reset your password.');
+    }
+
+    function showSignUp() {
+      alert('Sign up functionality - Coming soon!\n\nPlease contact your administrator to create an account.');
+    }
+
+    // Check if already logged in
+    if (localStorage.getItem('isLoggedIn') === 'true') {
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      if (userData.role === 'wholesaler') {
+        if (window.innerWidth <= 768) {
+          window.location.href = 'wholesaler-dashboard/mobile/index.html';
+        } else {
+          window.location.href = 'wholesaler-dashboard/desktop/index.html';
+        }
+      } else {
+        window.location.href = 'retailer-dashboard/index.html';
+      }
+    }
+
+    // Auto-select role from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const roleParam = urlParams.get('role');
+    if (roleParam === 'wholesaler' || roleParam === 'retailer') {
+      const roleOption = document.querySelector(`[data-role="${roleParam}"]`);
+      if (roleOption) {
+        roleOption.click();
+      }
+    }
+  </script>
+</body>
+</html>
+

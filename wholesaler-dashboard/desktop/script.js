@@ -1,4 +1,26 @@
 /* =========================
+   AUTHENTICATION CHECK
+========================= */
+
+// Check if user is logged in
+function checkAuth() {
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  const userRole = localStorage.getItem('userRole');
+  
+  if (!isLoggedIn || userRole !== 'wholesaler') {
+    window.location.href = 'login.html';
+    return false;
+  }
+  return true;
+}
+
+// Run auth check - stop execution if not authenticated
+if (!checkAuth()) {
+  // Redirect will happen, stop execution
+  throw new Error('Not authenticated');
+}
+
+/* =========================
    WAREHOUSE (START POINT)
 ========================= */
 const warehouses = [

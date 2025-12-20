@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <title>Sign Up - InventoryPro Mobile</title>
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-dark: #3a0ca3;
+      --success: #06d6a0;
+      --warning: #ff9f1c;
+      --danger: #ef476f;
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --text: #1f2937;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: var(--text);
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .signup-container {
+      background: var(--card);
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 100%;
+      padding: 24px 20px;
+      position: relative;
+      overflow: hidden;
+      max-height: 95vh;
+      overflow-y: auto;
+    }
+
+    .signup-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+    }
+
+    .signup-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .signup-header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .signup-header p {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    /* Progress Steps - Mobile Optimized */
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .progress-steps::before {
+      content: '';
+      position: absolute;
+      top: 18px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--border);
+      z-index: 0;
+    }
+
+    .step {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      min-width: 50px;
+    }
+
+    .step-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--card);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: var(--muted);
+      font-size: 0.9rem;
+      transition: all 0.3s;
+    }
+
+    .step.active .step-circle {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .step.completed .step-circle {
+      background: var(--success);
+      border-color: var(--success);
+      color: white;
+    }
+
+    .step-label {
+      margin-top: 6px;
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-align: center;
+      display: none;
+    }
+
+    .step.active .step-label {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Form Steps */
+    .form-step {
+      display: none;
+      animation: fadeIn 0.3s;
+    }
+
+    .form-step.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .step-description {
+      color: var(--muted);
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    .form-group label .required {
+      color: var(--danger);
+      margin-left: 4px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 16px; /* Prevents zoom on iOS */
+      font-family: inherit;
+      transition: all 0.2s;
+      background: var(--card);
+      color: var(--text);
+      -webkit-appearance: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .file-upload {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--bg);
+      touch-action: manipulation;
+    }
+
+    .file-upload:active {
+      border-color: var(--primary);
+      background: rgba(67, 97, 238, 0.05);
+      transform: scale(0.98);
+    }
+
+    .file-upload input[type="file"] {
+      display: none;
+    }
+
+    .file-upload-icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .file-upload-text {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+    }
+
+    .file-upload-hint {
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .file-preview {
+      margin-top: 12px;
+      padding: 12px;
+      background: var(--bg);
+      border-radius: 8px;
+      display: none;
+    }
+
+    .file-preview.show {
+      display: block;
+    }
+
+    .file-preview-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      background: white;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .file-preview-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .file-preview-name {
+      flex: 1;
+      font-size: 0.85rem;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .file-preview-remove {
+      background: var(--danger);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      touch-action: manipulation;
+      margin-left: 8px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      touch-action: manipulation;
+      min-height: 48px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text);
+      border: 2px solid var(--border);
+    }
+
+    .btn-secondary:active {
+      background: var(--border);
+      transform: scale(0.98);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .error-message {
+      background: #fee2e2;
+      color: #dc2626;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+      display: none;
+      border-left: 4px solid var(--danger);
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .success-message {
+      background: #d1fae5;
+      color: #065f46;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+      display: none;
+      border-left: 4px solid var(--success);
+    }
+
+    .success-message.show {
+      display: block;
+    }
+
+    .role-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .role-option {
+      padding: 20px 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: var(--card);
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+      position: relative;
+      touch-action: manipulation;
+    }
+
+    .role-option::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--primary);
+      transform: scaleX(0);
+      transition: transform 0.3s;
+    }
+
+    .role-option:active {
+      transform: scale(0.98);
+    }
+
+    .role-option.selected {
+      border-color: var(--primary);
+      background: linear-gradient(135deg, rgba(67, 97, 238, 0.05) 0%, rgba(67, 97, 238, 0.02) 100%);
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+    }
+
+    .role-option.selected::before {
+      transform: scaleX(1);
+    }
+
+    .role-icon {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+
+    .role-label {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .role-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .login-link {
+      text-align: center;
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .login-link a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .login-link a:active {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="signup-container">
+    <div class="signup-header">
+      <h1>Create Account</h1>
+      <p>Join InventoryPro today</p>
+    </div>
+
+    <div id="errorMessage" class="error-message"></div>
+    <div id="successMessage" class="success-message"></div>
+
+    <!-- Progress Steps -->
+    <div class="progress-steps">
+      <div class="step active" data-step="1">
+        <div class="step-circle">1</div>
+      </div>
+      <div class="step" data-step="2">
+        <div class="step-circle">2</div>
+      </div>
+      <div class="step" data-step="3">
+        <div class="step-circle">3</div>
+      </div>
+      <div class="step" data-step="4">
+        <div class="step-circle">4</div>
+      </div>
+      <div class="step" data-step="5">
+        <div class="step-circle">5</div>
+      </div>
+      <div class="step" data-step="6">
+        <div class="step-circle">6</div>
+      </div>
+      <div class="step" data-step="7">
+        <div class="step-circle">7</div>
+      </div>
+    </div>
+
+    <form id="signupForm">
+      <!-- Step 1: Role Selection -->
+      <div class="form-step active" data-step="1">
+        <h2 class="step-title">Select Your Role</h2>
+        <p class="step-description">Choose whether you're a wholesaler or retailer</p>
+        
+        <div class="role-selector">
+          <div class="role-option" data-role="wholesaler">
+            <span class="role-icon">🏢</span>
+            <div class="role-label">Wholesaler</div>
+            <div class="role-desc">Bulk distribution</div>
+          </div>
+          <div class="role-option" data-role="retailer">
+            <span class="role-icon">🏪</span>
+            <div class="role-label">Retailer</div>
+            <div class="role-desc">Shop owner</div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-primary" onclick="nextStep()">Continue</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Business Information -->
+      <div class="form-step" data-step="2">
+        <h2 class="step-title">Business Information</h2>
+        <p class="step-description" id="step2Description">Tell us about your business</p>
+        
+        <div id="wholesalerBusinessFields">
+          <div class="form-group">
+            <label for="businessName">Business/Company Name <span class="required">*</span></label>
+            <input type="text" id="businessName" name="businessName" placeholder="Enter business name" required />
+          </div>
+          <div class="form-group">
+            <label for="businessType">Business Type <span class="required">*</span></label>
+            <select id="businessType" name="businessType" required>
+              <option value="">Select type</option>
+              <option value="wholesaler">Wholesaler</option>
+              <option value="distributor">Distributor</option>
+              <option value="supplier">Supplier</option>
+              <option value="manufacturer">Manufacturer</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="registrationNumber">Registration Number <span class="required">*</span></label>
+            <input type="text" id="registrationNumber" name="registrationNumber" placeholder="Company registration no." required />
+          </div>
+          <div class="form-group">
+            <label for="gstNumber">GST Number <span class="required">*</span></label>
+            <input type="text" id="gstNumber" name="gstNumber" placeholder="GSTIN" required />
+          </div>
+          <div class="form-group">
+            <label for="panNumber">PAN Number <span class="required">*</span></label>
+            <input type="text" id="panNumber" name="panNumber" placeholder="PAN" required />
+          </div>
+        </div>
+
+        <div id="retailerBusinessFields" style="display: none;">
+          <div class="form-group">
+            <label for="shopName">Shop Name <span class="required">*</span></label>
+            <input type="text" id="shopName" name="shopName" placeholder="Enter shop name" required />
+          </div>
+          <div class="form-group">
+            <label for="shopType">Shop Type <span class="required">*</span></label>
+            <select id="shopType" name="shopType" required>
+              <option value="">Select type</option>
+              <option value="grocery">Grocery Store</option>
+              <option value="supermarket">Supermarket</option>
+              <option value="convenience">Convenience Store</option>
+              <option value="kirana">Kirana Store</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="retailerGstNumber">GST Number</label>
+            <input type="text" id="retailerGstNumber" name="retailerGstNumber" placeholder="GSTIN (if applicable)" />
+          </div>
+          <div class="form-group">
+            <label for="shopLicenseNumber">Shop License Number <span class="required">*</span></label>
+            <input type="text" id="shopLicenseNumber" name="shopLicenseNumber" placeholder="Shop license number" required />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
+          <button type="button" class="btn btn-primary" onclick="nextStep()">Continue</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Personal Information -->
+      <div class="form-step" data-step="3">
+        <h2 class="step-title">Personal Information</h2>
+        <p class="step-description">Tell us about yourself</p>
+        
+        <div class="form-group">
+          <label for="firstName">First Name <span class="required">*</span></label>
+          <input type="text" id="firstName" name="firstName" placeholder="Enter first name" required />
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name <span class="required">*</span></label>
+          <input type="text" id="lastName" name="lastName" placeholder="Enter last name" required />
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address <span class="required">*</span></label>
+          <input type="email" id="email" name="email" placeholder="Enter email address" required autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number <span class="required">*</span></label>
+          <input type="tel" id="phone" name="phone" placeholder="Enter phone number" required autocomplete="tel" />
+        </div>
+        <div class="form-group">
+          <label for="alternatePhone">Alternate Phone Number</label>
+          <input type="tel" id="alternatePhone" name="alternatePhone" placeholder="Optional alternate number" />
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
+          <button type="button" class="btn btn-primary" onclick="nextStep()">Continue</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Location Information -->
+      <div class="form-step" data-step="4">
+        <h2 class="step-title">Location Details</h2>
+        <p class="step-description">Where is your business located?</p>
+        
+        <div class="form-group">
+          <label for="address">Complete Address <span class="required">*</span></label>
+          <textarea id="address" name="address" placeholder="Enter complete address" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="city">City <span class="required">*</span></label>
+          <input type="text" id="city" name="city" placeholder="Enter city" required />
+        </div>
+        <div class="form-group">
+          <label for="state">State <span class="required">*</span></label>
+          <input type="text" id="state" name="state" placeholder="Enter state" required />
+        </div>
+        <div class="form-group">
+          <label for="pincode">PIN Code <span class="required">*</span></label>
+          <input type="text" id="pincode" name="pincode" placeholder="Enter PIN code" required pattern="[0-9]{6}" />
+        </div>
+        <div class="form-group">
+          <label for="country">Country <span class="required">*</span></label>
+          <input type="text" id="country" name="country" placeholder="Enter country" value="India" required />
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
+          <button type="button" class="btn btn-primary" onclick="nextStep()">Continue</button>
+        </div>
+      </div>
+
+      <!-- Step 5: Licensing Information -->
+      <div class="form-step" data-step="5">
+        <h2 class="step-title">Licensing & Compliance</h2>
+        <p class="step-description">Provide your licensing information</p>
+        
+        <div id="wholesalerLicensingFields">
+          <div class="form-group">
+            <label for="tradeLicense">Trade License Number <span class="required">*</span></label>
+            <input type="text" id="tradeLicense" name="tradeLicense" placeholder="Trade license number" required />
+          </div>
+          <div class="form-group">
+            <label for="fssaiLicense">FSSAI License Number (if applicable)</label>
+            <input type="text" id="fssaiLicense" name="fssaiLicense" placeholder="FSSAI license number" />
+          </div>
+          <div class="form-group">
+            <label for="drugLicense">Drug License Number (if applicable)</label>
+            <input type="text" id="drugLicense" name="drugLicense" placeholder="Drug license number" />
+          </div>
+          <div class="form-group">
+            <label for="warehouseCount">Number of Warehouses <span class="required">*</span></label>
+            <input type="number" id="warehouseCount" name="warehouseCount" placeholder="Number of warehouses" min="1" required />
+          </div>
+        </div>
+
+        <div id="retailerLicensingFields" style="display: none;">
+          <div class="form-group">
+            <label for="retailerTradeLicense">Trade License Number <span class="required">*</span></label>
+            <input type="text" id="retailerTradeLicense" name="retailerTradeLicense" placeholder="Trade license number" required />
+          </div>
+          <div class="form-group">
+            <label for="retailerFssaiLicense">FSSAI License Number (if applicable)</label>
+            <input type="text" id="retailerFssaiLicense" name="retailerFssaiLicense" placeholder="FSSAI license number" />
+          </div>
+          <div class="form-group">
+            <label for="shopArea">Shop Area (sq. ft.) <span class="required">*</span></label>
+            <input type="number" id="shopArea" name="shopArea" placeholder="Shop area in square feet" min="1" required />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
+          <button type="button" class="btn btn-primary" onclick="nextStep()">Continue</button>
+        </div>
+      </div>
+
+      <!-- Step 6: Document Uploads -->
+      <div class="form-step" data-step="6">
+        <h2 class="step-title">Upload Documents</h2>
+        <p class="step-description">Upload required documents for verification</p>
+        
+        <div class="form-group">
+          <label>Business Registration Certificate <span class="required">*</span></label>
+          <div class="file-upload" onclick="document.getElementById('registrationCert').click()">
+            <div class="file-upload-icon">📄</div>
+            <div class="file-upload-text">Tap to upload</div>
+            <div class="file-upload-hint">PDF, JPG, PNG (Max 5MB)</div>
+            <input type="file" id="registrationCert" name="registrationCert" accept=".pdf,.jpg,.jpeg,.png" required />
+          </div>
+          <div class="file-preview" id="registrationCertPreview"></div>
+        </div>
+
+        <div class="form-group">
+          <label>GST Certificate <span class="required">*</span></label>
+          <div class="file-upload" onclick="document.getElementById('gstCert').click()">
+            <div class="file-upload-icon">📄</div>
+            <div class="file-upload-text">Tap to upload</div>
+            <div class="file-upload-hint">PDF, JPG, PNG (Max 5MB)</div>
+            <input type="file" id="gstCert" name="gstCert" accept=".pdf,.jpg,.jpeg,.png" required />
+          </div>
+          <div class="file-preview" id="gstCertPreview"></div>
+        </div>
+
+        <div class="form-group">
+          <label>PAN Card <span class="required">*</span></label>
+          <div class="file-upload" onclick="document.getElementById('panCard').click()">
+            <div class="file-upload-icon">📄</div>
+            <div class="file-upload-text">Tap to upload</div>
+            <div class="file-upload-hint">PDF, JPG, PNG (Max 5MB)</div>
+            <input type="file" id="panCard" name="panCard" accept=".pdf,.jpg,.jpeg,.png" required />
+          </div>
+          <div class="file-preview" id="panCardPreview"></div>
+        </div>
+
+        <div class="form-group">
+          <label>Trade License <span class="required">*</span></label>
+          <div class="file-upload" onclick="document.getElementById('tradeLicenseDoc').click()">
+            <div class="file-upload-icon">📄</div>
+            <div class="file-upload-text">Tap to upload</div>
+            <div class="file-upload-hint">PDF, JPG, PNG (Max 5MB)</div>
+            <input type="file" id="tradeLicenseDoc" name="tradeLicenseDoc" accept=".pdf,.jpg,.jpeg,.png" required />
+          </div>
+          <div class="file-preview" id="tradeLicenseDocPreview"></div>
+        </div>
+
+        <div class="form-group">
+          <label>Identity Proof (Aadhaar/Passport) <span class="required">*</span></label>
+          <div class="file-upload" onclick="document.getElementById('identityProof').click()">
+            <div class="file-upload-icon">🆔</div>
+            <div class="file-upload-text">Tap to upload</div>
+            <div class="file-upload-hint">PDF, JPG, PNG (Max 5MB)</div>
+            <input type="file" id="identityProof" name="identityProof" accept=".pdf,.jpg,.jpeg,.png" required />
+          </div>
+          <div class="file-preview" id="identityProofPreview"></div>
+        </div>
+
+        <div class="form-group">
+          <label>Address Proof <span class="required">*</span></label>
+          <div class="file-upload" onclick="document.getElementById('addressProof').click()">
+            <div class="file-upload-icon">📍</div>
+            <div class="file-upload-text">Tap to upload</div>
+            <div class="file-upload-hint">PDF, JPG, PNG (Max 5MB)</div>
+            <input type="file" id="addressProof" name="addressProof" accept=".pdf,.jpg,.jpeg,.png" required />
+          </div>
+          <div class="file-preview" id="addressProofPreview"></div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
+          <button type="button" class="btn btn-primary" onclick="nextStep()">Continue</button>
+        </div>
+      </div>
+
+      <!-- Step 7: Account Credentials -->
+      <div class="form-step" data-step="7">
+        <h2 class="step-title">Create Account</h2>
+        <p class="step-description">Set up your login credentials</p>
+        
+        <div class="form-group">
+          <label for="username">Username <span class="required">*</span></label>
+          <input type="text" id="username" name="username" placeholder="Choose a username" required autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label for="password">Password <span class="required">*</span></label>
+          <input type="password" id="password" name="password" placeholder="Create a strong password" required autocomplete="new-password" />
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password <span class="required">*</span></label>
+          <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required autocomplete="new-password" />
+        </div>
+
+        <div class="form-group">
+          <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
+            <input type="checkbox" id="terms" name="terms" required style="width: 20px; height: 20px; accent-color: var(--primary); margin-top: 2px; flex-shrink: 0;" />
+            <span style="font-size: 0.85rem;">I agree to the <a href="#" style="color: var(--primary);">Terms and Conditions</a> and <a href="#" style="color: var(--primary);">Privacy Policy</a> <span class="required">*</span></span>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
+          <button type="submit" class="btn btn-primary" id="submitBtn">Create Account</button>
+        </div>
+      </div>
+    </form>
+
+    <div class="login-link">
+      Already have an account? <a href="login.html">Sign In</a>
+    </div>
+  </div>
+
+  <script>
+    let currentStep = 1;
+    let selectedRole = null;
+    const totalSteps = 7;
+
+    // Role Selection
+    const roleOptions = document.querySelectorAll('.role-option');
+    roleOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        roleOptions.forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+        selectedRole = option.dataset.role;
+        updateRoleSpecificFields();
+      });
+    });
+
+    function updateRoleSpecificFields() {
+      const isWholesaler = selectedRole === 'wholesaler';
+      document.getElementById('wholesalerBusinessFields').style.display = isWholesaler ? 'block' : 'none';
+      document.getElementById('retailerBusinessFields').style.display = isWholesaler ? 'none' : 'block';
+      document.getElementById('wholesalerLicensingFields').style.display = isWholesaler ? 'block' : 'none';
+      document.getElementById('retailerLicensingFields').style.display = isWholesaler ? 'none' : 'block';
+      
+      const step2Desc = document.getElementById('step2Description');
+      step2Desc.textContent = isWholesaler 
+        ? 'Tell us about your wholesale business' 
+        : 'Tell us about your retail shop';
+    }
+
+    // Step Navigation
+    function updateStepDisplay() {
+      document.querySelectorAll('.form-step').forEach((step, index) => {
+        step.classList.toggle('active', index + 1 === currentStep);
+      });
+      document.querySelectorAll('.step').forEach((step, index) => {
+        step.classList.toggle('active', index + 1 === currentStep);
+        step.classList.toggle('completed', index + 1 < currentStep);
+      });
+    }
+
+    function nextStep() {
+      // Only validate role selection on step 1
+      if (currentStep === 1) {
+        if (!selectedRole) {
+          showError('Please select your role');
+          return;
+        }
+      }
+      
+      // Allow free navigation through all other steps
+      if (currentStep < totalSteps) {
+        currentStep++;
+        updateStepDisplay();
+        window.scrollTo(0, 0);
+        // Clear any error messages when moving forward
+        document.getElementById('errorMessage').classList.remove('show');
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 1) {
+        currentStep--;
+        updateStepDisplay();
+        window.scrollTo(0, 0);
+        // Clear any error messages when moving back
+        document.getElementById('errorMessage').classList.remove('show');
+      }
+    }
+
+    // File Upload Handlers
+    function setupFileUpload(inputId, previewId) {
+      const input = document.getElementById(inputId);
+      const preview = document.getElementById(previewId);
+      
+      input.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          if (file.size > 5 * 1024 * 1024) {
+            showError('File size must be less than 5MB');
+            input.value = '';
+            return;
+          }
+          preview.innerHTML = `
+            <div class="file-preview-item">
+              <span class="file-preview-name">${file.name}</span>
+              <button type="button" class="file-preview-remove" onclick="removeFile('${inputId}', '${previewId}')">Remove</button>
+            </div>
+          `;
+          preview.classList.add('show');
+        }
+      });
+    }
+
+    function removeFile(inputId, previewId) {
+      document.getElementById(inputId).value = '';
+      document.getElementById(previewId).innerHTML = '';
+      document.getElementById(previewId).classList.remove('show');
+    }
+
+    // Setup all file uploads
+    setupFileUpload('registrationCert', 'registrationCertPreview');
+    setupFileUpload('gstCert', 'gstCertPreview');
+    setupFileUpload('panCard', 'panCardPreview');
+    setupFileUpload('tradeLicenseDoc', 'tradeLicenseDocPreview');
+    setupFileUpload('identityProof', 'identityProofPreview');
+    setupFileUpload('addressProof', 'addressProofPreview');
+
+    // Form Submission
+    const signupForm = document.getElementById('signupForm');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.classList.add('show');
+      successMessage.classList.remove('show');
+      setTimeout(() => {
+        errorMessage.classList.remove('show');
+      }, 5000);
+    }
+
+    function showSuccess(message) {
+      successMessage.textContent = message;
+      successMessage.classList.add('show');
+      errorMessage.classList.remove('show');
+    }
+
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Validate role selection
+      if (!selectedRole) {
+        showError('Please select your role');
+        currentStep = 1;
+        updateStepDisplay();
+        window.scrollTo(0, 0);
+        return;
+      }
+
+      // Validate all required fields
+      const allSteps = document.querySelectorAll('.form-step');
+      let hasErrors = false;
+      let firstErrorStep = null;
+
+      // Check all steps for required fields
+      allSteps.forEach((step, index) => {
+        const stepNumber = index + 1;
+        const requiredFields = step.querySelectorAll('[required]');
+        
+        requiredFields.forEach(field => {
+          // Skip file inputs for now (they're handled separately)
+          if (field.type === 'file') {
+            if (!field.files || field.files.length === 0) {
+              hasErrors = true;
+              if (!firstErrorStep) firstErrorStep = stepNumber;
+              field.closest('.form-group')?.querySelector('label')?.style.color = 'var(--danger)';
+            }
+          } else if (!field.value.trim()) {
+            hasErrors = true;
+            if (!firstErrorStep) firstErrorStep = stepNumber;
+            field.style.borderColor = 'var(--danger)';
+          } else {
+            field.style.borderColor = '';
+            field.closest('.form-group')?.querySelector('label')?.style.color = '';
+          }
+        });
+      });
+
+      if (hasErrors) {
+        showError('Please fill in all required fields. Moving to first incomplete step...');
+        if (firstErrorStep) {
+          currentStep = firstErrorStep;
+          updateStepDisplay();
+          window.scrollTo(0, 0);
+        }
+        return;
+      }
+
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (password !== confirmPassword) {
+        showError('Passwords do not match');
+        return;
+      }
+
+      if (password.length < 8) {
+        showError('Password must be at least 8 characters long');
+        return;
+      }
+
+      // Collect all form data
+      const data = {
+        role: selectedRole,
+        businessName: document.getElementById('businessName')?.value || document.getElementById('shopName')?.value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        username: document.getElementById('username').value,
+        password: password,
+        createdAt: new Date().toISOString()
+      };
+
+      // Add role-specific fields
+      if (selectedRole === 'wholesaler') {
+        data.businessType = document.getElementById('businessType').value;
+        data.registrationNumber = document.getElementById('registrationNumber').value;
+        data.gstNumber = document.getElementById('gstNumber').value;
+        data.panNumber = document.getElementById('panNumber').value;
+        data.tradeLicense = document.getElementById('tradeLicense').value;
+        data.warehouseCount = document.getElementById('warehouseCount').value;
+      } else {
+        data.shopName = document.getElementById('shopName').value;
+        data.shopType = document.getElementById('shopType').value;
+        data.shopLicenseNumber = document.getElementById('shopLicenseNumber').value;
+        data.shopArea = document.getElementById('shopArea').value;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating account...';
+
+      // Simulate API call
+      setTimeout(() => {
+        // Store user data
+        const users = JSON.parse(localStorage.getItem('registered_users') || '[]');
+        users.push(data);
+        localStorage.setItem('registered_users', JSON.stringify(users));
+
+        // Auto-login
+        localStorage.setItem('user', JSON.stringify({
+          username: data.username,
+          role: selectedRole,
+          timestamp: new Date().toISOString()
+        }));
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userRole', selectedRole);
+
+        showSuccess('Account created successfully! Redirecting...');
+
+        setTimeout(() => {
+          if (selectedRole === 'wholesaler') {
+            window.location.href = '../../wholesaler-dashboard/mobile/index.html';
+          } else {
+            window.location.href = '../../retailer-dashboard/index.html';
+          }
+        }, 1500);
+      }, 2000);
+    });
+
+    // Initialize
+    updateStepDisplay();
+  </script>
+</body>
+</html>
+

@@ -1227,7 +1227,26 @@ function renderSettingsView() {
 }
 
 /* =========================
+   AUTHENTICATION CHECK
+========================= */
+
+// Check if user is logged in
+function checkAuth() {
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  const userRole = localStorage.getItem('userRole');
+  
+  if (!isLoggedIn || userRole !== 'wholesaler') {
+    window.location.href = 'login.html';
+    return false;
+  }
+  return true;
+}
+
+/* =========================
    INIT
 ========================= */
 
-init();
+// Run auth check before initializing
+if (checkAuth()) {
+  init();
+}
