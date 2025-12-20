@@ -22,33 +22,41 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
+      -webkit-tap-highlight-color: rgba(67, 97, 238, 0.2);
     }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-attachment: fixed;
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
+      display: block;
+      padding: 16px;
+      padding-top: calc(16px + env(safe-area-inset-top));
+      padding-bottom: calc(16px + env(safe-area-inset-bottom));
       color: var(--text);
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      line-height: 1.6;
     }
 
     .signup-container {
       background: var(--card);
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      border-radius: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
       width: 100%;
       max-width: 100%;
-      padding: 24px 20px;
+      padding: 28px 20px;
       position: relative;
-      overflow: hidden;
-      max-height: 95vh;
-      overflow-y: auto;
+      overflow: visible;
+      margin: 0 auto;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .signup-container form {
+      overflow: visible;
+      width: 100%;
     }
 
     .signup-container::before {
@@ -63,23 +71,26 @@
 
     .signup-header {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 28px;
+      padding-top: 4px;
     }
 
     .signup-header h1 {
-      font-size: 1.8rem;
+      font-size: 1.75rem;
       font-weight: 700;
       color: var(--text);
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      letter-spacing: -0.5px;
     }
 
     .signup-header p {
       color: var(--muted);
       font-size: 0.9rem;
+      font-weight: 400;
     }
 
     /* Progress Steps - Mobile Optimized */
@@ -90,6 +101,20 @@
       position: relative;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
+      padding-bottom: 8px;
+    }
+
+    .progress-steps::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    .progress-steps::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .progress-steps::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
     }
 
     .progress-steps::before {
@@ -157,10 +182,17 @@
     .form-step {
       display: none;
       animation: fadeIn 0.3s;
+      width: 100%;
+      opacity: 0;
+      visibility: hidden;
+      min-height: 200px;
     }
 
     .form-step.active {
       display: block;
+      width: 100%;
+      opacity: 1;
+      visibility: visible;
     }
 
     @keyframes fadeIn {
@@ -227,20 +259,33 @@
     }
 
     .file-upload {
-      border: 2px dashed var(--border);
-      border-radius: 12px;
-      padding: 20px;
+      border: 2.5px dashed var(--border);
+      border-radius: 16px;
+      padding: 24px 20px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       background: var(--bg);
       touch-action: manipulation;
+      -webkit-tap-highlight-color: rgba(67, 97, 238, 0.2);
+      user-select: none;
+      -webkit-user-select: none;
+      pointer-events: auto;
+      -webkit-touch-callout: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
     }
 
-    .file-upload:active {
+    .file-upload:active,
+    .file-upload:focus {
       border-color: var(--primary);
-      background: rgba(67, 97, 238, 0.05);
+      background: rgba(67, 97, 238, 0.06);
       transform: scale(0.98);
+      outline: none;
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.15);
+    }
+    
+    .file-upload * {
+      pointer-events: none;
     }
 
     .file-upload input[type="file"] {
@@ -316,15 +361,45 @@
 
     .btn {
       flex: 1;
-      padding: 14px 20px;
+      padding: 16px 24px;
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       touch-action: manipulation;
-      min-height: 48px;
+      min-height: 52px;
+      -webkit-tap-highlight-color: rgba(67, 97, 238, 0.2);
+      user-select: none;
+      -webkit-user-select: none;
+      position: relative;
+      pointer-events: auto;
+      -webkit-touch-callout: none;
+      letter-spacing: 0.3px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+    }
+    
+    .btn-primary:active {
+      transform: scale(0.97) translateY(1px);
+      box-shadow: 0 2px 6px rgba(67, 97, 238, 0.3);
+    }
+    
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text);
+      border: 2px solid var(--border);
+    }
+    
+    .btn-secondary:active {
+      transform: scale(0.97) translateY(1px);
+      background: var(--border);
     }
 
     .btn-primary {
@@ -355,14 +430,16 @@
     }
 
     .error-message {
-      background: #fee2e2;
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
       color: #dc2626;
-      padding: 12px 16px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      font-size: 0.85rem;
+      padding: 14px 18px;
+      border-radius: 12px;
+      margin-bottom: 22px;
+      font-size: 0.9rem;
       display: none;
       border-left: 4px solid var(--danger);
+      box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
+      animation: slideDown 0.3s ease-out;
     }
 
     .error-message.show {
@@ -370,18 +447,31 @@
     }
 
     .success-message {
-      background: #d1fae5;
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
       color: #065f46;
-      padding: 12px 16px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      font-size: 0.85rem;
+      padding: 14px 18px;
+      border-radius: 12px;
+      margin-bottom: 22px;
+      font-size: 0.9rem;
       display: none;
       border-left: 4px solid var(--success);
+      box-shadow: 0 2px 8px rgba(5, 150, 105, 0.15);
+      animation: slideDown 0.3s ease-out;
     }
 
     .success-message.show {
       display: block;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .role-selector {
@@ -401,6 +491,15 @@
       text-align: center;
       position: relative;
       touch-action: manipulation;
+      -webkit-tap-highlight-color: rgba(67, 97, 238, 0.2);
+      user-select: none;
+      -webkit-user-select: none;
+      pointer-events: auto;
+      -webkit-touch-callout: none;
+    }
+    
+    .role-option:active {
+      transform: scale(0.98);
     }
 
     .role-option::before {
@@ -421,8 +520,9 @@
 
     .role-option.selected {
       border-color: var(--primary);
-      background: linear-gradient(135deg, rgba(67, 97, 238, 0.05) 0%, rgba(67, 97, 238, 0.02) 100%);
-      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+      background: linear-gradient(135deg, rgba(67, 97, 238, 0.08) 0%, rgba(67, 97, 238, 0.03) 100%);
+      box-shadow: 0 4px 16px rgba(67, 97, 238, 0.25), 0 0 0 3px rgba(67, 97, 238, 0.1);
+      transform: translateY(-2px);
     }
 
     .role-option.selected::before {
@@ -518,7 +618,7 @@
         </div>
 
         <div class="form-actions">
-          <button type="button" class="btn btn-primary" onclick="nextStep()">Continue</button>
+          <button type="button" class="btn btn-primary btn-next">Continue</button>
         </div>
       </div>
 
@@ -584,8 +684,8 @@
         </div>
 
         <div class="form-actions">
-          <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
-          <button type="button" class="btn btn-primary" onclick="nextStep()">Continue</button>
+          <button type="button" class="btn btn-secondary btn-prev">Back</button>
+          <button type="button" class="btn btn-primary btn-next">Continue</button>
         </div>
       </div>
 
@@ -616,8 +716,8 @@
         </div>
 
         <div class="form-actions">
-          <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
-          <button type="button" class="btn btn-primary" onclick="nextStep()">Continue</button>
+          <button type="button" class="btn btn-secondary btn-prev">Back</button>
+          <button type="button" class="btn btn-primary btn-next">Continue</button>
         </div>
       </div>
 
@@ -648,8 +748,8 @@
         </div>
 
         <div class="form-actions">
-          <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
-          <button type="button" class="btn btn-primary" onclick="nextStep()">Continue</button>
+          <button type="button" class="btn btn-secondary btn-prev">Back</button>
+          <button type="button" class="btn btn-primary btn-next">Continue</button>
         </div>
       </div>
 
@@ -693,8 +793,8 @@
         </div>
 
         <div class="form-actions">
-          <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
-          <button type="button" class="btn btn-primary" onclick="nextStep()">Continue</button>
+          <button type="button" class="btn btn-secondary btn-prev">Back</button>
+          <button type="button" class="btn btn-primary btn-next">Continue</button>
         </div>
       </div>
 
@@ -705,7 +805,7 @@
         
         <div class="form-group">
           <label>Business Registration Certificate <span class="required">*</span></label>
-          <div class="file-upload" onclick="document.getElementById('registrationCert').click()">
+          <div class="file-upload" data-file-input="registrationCert">
             <div class="file-upload-icon">📄</div>
             <div class="file-upload-text">Tap to upload</div>
             <div class="file-upload-hint">PDF, JPG, PNG (Max 5MB)</div>
@@ -716,7 +816,7 @@
 
         <div class="form-group">
           <label>GST Certificate <span class="required">*</span></label>
-          <div class="file-upload" onclick="document.getElementById('gstCert').click()">
+          <div class="file-upload" data-file-input="gstCert">
             <div class="file-upload-icon">📄</div>
             <div class="file-upload-text">Tap to upload</div>
             <div class="file-upload-hint">PDF, JPG, PNG (Max 5MB)</div>
@@ -727,7 +827,7 @@
 
         <div class="form-group">
           <label>PAN Card <span class="required">*</span></label>
-          <div class="file-upload" onclick="document.getElementById('panCard').click()">
+          <div class="file-upload" data-file-input="panCard">
             <div class="file-upload-icon">📄</div>
             <div class="file-upload-text">Tap to upload</div>
             <div class="file-upload-hint">PDF, JPG, PNG (Max 5MB)</div>
@@ -738,7 +838,7 @@
 
         <div class="form-group">
           <label>Trade License <span class="required">*</span></label>
-          <div class="file-upload" onclick="document.getElementById('tradeLicenseDoc').click()">
+          <div class="file-upload" data-file-input="tradeLicenseDoc">
             <div class="file-upload-icon">📄</div>
             <div class="file-upload-text">Tap to upload</div>
             <div class="file-upload-hint">PDF, JPG, PNG (Max 5MB)</div>
@@ -749,7 +849,7 @@
 
         <div class="form-group">
           <label>Identity Proof (Aadhaar/Passport) <span class="required">*</span></label>
-          <div class="file-upload" onclick="document.getElementById('identityProof').click()">
+          <div class="file-upload" data-file-input="identityProof">
             <div class="file-upload-icon">🆔</div>
             <div class="file-upload-text">Tap to upload</div>
             <div class="file-upload-hint">PDF, JPG, PNG (Max 5MB)</div>
@@ -760,7 +860,7 @@
 
         <div class="form-group">
           <label>Address Proof <span class="required">*</span></label>
-          <div class="file-upload" onclick="document.getElementById('addressProof').click()">
+          <div class="file-upload" data-file-input="addressProof">
             <div class="file-upload-icon">📍</div>
             <div class="file-upload-text">Tap to upload</div>
             <div class="file-upload-hint">PDF, JPG, PNG (Max 5MB)</div>
@@ -770,8 +870,8 @@
         </div>
 
         <div class="form-actions">
-          <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
-          <button type="button" class="btn btn-primary" onclick="nextStep()">Continue</button>
+          <button type="button" class="btn btn-secondary btn-prev">Back</button>
+          <button type="button" class="btn btn-primary btn-next">Continue</button>
         </div>
       </div>
 
@@ -801,7 +901,7 @@
         </div>
 
         <div class="form-actions">
-          <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
+          <button type="button" class="btn btn-secondary btn-prev">Back</button>
           <button type="submit" class="btn btn-primary" id="submitBtn">Create Account</button>
         </div>
       </div>
@@ -817,34 +917,70 @@
     let selectedRole = null;
     const totalSteps = 7;
 
-    // Role Selection
-    const roleOptions = document.querySelectorAll('.role-option');
-    roleOptions.forEach(option => {
-      option.addEventListener('click', () => {
-        roleOptions.forEach(opt => opt.classList.remove('selected'));
-        option.classList.add('selected');
-        selectedRole = option.dataset.role;
+    // Role Selection - Use event delegation for better touch support
+    document.body.addEventListener('click', (e) => {
+      const roleOption = e.target.closest('.role-option');
+      if (roleOption) {
+        e.preventDefault();
+        e.stopPropagation();
+        const allOptions = document.querySelectorAll('.role-option');
+        allOptions.forEach(opt => opt.classList.remove('selected'));
+        roleOption.classList.add('selected');
+        selectedRole = roleOption.dataset.role;
         updateRoleSpecificFields();
-      });
-    });
+      }
+    }, true);
+    
+    document.body.addEventListener('touchend', (e) => {
+      const roleOption = e.target.closest('.role-option');
+      if (roleOption) {
+        e.preventDefault();
+        e.stopPropagation();
+        const allOptions = document.querySelectorAll('.role-option');
+        allOptions.forEach(opt => opt.classList.remove('selected'));
+        roleOption.classList.add('selected');
+        selectedRole = roleOption.dataset.role;
+        updateRoleSpecificFields();
+      }
+    }, true);
 
     function updateRoleSpecificFields() {
+      if (!selectedRole) return;
+      
       const isWholesaler = selectedRole === 'wholesaler';
-      document.getElementById('wholesalerBusinessFields').style.display = isWholesaler ? 'block' : 'none';
-      document.getElementById('retailerBusinessFields').style.display = isWholesaler ? 'none' : 'block';
-      document.getElementById('wholesalerLicensingFields').style.display = isWholesaler ? 'block' : 'none';
-      document.getElementById('retailerLicensingFields').style.display = isWholesaler ? 'none' : 'block';
+      const wholesalerBusiness = document.getElementById('wholesalerBusinessFields');
+      const retailerBusiness = document.getElementById('retailerBusinessFields');
+      const wholesalerLicensing = document.getElementById('wholesalerLicensingFields');
+      const retailerLicensing = document.getElementById('retailerLicensingFields');
+      
+      if (wholesalerBusiness) wholesalerBusiness.style.display = isWholesaler ? 'block' : 'none';
+      if (retailerBusiness) retailerBusiness.style.display = isWholesaler ? 'none' : 'block';
+      if (wholesalerLicensing) wholesalerLicensing.style.display = isWholesaler ? 'block' : 'none';
+      if (retailerLicensing) retailerLicensing.style.display = isWholesaler ? 'none' : 'block';
       
       const step2Desc = document.getElementById('step2Description');
-      step2Desc.textContent = isWholesaler 
-        ? 'Tell us about your wholesale business' 
-        : 'Tell us about your retail shop';
+      if (step2Desc) {
+        step2Desc.textContent = isWholesaler 
+          ? 'Tell us about your wholesale business' 
+          : 'Tell us about your retail shop';
+      }
     }
 
     // Step Navigation
     function updateStepDisplay() {
       document.querySelectorAll('.form-step').forEach((step, index) => {
-        step.classList.toggle('active', index + 1 === currentStep);
+        const isActive = index + 1 === currentStep;
+        step.classList.toggle('active', isActive);
+        if (isActive) {
+          // Ensure active step is visible
+          step.style.display = 'block';
+          step.style.opacity = '1';
+          step.style.visibility = 'visible';
+        } else {
+          step.style.display = 'none';
+          step.style.opacity = '0';
+          step.style.visibility = 'hidden';
+        }
       });
       document.querySelectorAll('.step').forEach((step, index) => {
         step.classList.toggle('active', index + 1 === currentStep);
@@ -865,9 +1001,18 @@
       if (currentStep < totalSteps) {
         currentStep++;
         updateStepDisplay();
-        window.scrollTo(0, 0);
+        // Scroll to top of container smoothly
+        const container = document.querySelector('.signup-container');
+        if (container) {
+          container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        // Also scroll window to top
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
         // Clear any error messages when moving forward
-        document.getElementById('errorMessage').classList.remove('show');
+        const errorMsg = document.getElementById('errorMessage');
+        if (errorMsg) errorMsg.classList.remove('show');
       }
     }
 
@@ -875,9 +1020,18 @@
       if (currentStep > 1) {
         currentStep--;
         updateStepDisplay();
-        window.scrollTo(0, 0);
+        // Scroll to top of container smoothly
+        const container = document.querySelector('.signup-container');
+        if (container) {
+          container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        // Also scroll window to top
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
         // Clear any error messages when moving back
-        document.getElementById('errorMessage').classList.remove('show');
+        const errorMsg = document.getElementById('errorMessage');
+        if (errorMsg) errorMsg.classList.remove('show');
       }
     }
 
@@ -897,7 +1051,7 @@
           preview.innerHTML = `
             <div class="file-preview-item">
               <span class="file-preview-name">${file.name}</span>
-              <button type="button" class="file-preview-remove" onclick="removeFile('${inputId}', '${previewId}')">Remove</button>
+              <button type="button" class="file-preview-remove" data-remove-file="${inputId}" data-remove-preview="${previewId}">Remove</button>
             </div>
           `;
           preview.classList.add('show');
@@ -906,10 +1060,36 @@
     }
 
     function removeFile(inputId, previewId) {
-      document.getElementById(inputId).value = '';
-      document.getElementById(previewId).innerHTML = '';
-      document.getElementById(previewId).classList.remove('show');
+      const input = document.getElementById(inputId);
+      const preview = document.getElementById(previewId);
+      if (input) input.value = '';
+      if (preview) {
+        preview.innerHTML = '';
+        preview.classList.remove('show');
+      }
     }
+    
+    // Setup remove file button handlers
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('file-preview-remove')) {
+        const inputId = e.target.getAttribute('data-remove-file');
+        const previewId = e.target.getAttribute('data-remove-preview');
+        if (inputId && previewId) {
+          removeFile(inputId, previewId);
+        }
+      }
+    });
+    
+    document.addEventListener('touchend', (e) => {
+      if (e.target.classList.contains('file-preview-remove')) {
+        e.preventDefault();
+        const inputId = e.target.getAttribute('data-remove-file');
+        const previewId = e.target.getAttribute('data-remove-preview');
+        if (inputId && previewId) {
+          removeFile(inputId, previewId);
+        }
+      }
+    });
 
     // Setup all file uploads
     setupFileUpload('registrationCert', 'registrationCertPreview');
@@ -948,7 +1128,13 @@
         showError('Please select your role');
         currentStep = 1;
         updateStepDisplay();
-        window.scrollTo(0, 0);
+        const container = document.querySelector('.signup-container');
+        if (container) {
+          container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
         return;
       }
 
@@ -968,7 +1154,9 @@
             if (!field.files || field.files.length === 0) {
               hasErrors = true;
               if (!firstErrorStep) firstErrorStep = stepNumber;
-              field.closest('.form-group')?.querySelector('label')?.style.color = 'var(--danger)';
+              const formGroup = field.closest('.form-group');
+              const label = formGroup ? formGroup.querySelector('label') : null;
+              if (label) label.style.color = 'var(--danger)';
             }
           } else if (!field.value.trim()) {
             hasErrors = true;
@@ -976,7 +1164,9 @@
             field.style.borderColor = 'var(--danger)';
           } else {
             field.style.borderColor = '';
-            field.closest('.form-group')?.querySelector('label')?.style.color = '';
+            const formGroup = field.closest('.form-group');
+            const label = formGroup ? formGroup.querySelector('label') : null;
+            if (label) label.style.color = '';
           }
         });
       });
@@ -986,7 +1176,14 @@
         if (firstErrorStep) {
           currentStep = firstErrorStep;
           updateStepDisplay();
-          window.scrollTo(0, 0);
+          // Scroll to top smoothly
+          const container = document.querySelector('.signup-container');
+          if (container) {
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+          setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }, 100);
         }
         return;
       }
@@ -1061,8 +1258,93 @@
       }, 2000);
     });
 
+    // Setup button event listeners for touch support
+    function setupButtonListeners() {
+      // Use event delegation for better reliability
+      document.body.addEventListener('click', (e) => {
+        if (e.target.classList.contains('btn-next') || e.target.closest('.btn-next')) {
+          e.preventDefault();
+          e.stopPropagation();
+          nextStep();
+        }
+        if (e.target.classList.contains('btn-prev') || e.target.closest('.btn-prev')) {
+          e.preventDefault();
+          e.stopPropagation();
+          prevStep();
+        }
+      }, true);
+      
+      // Touch events
+      document.body.addEventListener('touchend', (e) => {
+        if (e.target.classList.contains('btn-next') || e.target.closest('.btn-next')) {
+          e.preventDefault();
+          e.stopPropagation();
+          nextStep();
+        }
+        if (e.target.classList.contains('btn-prev') || e.target.closest('.btn-prev')) {
+          e.preventDefault();
+          e.stopPropagation();
+          prevStep();
+        }
+      }, true);
+    }
+
+    // Setup file upload touch handlers
+    function setupFileUploadHandlers() {
+      // Use event delegation
+      document.body.addEventListener('click', (e) => {
+        const upload = e.target.closest('.file-upload[data-file-input]');
+        if (upload) {
+          e.preventDefault();
+          e.stopPropagation();
+          const inputId = upload.getAttribute('data-file-input');
+          const input = document.getElementById(inputId);
+          if (input) {
+            input.click();
+          }
+        }
+      }, true);
+      
+      document.body.addEventListener('touchend', (e) => {
+        const upload = e.target.closest('.file-upload[data-file-input]');
+        if (upload) {
+          e.preventDefault();
+          e.stopPropagation();
+          const inputId = upload.getAttribute('data-file-input');
+          const input = document.getElementById(inputId);
+          if (input) {
+            input.click();
+          }
+        }
+      }, true);
+    }
+
     // Initialize
-    updateStepDisplay();
+    function initializeApp() {
+      updateStepDisplay();
+      setupButtonListeners();
+      setupFileUploadHandlers();
+      
+      const firstStep = document.querySelector('.form-step[data-step="1"]');
+      if (firstStep) {
+        firstStep.style.display = 'block';
+        firstStep.style.opacity = '1';
+        firstStep.style.visibility = 'visible';
+      }
+    }
+    
+    // Run initialization
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeApp);
+    } else {
+      initializeApp();
+    }
+    
+    // Also run on window load as backup
+    window.addEventListener('load', () => {
+      setupButtonListeners();
+      setupFileUploadHandlers();
+    });
   </script>
 </body>
 </html>

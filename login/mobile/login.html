@@ -28,25 +28,31 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-attachment: fixed;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 16px;
+      padding-top: calc(16px + env(safe-area-inset-top));
+      padding-bottom: calc(16px + env(safe-area-inset-bottom));
       color: var(--text);
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      line-height: 1.6;
     }
 
     .login-container {
       background: var(--card);
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      border-radius: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
       width: 100%;
       max-width: 100%;
       padding: 32px 24px;
       position: relative;
       overflow: hidden;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
 
     .login-container::before {
@@ -65,19 +71,21 @@
     }
 
     .login-header h1 {
-      font-size: 2rem;
+      font-size: 1.9rem;
       font-weight: 700;
       color: var(--text);
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      letter-spacing: -0.5px;
     }
 
     .login-header p {
       color: var(--muted);
       font-size: 0.95rem;
+      font-weight: 400;
     }
 
     .role-selector {
@@ -118,8 +126,9 @@
 
     .role-option.selected {
       border-color: var(--primary);
-      background: linear-gradient(135deg, rgba(67, 97, 238, 0.05) 0%, rgba(67, 97, 238, 0.02) 100%);
-      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+      background: linear-gradient(135deg, rgba(67, 97, 238, 0.08) 0%, rgba(67, 97, 238, 0.03) 100%);
+      box-shadow: 0 4px 16px rgba(67, 97, 238, 0.25), 0 0 0 3px rgba(67, 97, 238, 0.1);
+      transform: translateY(-2px);
     }
 
     .role-option.selected::before {
@@ -238,24 +247,26 @@
 
     .login-btn {
       width: 100%;
-      padding: 16px;
+      padding: 18px 24px;
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
       color: white;
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1);
       position: relative;
       overflow: hidden;
       touch-action: manipulation;
-      min-height: 48px;
+      min-height: 52px;
+      letter-spacing: 0.3px;
     }
 
     .login-btn:active {
-      transform: scale(0.98);
+      transform: scale(0.97) translateY(1px);
+      box-shadow: 0 2px 6px rgba(67, 97, 238, 0.3);
     }
 
     .login-btn:disabled {
@@ -285,14 +296,16 @@
     }
 
     .error-message {
-      background: #fee2e2;
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
       color: #dc2626;
-      padding: 12px 16px;
-      border-radius: 8px;
-      margin-bottom: 20px;
+      padding: 14px 18px;
+      border-radius: 12px;
+      margin-bottom: 22px;
       font-size: 0.9rem;
       display: none;
       border-left: 4px solid var(--danger);
+      box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
+      animation: slideDown 0.3s ease-out;
     }
 
     .error-message.show {
@@ -300,18 +313,31 @@
     }
 
     .success-message {
-      background: #d1fae5;
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
       color: #065f46;
-      padding: 12px 16px;
-      border-radius: 8px;
-      margin-bottom: 20px;
+      padding: 14px 18px;
+      border-radius: 12px;
+      margin-bottom: 22px;
       font-size: 0.9rem;
       display: none;
       border-left: 4px solid var(--success);
+      box-shadow: 0 2px 8px rgba(5, 150, 105, 0.15);
+      animation: slideDown 0.3s ease-out;
     }
 
     .success-message.show {
       display: block;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .signup-link {
@@ -436,46 +462,122 @@
 
     <div class="switch-role">
       <span>Want to switch? </span>
-      <a href="#" onclick="switchRole(); return false;">Login as <span id="switchRoleText">Retailer</span></a>
+      <a href="#" id="switchRoleLink">Login as <span id="switchRoleText">Retailer</span></a>
     </div>
   </div>
 
   <script>
-    // Role Selection
+    // Role Selection - Use event delegation
     let selectedRole = 'wholesaler';
-    const roleOptions = document.querySelectorAll('.role-option');
     const switchRoleText = document.getElementById('switchRoleText');
     
-    roleOptions.forEach(option => {
-      option.addEventListener('click', () => {
-        roleOptions.forEach(opt => opt.classList.remove('selected'));
-        option.classList.add('selected');
-        selectedRole = option.dataset.role;
+    document.body.addEventListener('click', (e) => {
+      const roleOption = e.target.closest('.role-option');
+      if (roleOption) {
+        e.preventDefault();
+        e.stopPropagation();
+        const allOptions = document.querySelectorAll('.role-option');
+        allOptions.forEach(opt => opt.classList.remove('selected'));
+        roleOption.classList.add('selected');
+        selectedRole = roleOption.dataset.role;
+        updateSwitchRoleText();
+      }
+    }, true);
+    
+    document.body.addEventListener('touchend', (e) => {
+      const roleOption = e.target.closest('.role-option');
+      if (roleOption) {
+        e.preventDefault();
+        e.stopPropagation();
+        const allOptions = document.querySelectorAll('.role-option');
+        allOptions.forEach(opt => opt.classList.remove('selected'));
+        roleOption.classList.add('selected');
+        selectedRole = roleOption.dataset.role;
+        updateSwitchRoleText();
+      }
+    }, true);
+    
+    function updateSwitchRoleText() {
+      if (switchRoleText) {
+        switchRoleText.textContent = selectedRole === 'wholesaler' ? 'Retailer' : 'Wholesaler';
+      }
+    }
+    
+    // Set default selection
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelector('[data-role="wholesaler"]')?.classList.add('selected');
         updateSwitchRoleText();
       });
-    });
-
-    // Set default selection
-    document.querySelector('[data-role="wholesaler"]').classList.add('selected');
-    updateSwitchRoleText();
-
-    function updateSwitchRoleText() {
-      switchRoleText.textContent = selectedRole === 'wholesaler' ? 'Retailer' : 'Wholesaler';
+    } else {
+      document.querySelector('[data-role="wholesaler"]')?.classList.add('selected');
+      updateSwitchRoleText();
     }
 
     function switchRole() {
       const newRole = selectedRole === 'wholesaler' ? 'retailer' : 'wholesaler';
-      document.querySelector(`[data-role="${newRole}"]`).click();
+      const roleOption = document.querySelector(`[data-role="${newRole}"]`);
+      if (roleOption) {
+        const allOptions = document.querySelectorAll('.role-option');
+        allOptions.forEach(opt => opt.classList.remove('selected'));
+        roleOption.classList.add('selected');
+        selectedRole = newRole;
+        updateSwitchRoleText();
+      }
+    }
+    
+    // Setup switch role link with touch support
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        const switchRoleLink = document.getElementById('switchRoleLink');
+        if (switchRoleLink) {
+          const handleSwitch = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            switchRole();
+          };
+          switchRoleLink.addEventListener('click', handleSwitch);
+          switchRoleLink.addEventListener('touchend', handleSwitch);
+        }
+      });
+    } else {
+      const switchRoleLink = document.getElementById('switchRoleLink');
+      if (switchRoleLink) {
+        const handleSwitch = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          switchRole();
+        };
+        switchRoleLink.addEventListener('click', handleSwitch);
+        switchRoleLink.addEventListener('touchend', handleSwitch);
+      }
+    }
+    
+    // Set default selection
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelector('[data-role="wholesaler"]')?.classList.add('selected');
+        updateSwitchRoleText();
+      });
+    } else {
+      document.querySelector('[data-role="wholesaler"]')?.classList.add('selected');
+      updateSwitchRoleText();
     }
 
     // Password Toggle
     const togglePassword = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('password');
     
-    togglePassword.addEventListener('click', () => {
+    const togglePasswordVisibility = () => {
       const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
       passwordInput.setAttribute('type', type);
       togglePassword.textContent = type === 'password' ? '👁️' : '🙈';
+    };
+    
+    togglePassword.addEventListener('click', togglePasswordVisibility);
+    togglePassword.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      togglePasswordVisibility();
     });
 
     // Form Submission

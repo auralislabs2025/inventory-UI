@@ -957,6 +957,54 @@
     signupForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
+      // Validate role selection
+      if (!selectedRole) {
+        showError('Please select your role');
+        currentStep = 1;
+        updateStepDisplay();
+        window.scrollTo(0, 0);
+        return;
+      }
+
+      // Validate all required fields
+      const allSteps = document.querySelectorAll('.form-step');
+      let hasErrors = false;
+      let firstErrorStep = null;
+
+      // Check all steps for required fields
+      allSteps.forEach((step, index) => {
+        const stepNumber = index + 1;
+        const requiredFields = step.querySelectorAll('[required]');
+        
+        requiredFields.forEach(field => {
+          // Skip file inputs for now (they're handled separately)
+          if (field.type === 'file') {
+            if (!field.files || field.files.length === 0) {
+              hasErrors = true;
+              if (!firstErrorStep) firstErrorStep = stepNumber;
+              field.closest('.form-group')?.querySelector('label')?.style.color = 'var(--danger)';
+            }
+          } else if (!field.value.trim()) {
+            hasErrors = true;
+            if (!firstErrorStep) firstErrorStep = stepNumber;
+            field.style.borderColor = 'var(--danger)';
+          } else {
+            field.style.borderColor = '';
+            field.closest('.form-group')?.querySelector('label')?.style.color = '';
+          }
+        });
+      });
+
+      if (hasErrors) {
+        showError('Please fill in all required fields. Moving to first incomplete step...');
+        if (firstErrorStep) {
+          currentStep = firstErrorStep;
+          updateStepDisplay();
+          window.scrollTo(0, 0);
+        }
+        return;
+      }
+
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
 
