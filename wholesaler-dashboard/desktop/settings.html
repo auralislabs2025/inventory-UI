@@ -81,7 +81,10 @@
   <main class="main">
     <header class="topbar">
       <h1>Settings</h1>
-      <div class="user">Wholesaler Admin</div>
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <div class="user">Wholesaler Admin</div>
+        <button onclick="logout()" style="padding: 8px 16px; border: 1px solid #e5e7eb; border-radius: 6px; background: white; cursor: pointer; font-size: 0.9rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#ef476f'; this.style.color='#ef476f'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.color='inherit'">Logout</button>
+      </div>
     </header>
 
     <section style="padding: 20px;">
@@ -214,6 +217,7 @@
   </main>
 </div>
 
+<script src="auth.js"></script>
 <script>
   function resetData() {
     if (confirm("Are you sure you want to reset all data? This cannot be undone!")) {
