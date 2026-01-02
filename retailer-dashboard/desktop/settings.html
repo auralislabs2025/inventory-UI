@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings - Retailer Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="auth.js"></script>
+  <style>
+    .settings-card {
+      background: var(--card);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin-bottom: 25px;
+    }
+    .settings-card h2 {
+      font-size: 1.35rem;
+      color: var(--dark);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border);
+    }
+    .setting-group {
+      margin-bottom: 25px;
+    }
+    .setting-group label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.05rem;
+      color: var(--dark);
+      cursor: pointer;
+    }
+    .setting-group input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      cursor: pointer;
+    }
+    .setting-group select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-top: 8px;
+      background: var(--card);
+      color: var(--dark);
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <h2>InventoryPro</h2>
+    <div class="role-label">RETAILERS</div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">MENU</div>
+      <ul>
+        <li><a href="index.html">Dashboard</a></li>
+        <li><a href="marketspace.html">Market Space</a></li>
+        <li><a href="inventory.html">Inventory</a></li>
+      </ul>
+    </div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">PROCUREMENT</div>
+      <ul>
+        <li><a href="cart.html">My Cart<span class="nav-badge cart-badge" style="display: none;">0</span></a></li>
+        <li><a href="orders.html">My Orders</a></li>
+        <li><a href="invoices.html">Invoices</a></li>
+        <li><a href="quotes.html">Active Quotes</a></li>
+      </ul>
+    </div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">ACCOUNT</div>
+      <ul>
+        <li class="active"><a href="settings.html">Settings</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h1>Settings</h1>
+      <input type="text" placeholder="Search by SKU, Product or Brand..." class="global-search" id="globalSearch">
+      <div class="user-info">
+        <select id="themeSelect" onchange="changeTheme(this.value)">
+          <option value="">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+        <div class="user" id="userDisplay">
+          <div class="user-name">Retailer Admin</div>
+          <div class="user-role">Retailer</div>
+        </div>
+        <div class="user-avatar" id="userAvatar">RA</div>
+        <button onclick="logout()" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); cursor: pointer; margin-left: 10px; font-size: 0.9rem;">Logout</button>
+      </div>
+    </header>
+
+    <section class="content">
+      <h1>Settings & Preferences</h1>
+
+      <div class="settings-card">
+        <h2>Appearance</h2>
+        <div class="setting-group">
+          <label>Theme
+            <select id="themeSelectMain" onchange="changeTheme(this.value)">
+              <option value="">Light (Default)</option>
+              <option value="dark">Dark Mode</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <h2>Notifications & Alerts</h2>
+        <div class="setting-group">
+          <label>Low Stock Alerts <input type="checkbox" id="lowStockAlert" checked onchange="saveSetting('lowStockAlert', this.checked)"></label>
+        </div>
+        <div class="setting-group">
+          <label>Out of Stock Alerts <input type="checkbox" id="outOfStockAlert" checked onchange="saveSetting('outOfStockAlert', this.checked)"></label>
+        </div>
+        <div class="setting-group">
+          <label>Email Notifications <input type="checkbox" id="emailNotif" onchange="saveSetting('emailNotif', this.checked)"></label>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <h2>Display Preferences</h2>
+        <div class="setting-group">
+          <label>Default Currency
+            <select id="currencySelect" onchange="saveSetting('currency', this.value)">
+              <option value="USD">USD (US Dollar)</option>
+              <option value="EUR">EUR (Euro)</option>
+              <option value="GBP">GBP (British Pound)</option>
+              <option value="INR">INR (Indian Rupee)</option>
+            </select>
+          </label>
+        </div>
+        <div class="setting-group">
+          <label>Unit of Measure
+            <select id="unitSelect" onchange="saveSetting('unit', this.value)">
+              <option value="pcs">Pieces (pcs)</option>
+              <option value="box">Boxes</option>
+              <option value="kg">Kilograms (kg)</option>
+              <option value="m">Meters (m)</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <h2>Danger Zone</h2>
+        <p style="color: var(--danger); margin-bottom: 20px;">These actions cannot be undone.</p>
+        <button class="btn btn-danger" onclick="openClearModal()">Clear All Data (Reset App)</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal" id="clearModal">
+  <div class="modal-content">
+    <button class="close-modal" onclick="closeModal()">×</button>
+    <h2>Clear All Data?</h2>
+    <p style="margin: 20px 0; line-height: 1.6;">
+      This will permanently delete:<br>
+      • All inventory items<br>
+      • All suppliers & purchase orders<br>
+      • All settings and history
+    </p>
+    <button class="btn btn-danger" onclick="clearAllData()">Yes, Delete Everything</button>
+    <button class="btn" onclick="closeModal()" style="margin-left: 15px;">Cancel</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="common.js"></script>
+<script>
+  const settings = JSON.parse(localStorage.getItem('retailer_settings') || '{}');
+  const savedTheme = localStorage.getItem('theme') || '';
+
+  function loadSettings(){
+    document.getElementById('themeSelectMain').value = savedTheme;
+    document.getElementById('lowStockAlert').checked = settings.lowStockAlert !== false;
+    document.getElementById('outOfStockAlert').checked = settings.outOfStockAlert !== false;
+    document.getElementById('emailNotif').checked = !!settings.emailNotif;
+    document.getElementById('currencySelect').value = settings.currency || 'USD';
+    document.getElementById('unitSelect').value = settings.unit || 'pcs';
+  }
+
+  function saveSetting(key, value){
+    const s = JSON.parse(localStorage.getItem('retailer_settings') || '{}');
+    s[key] = value;
+    localStorage.setItem('retailer_settings', JSON.stringify(s));
+    showToast('Setting saved!');
+  }
+
+  function openClearModal(){
+    openModal('clearModal');
+  }
+
+  function clearAllData(){
+    if(confirm('Are you absolutely sure? This will delete ALL data!')){
+      localStorage.removeItem('retailer_inventory');
+      localStorage.removeItem('retailer_orders');
+      localStorage.removeItem('retailer_purchases');
+      localStorage.removeItem('retailer_suppliers');
+      localStorage.removeItem('retailer_settings');
+      showToast('All data cleared! Refreshing...');
+      setTimeout(() => window.location.reload(), 1500);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadSettings();
+  });
+</script>
+</body>
+</html>
+

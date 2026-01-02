@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Market Space - Retailer Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="auth.js"></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <h2>InventoryPro</h2>
+    <div class="role-label">RETAILERS</div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">MENU</div>
+      <ul>
+        <li><a href="index.html">Dashboard</a></li>
+        <li class="active"><a href="marketspace.html">Market Space</a></li>
+        <li><a href="inventory.html">Inventory</a></li>
+      </ul>
+    </div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">PROCUREMENT</div>
+      <ul>
+        <li><a href="cart.html">My Cart<span class="nav-badge cart-badge" style="display: none;">0</span></a></li>
+        <li><a href="orders.html">My Orders</a></li>
+        <li><a href="invoices.html">Invoices</a></li>
+        <li><a href="quotes.html">Active Quotes</a></li>
+      </ul>
+    </div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">ACCOUNT</div>
+      <ul>
+        <li><a href="settings.html">Settings</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h1>Market Space</h1>
+      <input type="text" placeholder="Search by SKU, Product or Brand..." class="global-search" id="globalSearch" onkeyup="filterProducts()">
+      <div class="user-info">
+        <select id="themeSelect" onchange="changeTheme(this.value)">
+          <option value="">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+        <div class="user" id="userDisplay">
+          <div class="user-name">Retailer Admin</div>
+          <div class="user-role">Retailer</div>
+        </div>
+        <div class="user-avatar" id="userAvatar">RA</div>
+        <button onclick="logout()" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); cursor: pointer; margin-left: 10px; font-size: 0.9rem;">Logout</button>
+      </div>
+    </header>
+
+    <section class="content">
+      <!-- Featured Wholesalers -->
+      <div class="wholesalers-section">
+        <div class="section-title">Featured Wholesalers</div>
+        <div class="section-subtitle">Suppliers delivering to your area</div>
+        <div class="wholesalers-scroll-container">
+          <div class="wholesalers-scroll" id="wholesalersScroll">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Bulk Catalog -->
+      <div>
+        <div class="section-title">Bulk Catalog</div>
+        <div class="filters" style="margin-bottom: 20px;">
+          <select id="categoryFilter" onchange="filterProducts()">
+            <option value="">All Categories</option>
+            <option>PROVISIONS</option>
+            <option>OILS & GHEE</option>
+            <option>STATIONERY</option>
+            <option>HOUSEHOLD</option>
+          </select>
+          <select id="wholesalerFilter" onchange="handleWholesalerDropdownChange()">
+            <option value="">All Wholesalers</option>
+          </select>
+        </div>
+        <div class="catalog-grid" id="catalogGrid">
+          <!-- Filled by JS -->
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Quote Modal -->
+<div class="modal" id="quoteModal">
+  <div class="modal-content">
+    <button class="close-modal" onclick="closeModal()">×</button>
+    <h2>Raise Quote Request</h2>
+    <form onsubmit="submitQuote(event)">
+      <input type="hidden" id="quoteProductId">
+      <div class="form-group">
+        <label>Product</label>
+        <input type="text" id="quoteProductName" readonly>
+      </div>
+      <div class="form-group">
+        <label>Quantity</label>
+        <input type="number" id="quoteQuantity" min="1" required>
+      </div>
+      <div class="form-group">
+        <label>Notes (Optional)</label>
+        <textarea id="quoteNotes" rows="3"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit Quote Request</button>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="common.js"></script>
+<script>
+  // Sample data
+  let wholesalers = JSON.parse(localStorage.getItem('retailer_wholesalers') || '[]');
+  let products = JSON.parse(localStorage.getItem('retailer_products') || '[]');
+  let selectedWholesalerId = null; // Track selected wholesaler
+
+  if(wholesalers.length === 0) {
+    wholesalers = [
+      {id: 1, name: 'Cochin Spices', badge: 'top-rated', icon: '🌶️'},
+      {id: 2, name: 'Kairali Stationery', badge: 'verified', icon: '📝'},
+      {id: 3, name: 'Malabar Snacks', badge: 'premium', icon: '🍪'},
+      {id: 4, name: 'Periyar Drinks', badge: 'verified', icon: '🥤'},
+      {id: 5, name: 'TVM General', badge: 'new', icon: '🏪'},
+      {id: 6, name: 'Palakkad Rice', badge: 'top-rated', icon: '🌾'}
+    ];
+    localStorage.setItem('retailer_wholesalers', JSON.stringify(wholesalers));
+  }
+
+  if(products.length === 0) {
+    products = [
+      {id: 1, name: 'Jaya Rice (Double Horse) - 50kg Sack', category: 'PROVISIONS', price: 2450, minOrder: 5, stock: 'in-stock', wholesalerId: 6},
+      {id: 2, name: 'Kera Coconut Oil - 1L Pouch', category: 'OILS & GHEE', price: 185, minOrder: 20, stock: 'in-stock', wholesalerId: 6},
+      {id: 3, name: 'Classmate Notebooks (Long) - 172pg', category: 'STATIONERY', price: 45, minOrder: 50, stock: 'low-stock', wholesalerId: 2},
+      {id: 4, name: 'Vim Dishwash Bar - Large Box', category: 'HOUSEHOLD', price: 850, minOrder: 2, stock: 'in-stock', wholesalerId: 5},
+      {id: 5, name: 'Fortune Sunflower Oil - 1L', category: 'OILS & GHEE', price: 175, minOrder: 20, stock: 'in-stock', wholesalerId: 6},
+      {id: 6, name: 'Aashirvaad Atta - 10kg', category: 'PROVISIONS', price: 450, minOrder: 10, stock: 'in-stock', wholesalerId: 6},
+      {id: 7, name: 'Reynolds Pens - Pack of 10', category: 'STATIONERY', price: 120, minOrder: 20, stock: 'in-stock', wholesalerId: 2},
+      {id: 8, name: 'Surf Excel - 1kg', category: 'HOUSEHOLD', price: 220, minOrder: 10, stock: 'low-stock', wholesalerId: 5}
+    ];
+    localStorage.setItem('retailer_products', JSON.stringify(products));
+  }
+
+  function renderWholesalers() {
+    const container = document.getElementById('wholesalersScroll');
+    // Duplicate wholesalers for seamless loop
+    const duplicatedWholesalers = [...wholesalers, ...wholesalers];
+    container.innerHTML = duplicatedWholesalers.map((w, index) => {
+      const badgeClass = `badge-${w.badge.replace('-', '-')}`;
+      const badgeText = w.badge === 'top-rated' ? 'Top Rated' : 
+                       w.badge === 'verified' ? 'Verified' :
+                       w.badge === 'premium' ? 'Premium' : 'New';
+      return `
+        <div class="wholesaler-card" onclick="filterByWholesaler(${w.id})" data-wholesaler-id="${w.id}">
+          <div class="wholesaler-icon">${w.icon}</div>
+          <div class="wholesaler-name">${w.name}</div>
+          <span class="wholesaler-badge ${badgeClass}">${badgeText}</span>
+        </div>
+      `;
+    }).join('');
+    
+    // Start auto-scroll after rendering
+    startAutoScroll();
+  }
+  
+  let autoScrollInterval = null;
+  let isScrolling = true;
+  let scrollPosition = 0;
+  
+  function startAutoScroll() {
+    const container = document.getElementById('wholesalersScroll');
+    if (!container || wholesalers.length === 0) return;
+    
+    // Calculate scroll amount (one card width + gap)
+    const cardWidth = 180; // Same as CSS flex: 0 0 180px
+    const gap = 16;
+    const scrollIncrement = 0.5; // Smaller increment for smoother scroll
+    const maxScroll = (cardWidth + gap) * wholesalers.length; // Scroll until first set ends
+    
+    // Clear existing interval if any
+    if (autoScrollInterval) {
+      clearInterval(autoScrollInterval);
+    }
+    
+    // Reset scroll position
+    scrollPosition = 0;
+    container.scrollLeft = 0;
+    
+    // Auto-scroll function
+    autoScrollInterval = setInterval(() => {
+      if (!isScrolling) return; // Pause if user is hovering
+      
+      scrollPosition += scrollIncrement;
+      container.scrollLeft = scrollPosition;
+      
+      // Reset scroll position when we reach the end of first set (seamless loop)
+      if (scrollPosition >= maxScroll) {
+        scrollPosition = 0;
+        container.scrollLeft = 0;
+      }
+    }, 16); // ~60fps for smooth scrolling
+    
+    // Pause on hover
+    container.addEventListener('mouseenter', () => {
+      isScrolling = false;
+    });
+    
+    container.addEventListener('mouseleave', () => {
+      isScrolling = true;
+      // Sync scroll position after hover to maintain continuity
+      scrollPosition = container.scrollLeft;
+    });
+    
+    // Handle manual scroll - sync position
+    let isManualScroll = false;
+    container.addEventListener('scroll', () => {
+      if (!isScrolling) {
+        isManualScroll = true;
+        scrollPosition = container.scrollLeft;
+        setTimeout(() => {
+          isManualScroll = false;
+        }, 100);
+      }
+    });
+  }
+
+  function filterProducts() {
+    const searchTerm = document.getElementById('globalSearch')?.value.toLowerCase() || '';
+    const category = document.getElementById('categoryFilter')?.value || '';
+    const wholesalerFilter = document.getElementById('wholesalerFilter')?.value || '';
+    
+    // Get all products with filters
+    let filteredProducts = products;
+    
+    // Apply wholesaler filter (from card click or dropdown)
+    const activeWholesalerId = selectedWholesalerId || (wholesalerFilter ? parseInt(wholesalerFilter) : null);
+    if (activeWholesalerId) {
+      filteredProducts = filteredProducts.filter(p => p.wholesalerId === activeWholesalerId);
+    }
+    
+    // Apply category filter
+    if (category) {
+      filteredProducts = filteredProducts.filter(p => p.category === category);
+    }
+    
+    // Apply search filter
+    if (searchTerm) {
+      filteredProducts = filteredProducts.filter(p => 
+        p.name.toLowerCase().includes(searchTerm) ||
+        p.category.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    // Render filtered products
+    const container = document.getElementById('catalogGrid');
+    if (filteredProducts.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--muted);">
+          <div style="font-size: 4rem; margin-bottom: 20px;">🔍</div>
+          <h2 style="margin-bottom: 10px;">No products found</h2>
+          <p>Try adjusting your search or filters</p>
+          <button class="btn btn-primary" onclick="clearAllFilters()" style="margin-top: 20px;">Clear All Filters</button>
+        </div>
+      `;
+      return;
+    }
+    
+    container.innerHTML = filteredProducts.map(p => {
+      const statusClass = p.stock === 'in-stock' ? 'status-in-stock' : 'status-low-stock';
+      const statusText = p.stock === 'in-stock' ? 'In Stock' : 'Low Stock';
+      const wholesaler = wholesalers.find(w => w.id === p.wholesalerId);
+      return `
+        <div class="product-card">
+          <span class="product-status ${statusClass}">${statusText}</span>
+          <span class="product-category">${p.category}</span>
+          <div class="product-name">${p.name}</div>
+          <div class="product-price">₹${p.price.toLocaleString()}</div>
+          <div class="product-min-order">Min Order: ${p.minOrder} ${p.minOrder === 1 ? 'Unit' : 'Units'}</div>
+          ${wholesaler ? `<div style="font-size: 0.8rem; color: var(--muted); margin-bottom: 8px;">${wholesaler.name}</div>` : ''}
+          <div class="product-actions">
+            <button class="btn" onclick="openQuoteModal(${p.id})">Raise Quote</button>
+            <button class="btn btn-primary" onclick="quickBuy(${p.id})">Quick Buy</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function filterByWholesaler(id) {
+    // Toggle selection - if same wholesaler clicked, deselect
+    if (selectedWholesalerId === id) {
+      clearWholesalerFilter();
+      return;
+    }
+    
+    // Set selected wholesaler
+    selectedWholesalerId = id;
+    
+    // Highlight selected wholesaler card
+    document.querySelectorAll('.wholesaler-card').forEach(card => {
+      const cardId = parseInt(card.getAttribute('data-wholesaler-id'));
+      if (cardId === id) {
+        card.classList.add('selected');
+      } else {
+        card.classList.remove('selected');
+      }
+    });
+    
+    // Update dropdown to match
+    const dropdown = document.getElementById('wholesalerFilter');
+    if (dropdown) {
+      dropdown.value = id;
+    }
+    
+    // Filter and render products
+    filterProducts();
+    
+    // Scroll to products section
+    document.getElementById('catalogGrid').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  
+  function clearWholesalerFilter() {
+    selectedWholesalerId = null;
+    
+    // Remove selection from all cards
+    document.querySelectorAll('.wholesaler-card').forEach(card => {
+      card.classList.remove('selected');
+    });
+    
+    // Clear dropdown
+    const dropdown = document.getElementById('wholesalerFilter');
+    if (dropdown) {
+      dropdown.value = '';
+    }
+    
+    // Re-render products
+    filterProducts();
+  }
+  
+  function clearAllFilters() {
+    clearWholesalerFilter();
+    document.getElementById('categoryFilter').value = '';
+    document.getElementById('globalSearch').value = '';
+    filterProducts();
+  }
+
+  function openQuoteModal(productId) {
+    const product = products.find(p => p.id === productId);
+    if(product) {
+      document.getElementById('quoteProductId').value = productId;
+      document.getElementById('quoteProductName').value = product.name;
+      document.getElementById('quoteQuantity').value = product.minOrder;
+      openModal('quoteModal');
+    }
+  }
+
+  function submitQuote(e) {
+    e.preventDefault();
+    const productId = parseInt(document.getElementById('quoteProductId').value);
+    const quantity = parseInt(document.getElementById('quoteQuantity').value);
+    const notes = document.getElementById('quoteNotes').value;
+    
+    createQuote(productId, quantity, notes);
+    closeModal();
+    e.target.reset();
+  }
+
+  function quickBuy(productId) {
+    const product = products.find(p => p.id === productId);
+    if(product) {
+      addToCart({...product, quantity: product.minOrder});
+    }
+  }
+
+  // Populate wholesaler filter
+  function populateWholesalerFilter() {
+    const select = document.getElementById('wholesalerFilter');
+    if(select) {
+      select.innerHTML = '<option value="">All Wholesalers</option>' +
+        wholesalers.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+    }
+  }
+  
+  function handleWholesalerDropdownChange() {
+    const dropdown = document.getElementById('wholesalerFilter');
+    const selectedId = dropdown.value ? parseInt(dropdown.value) : null;
+    
+    if (selectedId) {
+      // Update card selection
+      document.querySelectorAll('.wholesaler-card').forEach(card => {
+        const cardId = parseInt(card.getAttribute('data-wholesaler-id'));
+        if (cardId === selectedId) {
+          card.classList.add('selected');
+        } else {
+          card.classList.remove('selected');
+        }
+      });
+      selectedWholesalerId = selectedId;
+    } else {
+      clearWholesalerFilter();
+      return;
+    }
+    
+    filterProducts();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderWholesalers();
+    filterProducts(); // Use filterProducts for initial render
+    populateWholesalerFilter();
+  });
+  
+  // Clean up interval on page unload
+  window.addEventListener('beforeunload', () => {
+    if (autoScrollInterval) {
+      clearInterval(autoScrollInterval);
+    }
+  });
+</script>
+</body>
+</html>
+

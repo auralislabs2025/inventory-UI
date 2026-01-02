@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Cart - Retailer Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="auth.js"></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <h2>InventoryPro</h2>
+    <div class="role-label">RETAILERS</div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">MENU</div>
+      <ul>
+        <li><a href="index.html">Dashboard</a></li>
+        <li><a href="marketspace.html">Market Space</a></li>
+        <li><a href="inventory.html">Inventory</a></li>
+      </ul>
+    </div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">PROCUREMENT</div>
+      <ul>
+        <li class="active"><a href="cart.html">My Cart<span class="nav-badge cart-badge" style="display: none;">0</span></a></li>
+        <li><a href="orders.html">My Orders</a></li>
+        <li><a href="invoices.html">Invoices</a></li>
+        <li><a href="quotes.html">Active Quotes</a></li>
+      </ul>
+    </div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">ACCOUNT</div>
+      <ul>
+        <li><a href="settings.html">Settings</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h1>My Cart</h1>
+      <input type="text" placeholder="Search by SKU, Product or Brand..." class="global-search" id="globalSearch">
+      <div class="user-info">
+        <select id="themeSelect" onchange="changeTheme(this.value)">
+          <option value="">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+        <div class="user" id="userDisplay">
+          <div class="user-name">Retailer Admin</div>
+          <div class="user-role">Retailer</div>
+        </div>
+        <div class="user-avatar" id="userAvatar">RA</div>
+        <button onclick="logout()" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); cursor: pointer; margin-left: 10px; font-size: 0.9rem;">Logout</button>
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="page-header">
+        <h1>Shopping Cart</h1>
+        <div>
+          <button class="btn" onclick="clearCart()" style="display: none;" id="clearCartBtn">Clear Cart</button>
+        </div>
+      </div>
+
+      <div id="cartItems">
+        <!-- Filled by JS -->
+      </div>
+
+      <div class="cart-summary" id="cartSummary" style="display: none;">
+        <div class="cart-summary-row">
+          <span>Subtotal</span>
+          <span id="cartSubtotal">₹0</span>
+        </div>
+        <div class="cart-summary-row">
+          <span>Tax (GST)</span>
+          <span id="cartTax">₹0</span>
+        </div>
+        <div class="cart-summary-row">
+          <span>Total</span>
+          <span id="cartTotal">₹0</span>
+        </div>
+        <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="checkout()">Proceed to Checkout</button>
+      </div>
+
+      <div id="emptyCart" style="text-align: center; padding: 60px 20px;">
+        <div style="font-size: 4rem; margin-bottom: 20px;">🛒</div>
+        <h2 style="color: var(--muted); margin-bottom: 10px;">Your cart is empty</h2>
+        <p style="color: var(--muted); margin-bottom: 30px;">Add items from Market Space to get started</p>
+        <button class="btn btn-primary" onclick="window.location.href='marketspace.html'">Browse Market Space</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="common.js"></script>
+<script>
+  function renderCart() {
+    const cart = getCart();
+    const container = document.getElementById('cartItems');
+    const summary = document.getElementById('cartSummary');
+    const emptyCart = document.getElementById('emptyCart');
+    const clearBtn = document.getElementById('clearCartBtn');
+
+    if(cart.length === 0) {
+      container.innerHTML = '';
+      summary.style.display = 'none';
+      emptyCart.style.display = 'block';
+      clearBtn.style.display = 'none';
+      return;
+    }
+
+    emptyCart.style.display = 'none';
+    clearBtn.style.display = 'block';
+    summary.style.display = 'block';
+
+    container.innerHTML = cart.map(item => `
+      <div class="cart-item">
+        <div class="cart-item-info">
+          <div class="cart-item-name">${item.name || 'Product'}</div>
+          <div class="cart-item-details">
+            Category: ${item.category || 'N/A'} | ₹${(item.price || 0).toLocaleString()} per unit
+          </div>
+        </div>
+        <div class="cart-item-quantity">
+          <div class="quantity-control">
+            <button class="quantity-btn" onclick="updateCartItemQty(${item.id}, ${(item.quantity || 1) - 1})">−</button>
+            <input type="number" class="quantity-input" value="${item.quantity || 1}" min="1" onchange="updateCartItemQty(${item.id}, parseInt(this.value))">
+            <button class="quantity-btn" onclick="updateCartItemQty(${item.id}, ${(item.quantity || 1) + 1})">+</button>
+          </div>
+        </div>
+        <div class="cart-item-price">₹${((item.price || 0) * (item.quantity || 1)).toLocaleString()}</div>
+        <button class="btn btn-sm btn-danger" onclick="removeFromCart(${item.id}); renderCart();">Remove</button>
+      </div>
+    `).join('');
+
+    // Update summary
+    const subtotal = cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
+    const tax = subtotal * 0.18; // 18% GST
+    const total = subtotal + tax;
+
+    document.getElementById('cartSubtotal').textContent = '₹' + subtotal.toLocaleString();
+    document.getElementById('cartTax').textContent = '₹' + tax.toLocaleString();
+    document.getElementById('cartTotal').textContent = '₹' + total.toLocaleString();
+  }
+
+  function updateCartItemQty(productId, quantity) {
+    updateCartQuantity(productId, quantity);
+    renderCart();
+  }
+
+  function checkout() {
+    const cart = getCart();
+    if(cart.length === 0) {
+      showToast('Cart is empty!');
+      return;
+    }
+    
+    // Create order from cart
+    const orders = JSON.parse(localStorage.getItem('retailer_orders') || '[]');
+    const newOrder = {
+      id: Date.now(),
+      orderId: '#ORD-' + (1000 + orders.length + 1),
+      items: cart,
+      total: cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0),
+      status: 'Pending',
+      date: new Date().toISOString().split('T')[0]
+    };
+    orders.push(newOrder);
+    localStorage.setItem('retailer_orders', JSON.stringify(orders));
+    
+    clearCart();
+    renderCart();
+    showToast('Order placed successfully!');
+    setTimeout(() => {
+      window.location.href = 'orders.html';
+    }, 1500);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderCart();
+  });
+</script>
+</body>
+</html>
+

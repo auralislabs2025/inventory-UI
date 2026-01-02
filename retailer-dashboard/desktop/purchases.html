@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Purchases - Retailer Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="auth.js"></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <h2>InventoryPro</h2>
+    <div class="role-label">RETAILERS</div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">MENU</div>
+      <ul>
+        <li><a href="index.html">Dashboard</a></li>
+        <li><a href="marketspace.html">Market Space</a></li>
+        <li><a href="inventory.html">Inventory</a></li>
+      </ul>
+    </div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">PROCUREMENT</div>
+      <ul>
+        <li><a href="cart.html">My Cart<span class="nav-badge cart-badge" style="display: none;">0</span></a></li>
+        <li><a href="orders.html">My Orders</a></li>
+        <li><a href="invoices.html">Invoices</a></li>
+        <li><a href="quotes.html">Active Quotes</a></li>
+      </ul>
+    </div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">ACCOUNT</div>
+      <ul>
+        <li><a href="settings.html">Settings</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h1>Purchase Orders</h1>
+      <input type="text" placeholder="Search by SKU, Product or Brand..." class="global-search" id="globalSearch">
+      <div class="user-info">
+        <select id="themeSelect" onchange="changeTheme(this.value)">
+          <option value="">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+        <div class="user" id="userDisplay">
+          <div class="user-name">Retailer Admin</div>
+          <div class="user-role">Retailer</div>
+        </div>
+        <div class="user-avatar" id="userAvatar">RA</div>
+        <button onclick="logout()" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); cursor: pointer; margin-left: 10px; font-size: 0.9rem;">Logout</button>
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="page-header">
+        <h1>Purchase Orders</h1>
+        <div>
+          <button class="btn btn-primary" onclick="openModal('newPOModal')">+ New Purchase Order</button>
+        </div>
+      </div>
+
+      <div class="filters">
+        <input type="text" placeholder="Search..." id="searchInput" class="search-bar" onkeyup="filterTable()">
+        <select id="statusFilter" onchange="filterTable()">
+          <option value="">All Status</option>
+          <option>Draft</option>
+          <option>Pending</option>
+          <option>Approved</option>
+          <option>Received</option>
+          <option>Cancelled</option>
+        </select>
+        <button class="btn" onclick="clearFilters()">Clear Filters</button>
+      </div>
+
+      <div class="table-container">
+        <table id="purchasesTable">
+          <thead>
+            <tr>
+              <th>PO #</th>
+              <th>Supplier</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Expected</th>
+              <th>Total</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="purchasesBody">
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal" id="newPOModal">
+  <div class="modal-content">
+    <button class="close-modal" onclick="closeModal()">×</button>
+    <h2>New Purchase Order</h2>
+    <form onsubmit="createPO(event)">
+      <div class="form-group">
+        <label>Supplier Name</label>
+        <input type="text" name="supplier" required>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Total Amount ($)</label>
+          <input type="number" name="total" step="0.01" min="0" required>
+        </div>
+        <div class="form-group">
+          <label>Expected Date</label>
+          <input type="date" name="expectedDate" required>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Create PO</button>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="common.js"></script>
+<script>
+  let purchases = JSON.parse(localStorage.getItem('retailer_purchases') || '[]');
+
+  function renderTable(){
+    const tbody = document.getElementById('purchasesBody');
+    tbody.innerHTML = purchases.map(po => `
+      <tr>
+        <td><strong>${po.poNumber}</strong></td>
+        <td>${po.supplier}</td>
+        <td><span class="status-badge status-${po.status.toLowerCase()}">${po.status}</span></td>
+        <td>${po.created}</td>
+        <td>${po.expected}</td>
+        <td>$${po.total.toFixed(2)}</td>
+        <td>
+          <button class="btn btn-sm btn-primary" onclick="viewPO(${po.id})">View</button>
+          <button class="btn btn-sm btn-danger" onclick="deletePO(${po.id})">Delete</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function filterTable(){
+    const term = document.getElementById('searchInput').value.toLowerCase();
+    const status = document.getElementById('statusFilter').value;
+    const rows = document.querySelectorAll('#purchasesBody tr');
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      const rowStatus = row.cells[2].textContent.trim();
+      const match = text.includes(term) && (status === '' || rowStatus === status);
+      row.style.display = match ? '' : 'none';
+    });
+  }
+
+  function clearFilters(){
+    document.getElementById('searchInput').value = '';
+    document.getElementById('statusFilter').value = '';
+    filterTable();
+  }
+
+  function createPO(e){
+    e.preventDefault();
+    const form = e.target;
+    const newPO = {
+      id: Date.now(),
+      poNumber: 'PO-' + (1000 + purchases.length + 1),
+      supplier: form.supplier.value,
+      status: 'Draft',
+      created: new Date().toISOString().split('T')[0],
+      expected: form.expectedDate.value,
+      total: parseFloat(form.total.value)
+    };
+    purchases.push(newPO);
+    localStorage.setItem('retailer_purchases', JSON.stringify(purchases));
+    renderTable();
+    showToast('Purchase order created!');
+    closeModal();
+    form.reset();
+  }
+
+  function viewPO(id){
+    const po = purchases.find(p => p.id === id);
+    if(po) showToast(`Viewing ${po.poNumber}`);
+  }
+
+  function deletePO(id){
+    if(confirm('Delete this purchase order?')){
+      purchases = purchases.filter(p => p.id !== id);
+      localStorage.setItem('retailer_purchases', JSON.stringify(purchases));
+      renderTable();
+      showToast('Purchase order deleted!');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderTable();
+  });
+</script>
+</body>
+</html>

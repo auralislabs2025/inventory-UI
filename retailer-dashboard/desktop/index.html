@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Retailer Dashboard - InventoryPro</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="auth.js"></script>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h2>InventoryPro</h2>
+    <div class="role-label">RETAILERS</div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">MENU</div>
+      <ul>
+        <li class="active"><a href="index.html">Dashboard</a></li>
+        <li><a href="marketspace.html">Market Space</a></li>
+        <li><a href="inventory.html">Inventory</a></li>
+      </ul>
+    </div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">PROCUREMENT</div>
+      <ul>
+        <li><a href="cart.html">My Cart<span class="nav-badge cart-badge" style="display: none;">0</span></a></li>
+        <li><a href="orders.html">My Orders</a></li>
+        <li><a href="invoices.html">Invoices</a></li>
+        <li><a href="quotes.html">Active Quotes</a></li>
+      </ul>
+    </div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">ACCOUNT</div>
+      <ul>
+        <li><a href="settings.html">Settings</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <h1>Retailer Dashboard</h1>
+      <input type="text" placeholder="Search by SKU, Product or Brand..." class="global-search" id="globalSearch">
+      <div class="user-info">
+        <select id="themeSelect" onchange="changeTheme(this.value)">
+          <option value="">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+        <div class="user" id="userDisplay">
+          <div class="user-name">Retailer Admin</div>
+          <div class="user-role">Retailer</div>
+        </div>
+        <div class="user-avatar" id="userAvatar">RA</div>
+        <button onclick="logout()" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); cursor: pointer; margin-left: 10px; font-size: 0.9rem; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--danger)'; this.style.color='var(--danger)'" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text)'">Logout</button>
+      </div>
+    </header>
+
+    <!-- KPI ROW -->
+    <section class="kpis">
+      <div class="kpi">
+        <h3>Today Sales</h3>
+        <p id="todaySales">₹0</p>
+        <span class="kpi-change positive">+12% vs yesterday</span>
+      </div>
+      <div class="kpi">
+        <h3>Inventory Value</h3>
+        <p id="inventoryValue">₹0</p>
+        <span class="kpi-change">Total stock value</span>
+      </div>
+      <div class="kpi">
+        <h3>Pending Orders</h3>
+        <p id="pendingOrders">0</p>
+        <span class="kpi-change">Awaiting delivery</span>
+      </div>
+      <div class="kpi">
+        <h3>Low Stock Items</h3>
+        <p id="lowStock">0</p>
+        <span class="kpi-change warning">Needs reorder</span>
+      </div>
+    </section>
+
+    <!-- DASHBOARD CONTENT -->
+    <section class="content-grid">
+      <!-- LEFT COLUMN -->
+      <div class="left-column">
+        <!-- RECENT ACTIVITY -->
+        <div class="card">
+          <h2>Recent Sales</h2>
+          <div id="recentSales" class="activity-list">
+            <div class="activity-item">
+              <div class="activity-info">
+                <strong>Order #ORD-1001</strong>
+                <span>Customer: John Doe</span>
+              </div>
+              <div class="activity-meta">
+                <span class="amount">₹2,450</span>
+                <span class="time">2 hours ago</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LOW STOCK ALERTS -->
+        <div class="card">
+          <h2>Low Stock Alerts</h2>
+          <div id="lowStockAlerts" class="alerts-list">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="right-column">
+        <!-- QUICK ACTIONS -->
+        <div class="card">
+          <h2>Quick Actions</h2>
+          <div class="quick-actions">
+            <button class="action-btn" onclick="window.location.href='orders.html'">
+              <span class="icon">📦</span>
+              <span>New Order</span>
+            </button>
+            <button class="action-btn" onclick="window.location.href='purchases.html'">
+              <span class="icon">🛒</span>
+              <span>Purchase Order</span>
+            </button>
+            <button class="action-btn" onclick="window.location.href='inventory.html'">
+              <span class="icon">📋</span>
+              <span>View Inventory</span>
+            </button>
+            <button class="action-btn" onclick="window.location.href='reports.html'">
+              <span class="icon">📊</span>
+              <span>View Reports</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- TOP PRODUCTS -->
+        <div class="card">
+          <h2>Top Selling Products</h2>
+          <div id="topProducts" class="products-list">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="common.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
+

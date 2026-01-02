@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Retailer Dashboard - InventoryPro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <meta name="theme-color" content="#4361ee"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="InventoryPro"/>
+  <link rel="stylesheet" href="mobile.css" />
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <button id="hamburger" aria-label="Open menu">☰</button>
+  <div>
+    <h2 id="pageTitle">Dashboard</h2>
+    <span id="headerSubtitle">Retailer Portal</span>
+  </div>
+</header>
+
+<!-- DASHBOARD VIEW -->
+<div id="dashboardView">
+  <!-- KPI CARDS -->
+  <section class="kpi-grid">
+    <div class="kpi-card">
+      <label>Today Sales</label>
+      <strong id="todaySales">₹0</strong>
+      <span class="kpi-change positive">+12% vs yesterday</span>
+    </div>
+    <div class="kpi-card">
+      <label>Inventory Value</label>
+      <strong id="inventoryValue">₹0</strong>
+      <span class="kpi-change">Total stock</span>
+    </div>
+    <div class="kpi-card">
+      <label>Pending Orders</label>
+      <strong id="pendingOrders">0</strong>
+      <span class="kpi-change">Awaiting</span>
+    </div>
+    <div class="kpi-card">
+      <label>Low Stock</label>
+      <strong id="lowStock">0</strong>
+      <span class="kpi-change warning">Alerts</span>
+    </div>
+  </section>
+
+  <!-- QUICK ACTIONS -->
+  <section class="quick-actions-section">
+    <h4>Quick Actions</h4>
+    <div class="quick-actions-grid">
+      <button class="quick-action-btn" onclick="navigateToPage('orders')">
+        <span class="action-icon">📦</span>
+        <span>Orders</span>
+      </button>
+      <button class="quick-action-btn" onclick="navigateToPage('inventory')">
+        <span class="action-icon">📋</span>
+        <span>Inventory</span>
+      </button>
+      <button class="quick-action-btn" onclick="navigateToPage('purchases')">
+        <span class="action-icon">🛒</span>
+        <span>Purchases</span>
+      </button>
+      <button class="quick-action-btn" onclick="navigateToPage('reports')">
+        <span class="action-icon">📊</span>
+        <span>Reports</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- RECENT SALES -->
+  <section class="content-section">
+    <div class="section-header">
+      <h4>Recent Sales</h4>
+      <button class="link-btn" onclick="navigateToPage('orders')">View All →</button>
+    </div>
+    <div id="recentSalesList" class="sales-list"></div>
+  </section>
+
+  <!-- LOW STOCK ALERTS -->
+  <section class="content-section">
+    <div class="section-header">
+      <h4>Low Stock Alerts</h4>
+      <button class="link-btn" onclick="navigateToPage('inventory')">View All →</button>
+    </div>
+    <div id="lowStockList" class="alerts-list"></div>
+  </section>
+</div>
+
+<!-- ORDERS VIEW -->
+<div id="ordersView" style="display: none;">
+  <section class="page-content">
+    <div id="ordersSearchContainer" class="search-wrapper"></div>
+    <div id="ordersList"></div>
+  </section>
+</div>
+
+<!-- INVENTORY VIEW -->
+<div id="inventoryView" style="display: none;">
+  <section class="page-content">
+    <div id="inventorySearchContainer" class="search-wrapper"></div>
+    <div id="inventoryList"></div>
+  </section>
+</div>
+
+<!-- PURCHASES VIEW -->
+<div id="purchasesView" style="display: none;">
+  <section class="page-content">
+    <div id="purchasesSearchContainer" class="search-wrapper"></div>
+    <div id="purchasesList"></div>
+  </section>
+</div>
+
+<!-- SUPPLIERS VIEW -->
+<div id="suppliersView" style="display: none;">
+  <section class="page-content">
+    <div id="suppliersSearchContainer" class="search-wrapper"></div>
+    <div id="suppliersList"></div>
+  </section>
+</div>
+
+<!-- REPORTS VIEW -->
+<div id="reportsView" style="display: none;">
+  <section class="page-content">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <label>Total Sales</label>
+        <strong id="totalSales">₹0</strong>
+      </div>
+      <div class="stat-card">
+        <label>Orders</label>
+        <strong id="totalOrders">0</strong>
+      </div>
+      <div class="stat-card">
+        <label>Inventory Value</label>
+        <strong id="reportInventoryValue">₹0</strong>
+      </div>
+    </div>
+    <div id="reportsContent"></div>
+  </section>
+</div>
+
+<!-- SETTINGS VIEW -->
+<div id="settingsView" style="display: none;">
+  <section class="page-content">
+    <div id="settingsContent"></div>
+  </section>
+</div>
+
+<!-- BOTTOM ACTION BAR -->
+<div class="bottom-bar">
+  <button class="action-btn active" onclick="navigateToPage('dashboard')">
+    <span>📊</span>
+    <span>Dashboard</span>
+  </button>
+  <button class="action-btn" onclick="navigateToPage('orders')">
+    <span>📦</span>
+    <span>Orders</span>
+  </button>
+  <button class="action-btn" onclick="navigateToPage('inventory')">
+    <span>📋</span>
+    <span>Inventory</span>
+  </button>
+  <button class="action-btn" onclick="navigateToPage('reports')">
+    <span>📈</span>
+    <span>Reports</span>
+  </button>
+</div>
+
+<!-- HAMBURGER DRAWER -->
+<div id="drawerBackdrop" class="drawer-backdrop"></div>
+<aside id="drawer" class="drawer">
+  <div class="drawer-header">
+    <h3>InventoryPro</h3>
+    <button id="closeDrawer" aria-label="Close menu">✖</button>
+  </div>
+  <hr/>
+  <nav>
+    <button onclick="navigateToPage('dashboard'); closeDrawer();">
+      <span>🏠</span>
+      <span>Dashboard</span>
+    </button>
+    <button onclick="navigateToPage('inventory'); closeDrawer();">
+      <span>📋</span>
+      <span>Inventory</span>
+    </button>
+    <button onclick="navigateToPage('orders'); closeDrawer();">
+      <span>📦</span>
+      <span>Orders</span>
+    </button>
+    <button onclick="navigateToPage('purchases'); closeDrawer();">
+      <span>🛒</span>
+      <span>Purchases</span>
+    </button>
+    <button onclick="navigateToPage('suppliers'); closeDrawer();">
+      <span>🏢</span>
+      <span>Suppliers</span>
+    </button>
+    <button onclick="navigateToPage('reports'); closeDrawer();">
+      <span>📊</span>
+      <span>Reports</span>
+    </button>
+    <button onclick="navigateToPage('settings'); closeDrawer();">
+      <span>⚙️</span>
+      <span>Settings</span>
+    </button>
+  </nav>
+</aside>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<script src="mobile.js"></script>
+</body>
+</html>
+

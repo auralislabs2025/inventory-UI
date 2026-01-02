@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Suppliers - Retailer Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="auth.js"></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <h2>InventoryPro</h2>
+    <div class="role-label">RETAILERS</div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">MENU</div>
+      <ul>
+        <li><a href="index.html">Dashboard</a></li>
+        <li><a href="marketspace.html">Market Space</a></li>
+        <li><a href="inventory.html">Inventory</a></li>
+      </ul>
+    </div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">PROCUREMENT</div>
+      <ul>
+        <li><a href="cart.html">My Cart<span class="nav-badge cart-badge" style="display: none;">0</span></a></li>
+        <li><a href="orders.html">My Orders</a></li>
+        <li><a href="invoices.html">Invoices</a></li>
+        <li><a href="quotes.html">Active Quotes</a></li>
+      </ul>
+    </div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">ACCOUNT</div>
+      <ul>
+        <li><a href="settings.html">Settings</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h1>Suppliers</h1>
+      <input type="text" placeholder="Search by SKU, Product or Brand..." class="global-search" id="globalSearch">
+      <div class="user-info">
+        <select id="themeSelect" onchange="changeTheme(this.value)">
+          <option value="">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+        <div class="user" id="userDisplay">
+          <div class="user-name">Retailer Admin</div>
+          <div class="user-role">Retailer</div>
+        </div>
+        <div class="user-avatar" id="userAvatar">RA</div>
+        <button onclick="logout()" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); cursor: pointer; margin-left: 10px; font-size: 0.9rem;">Logout</button>
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="page-header">
+        <h1>Suppliers</h1>
+        <div>
+          <button class="btn btn-primary" onclick="openModal('supplierModal')">+ Add Supplier</button>
+        </div>
+      </div>
+
+      <div class="filters">
+        <input type="text" placeholder="Search suppliers..." id="searchInput" class="search-bar" onkeyup="filterTable()">
+        <select id="statusFilter" onchange="filterTable()">
+          <option value="">All Status</option>
+          <option>Active</option>
+          <option>Inactive</option>
+        </select>
+        <button class="btn" onclick="clearFilters()">Clear Filters</button>
+      </div>
+
+      <div class="table-container">
+        <table id="suppliersTable">
+          <thead>
+            <tr>
+              <th>Company Name</th>
+              <th>Contact Person</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Address</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="suppliersBody">
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal" id="supplierModal">
+  <div class="modal-content">
+    <button class="close-modal" onclick="closeModal()">×</button>
+    <h2 id="modalTitle">Add Supplier</h2>
+    <form onsubmit="saveSupplier(event)">
+      <input type="hidden" id="editId">
+      <div class="form-group">
+        <label>Company Name *</label>
+        <input type="text" id="companyName" required>
+      </div>
+      <div class="form-group">
+        <label>Contact Person</label>
+        <input type="text" id="contactPerson">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" id="email" required>
+        </div>
+        <div class="form-group">
+          <label>Phone *</label>
+          <input type="tel" id="phone" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <textarea id="address" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="status">
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Save Supplier</button>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="common.js"></script>
+<script>
+  let suppliers = JSON.parse(localStorage.getItem('retailer_suppliers') || '[]');
+  let editId = null;
+
+  function renderTable(){
+    const tbody = document.getElementById('suppliersBody');
+    tbody.innerHTML = suppliers.map(s => `
+      <tr>
+        <td><strong>${s.name}</strong></td>
+        <td>${s.contact || '-'}</td>
+        <td>${s.email}</td>
+        <td>${s.phone}</td>
+        <td>${(s.address || '-').substring(0, 30)}${(s.address || '').length > 30 ? '...' : ''}</td>
+        <td><span class="status-badge status-${s.status.toLowerCase()}">${s.status}</span></td>
+        <td>
+          <button class="btn btn-sm btn-primary" onclick="editSupplier(${s.id})">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteSupplier(${s.id})">Delete</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function filterTable(){
+    const term = document.getElementById('searchInput').value.toLowerCase();
+    const status = document.getElementById('statusFilter').value;
+    const rows = document.querySelectorAll('#suppliersBody tr');
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      const rowStatus = row.cells[5].textContent.trim();
+      const match = text.includes(term) && (status === '' || rowStatus === status);
+      row.style.display = match ? '' : 'none';
+    });
+  }
+
+  function clearFilters(){
+    document.getElementById('searchInput').value = '';
+    document.getElementById('statusFilter').value = '';
+    filterTable();
+  }
+
+  function saveSupplier(e){
+    e.preventDefault();
+    const supplier = {
+      id: editId || Date.now(),
+      name: document.getElementById('companyName').value,
+      contact: document.getElementById('contactPerson').value,
+      email: document.getElementById('email').value,
+      phone: document.getElementById('phone').value,
+      address: document.getElementById('address').value,
+      status: document.getElementById('status').value
+    };
+    if(editId){
+      suppliers = suppliers.map(s => s.id === editId ? supplier : s);
+      showToast('Supplier updated!');
+    } else {
+      suppliers.push(supplier);
+      showToast('Supplier added!');
+    }
+    localStorage.setItem('retailer_suppliers', JSON.stringify(suppliers));
+    renderTable();
+    closeModal();
+    document.getElementById('supplierModal').querySelector('form').reset();
+    editId = null;
+  }
+
+  function editSupplier(id){
+    const s = suppliers.find(x => x.id === id);
+    if(s){
+      editId = id;
+      document.getElementById('modalTitle').textContent = 'Edit Supplier';
+      document.getElementById('companyName').value = s.name;
+      document.getElementById('contactPerson').value = s.contact || '';
+      document.getElementById('email').value = s.email;
+      document.getElementById('phone').value = s.phone;
+      document.getElementById('address').value = s.address || '';
+      document.getElementById('status').value = s.status;
+      openModal('supplierModal');
+    }
+  }
+
+  function deleteSupplier(id){
+    if(confirm('Delete this supplier?')){
+      suppliers = suppliers.filter(s => s.id !== id);
+      localStorage.setItem('retailer_suppliers', JSON.stringify(suppliers));
+      renderTable();
+      showToast('Supplier deleted!');
+    }
+  }
+
+  document.getElementById('supplierModal').addEventListener('click', function(e){
+    if(e.target.id === 'supplierModal'){
+      document.getElementById('supplierModal').querySelector('form').reset();
+      editId = null;
+      document.getElementById('modalTitle').textContent = 'Add Supplier';
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderTable();
+  });
+</script>
+</body>
+</html>
+

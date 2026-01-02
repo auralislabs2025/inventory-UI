@@ -1143,7 +1143,11 @@
           if (selectedRole === 'wholesaler') {
             window.location.href = '../../wholesaler-dashboard/desktop/index.html';
           } else {
-            window.location.href = '../../retailer-dashboard/index.html';
+            if (window.innerWidth <= 768) {
+              window.location.href = '../../retailer-dashboard/mobile/index.html';
+            } else {
+              window.location.href = '../../retailer-dashboard/desktop/index.html';
+            }
           }
         }, 1500);
       }, 2000);

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Invoices - Retailer Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="auth.js"></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <h2>InventoryPro</h2>
+    <div class="role-label">RETAILERS</div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">MENU</div>
+      <ul>
+        <li><a href="index.html">Dashboard</a></li>
+        <li><a href="marketspace.html">Market Space</a></li>
+        <li><a href="inventory.html">Inventory</a></li>
+      </ul>
+    </div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">PROCUREMENT</div>
+      <ul>
+        <li><a href="cart.html">My Cart<span class="nav-badge cart-badge" style="display: none;">0</span></a></li>
+        <li><a href="orders.html">My Orders</a></li>
+        <li class="active"><a href="invoices.html">Invoices</a></li>
+        <li><a href="quotes.html">Active Quotes</a></li>
+      </ul>
+    </div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">ACCOUNT</div>
+      <ul>
+        <li><a href="settings.html">Settings</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h1>Invoices</h1>
+      <input type="text" placeholder="Search by SKU, Product or Brand..." class="global-search" id="globalSearch" onkeyup="filterInvoices()">
+      <div class="user-info">
+        <select id="themeSelect" onchange="changeTheme(this.value)">
+          <option value="">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+        <div class="user" id="userDisplay">
+          <div class="user-name">Retailer Admin</div>
+          <div class="user-role">Retailer</div>
+        </div>
+        <div class="user-avatar" id="userAvatar">RA</div>
+        <button onclick="logout()" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); cursor: pointer; margin-left: 10px; font-size: 0.9rem;">Logout</button>
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="page-header">
+        <h1>Invoices</h1>
+        <div>
+          <button class="btn" onclick="exportInvoices()">Export</button>
+        </div>
+      </div>
+
+      <div class="filters">
+        <select id="statusFilter" onchange="filterInvoices()">
+          <option value="">All Status</option>
+          <option>Paid</option>
+          <option>Pending</option>
+          <option>Overdue</option>
+        </select>
+        <input type="date" id="dateFrom" onchange="filterInvoices()">
+        <input type="date" id="dateTo" onchange="filterInvoices()">
+        <button class="btn" onclick="clearFilters()">Clear Filters</button>
+      </div>
+
+      <div class="table-container">
+        <table id="invoicesTable">
+          <thead>
+            <tr>
+              <th>Invoice #</th>
+              <th>Date</th>
+              <th>Order ID</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Due Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="invoicesBody">
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Invoice Details Modal -->
+<div class="modal" id="invoiceModal">
+  <div class="modal-content">
+    <button class="close-modal" onclick="closeModal()">×</button>
+    <h2>Invoice Details</h2>
+    <div id="invoiceDetails">
+      <!-- Filled by JS -->
+    </div>
+    <div style="margin-top: 20px;">
+      <button class="btn btn-primary" onclick="downloadInvoice()">Download PDF</button>
+      <button class="btn" onclick="closeModal()" style="margin-left: 10px;">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="common.js"></script>
+<script>
+  let invoices = getInvoices();
+  let selectedInvoiceId = null;
+
+  // Generate sample invoices from orders if none exist
+  if(invoices.length === 0) {
+    const orders = JSON.parse(localStorage.getItem('retailer_orders') || '[]');
+    invoices = orders.map((order, index) => ({
+      id: Date.now() + index,
+      invoiceNumber: 'INV-' + (1000 + index + 1),
+      orderId: order.orderId,
+      date: order.date,
+      dueDate: new Date(new Date(order.date).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      amount: order.total,
+      tax: order.total * 0.18,
+      status: index % 3 === 0 ? 'Paid' : index % 3 === 1 ? 'Pending' : 'Overdue',
+      items: order.items || []
+    }));
+    saveInvoices(invoices);
+  }
+
+  function renderInvoices() {
+    const tbody = document.getElementById('invoicesBody');
+    tbody.innerHTML = invoices.map(inv => {
+      const statusClass = inv.status === 'Paid' ? 'status-approved' : 
+                         inv.status === 'Pending' ? 'status-pending' : 'status-danger';
+      return `
+        <tr>
+          <td><strong>${inv.invoiceNumber}</strong></td>
+          <td>${inv.date}</td>
+          <td>${inv.orderId}</td>
+          <td>₹${inv.amount.toLocaleString()}</td>
+          <td><span class="status-badge ${statusClass}">${inv.status}</span></td>
+          <td>${inv.dueDate}</td>
+          <td>
+            <button class="btn btn-sm btn-primary" onclick="viewInvoice(${inv.id})">View</button>
+            <button class="btn btn-sm" onclick="downloadInvoice(${inv.id})">Download</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function filterInvoices() {
+    const term = document.getElementById('globalSearch').value.toLowerCase();
+    const status = document.getElementById('statusFilter').value;
+    const dateFrom = document.getElementById('dateFrom').value;
+    const dateTo = document.getElementById('dateTo').value;
+    const rows = document.querySelectorAll('#invoicesBody tr');
+    
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      const rowStatus = row.cells[4].textContent.trim();
+      const rowDate = row.cells[1].textContent.trim();
+      
+      const matchText = text.includes(term);
+      const matchStatus = status === '' || rowStatus === status;
+      const matchDateFrom = !dateFrom || rowDate >= dateFrom;
+      const matchDateTo = !dateTo || rowDate <= dateTo;
+      
+      row.style.display = (matchText && matchStatus && matchDateFrom && matchDateTo) ? '' : 'none';
+    });
+  }
+
+  function clearFilters() {
+    document.getElementById('globalSearch').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('dateFrom').value = '';
+    document.getElementById('dateTo').value = '';
+    filterInvoices();
+  }
+
+  function viewInvoice(id) {
+    const invoice = invoices.find(inv => inv.id === id);
+    if(!invoice) return;
+    
+    selectedInvoiceId = id;
+    const details = document.getElementById('invoiceDetails');
+    details.innerHTML = `
+      <div style="margin-bottom: 20px;">
+        <p><strong>Invoice Number:</strong> ${invoice.invoiceNumber}</p>
+        <p><strong>Order ID:</strong> ${invoice.orderId}</p>
+        <p><strong>Date:</strong> ${invoice.date}</p>
+        <p><strong>Due Date:</strong> ${invoice.dueDate}</p>
+        <p><strong>Status:</strong> ${invoice.status}</p>
+      </div>
+      <h3>Items</h3>
+      <table style="width: 100%; margin-top: 10px;">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(invoice.items || []).map(item => `
+            <tr>
+              <td>${item.name || 'Product'}</td>
+              <td>${item.quantity || 1}</td>
+              <td>₹${(item.price || 0).toLocaleString()}</td>
+              <td>₹${((item.price || 0) * (item.quantity || 1)).toLocaleString()}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      <div style="margin-top: 20px; text-align: right;">
+        <p><strong>Subtotal:</strong> ₹${(invoice.amount - invoice.tax).toLocaleString()}</p>
+        <p><strong>Tax (GST):</strong> ₹${invoice.tax.toLocaleString()}</p>
+        <p><strong>Total:</strong> ₹${invoice.amount.toLocaleString()}</p>
+      </div>
+    `;
+    openModal('invoiceModal');
+  }
+
+  function downloadInvoice(id) {
+    const invoice = invoices.find(inv => inv.id === (id || selectedInvoiceId));
+    if(invoice) {
+      showToast('Invoice download started!');
+      // In real app, this would generate and download PDF
+    }
+  }
+
+  function exportInvoices() {
+    showToast('Exporting invoices...');
+    // In real app, this would export to CSV/Excel
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderInvoices();
+  });
+</script>
+</body>
+</html>
+

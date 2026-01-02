@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Inventory - Retailer Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="auth.js"></script>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <h2>InventoryPro</h2>
+    <div class="role-label">RETAILERS</div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">MENU</div>
+      <ul>
+        <li><a href="index.html">Dashboard</a></li>
+        <li><a href="marketspace.html">Market Space</a></li>
+        <li class="active"><a href="inventory.html">Inventory</a></li>
+      </ul>
+    </div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">PROCUREMENT</div>
+      <ul>
+        <li><a href="cart.html">My Cart<span class="nav-badge cart-badge" style="display: none;">0</span></a></li>
+        <li><a href="orders.html">My Orders</a></li>
+        <li><a href="invoices.html">Invoices</a></li>
+        <li><a href="quotes.html">Active Quotes</a></li>
+      </ul>
+    </div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">ACCOUNT</div>
+      <ul>
+        <li><a href="settings.html">Settings</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h1>Inventory Management</h1>
+      <input type="text" placeholder="Search by SKU, Product or Brand..." class="global-search" id="globalSearch">
+      <div class="user-info">
+        <select id="themeSelect" onchange="changeTheme(this.value)">
+          <option value="">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+        <div class="user" id="userDisplay">
+          <div class="user-name">Retailer Admin</div>
+          <div class="user-role">Retailer</div>
+        </div>
+        <div class="user-avatar" id="userAvatar">RA</div>
+        <button onclick="logout()" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); cursor: pointer; margin-left: 10px; font-size: 0.9rem;">Logout</button>
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="page-header">
+        <h1>Inventory</h1>
+        <div>
+          <button class="btn btn-primary" onclick="openModal('addItemModal')">+ Add Item</button>
+          <button class="btn" onclick="openModal('importModal')">Import CSV</button>
+        </div>
+      </div>
+
+      <div class="filters">
+        <input type="text" placeholder="Search by name/SKU..." id="searchInput" class="search-bar" onkeyup="filterTable()">
+        <select id="categoryFilter" onchange="filterTable()">
+          <option value="">All Categories</option>
+          <option>Electronics</option>
+          <option>Accessories</option>
+          <option>Cables</option>
+        </select>
+        <select id="locationFilter" onchange="filterTable()">
+          <option value="">All Locations</option>
+          <option>Store Front</option>
+          <option>Back Room</option>
+        </select>
+        <button class="btn" onclick="clearFilters()">Clear Filters</button>
+      </div>
+
+      <div class="bulk-bar" id="bulkBar">
+        <span><strong id="selectedCount">0</strong> items selected</span>
+        <div>
+          <button class="btn btn-sm" onclick="exportInventory()">Export</button>
+          <button class="btn btn-sm btn-success" onclick="bulkAdjustStock()">Adjust Stock</button>
+          <button class="btn btn-sm btn-danger" onclick="bulkDelete()">Delete</button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table id="inventoryTable">
+          <thead>
+            <tr>
+              <th><input type="checkbox" onclick="toggleAll(this)"></th>
+              <th>SKU</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Qty</th>
+              <th>Reorder</th>
+              <th>Location</th>
+              <th>Cost</th>
+              <th>Value</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryBody">
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Modals -->
+<div class="modal" id="addItemModal">
+  <div class="modal-content">
+    <button class="close-modal" onclick="closeModal()">×</button>
+    <h2>Add New Item</h2>
+    <form onsubmit="addItem(event)">
+      <div class="form-group">
+        <label>SKU</label>
+        <input type="text" name="sku" required>
+      </div>
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" name="name" required>
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select name="category">
+          <option>Electronics</option>
+          <option>Accessories</option>
+          <option>Cables</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Quantity</label>
+          <input type="number" name="qty" value="0" min="0">
+        </div>
+        <div class="form-group">
+          <label>Reorder Point</label>
+          <input type="number" name="reorder" value="10" min="0">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Unit Cost (₹)</label>
+          <input type="number" name="cost" step="0.01" min="0">
+        </div>
+        <div class="form-group">
+          <label>Location</label>
+          <select name="location">
+            <option>Store Front</option>
+            <option>Back Room</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Save Item</button>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="editItemModal">
+  <div class="modal-content">
+    <button class="close-modal" onclick="closeModal()">×</button>
+    <h2>Edit Item</h2>
+    <form onsubmit="updateItem(event)">
+      <input type="hidden" id="editItemId">
+      <div class="form-group">
+        <label>SKU</label>
+        <input type="text" id="editSku" required>
+      </div>
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" id="editName" required>
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="editCategory">
+          <option>Electronics</option>
+          <option>Accessories</option>
+          <option>Cables</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Quantity</label>
+          <input type="number" id="editQty" value="0" min="0">
+        </div>
+        <div class="form-group">
+          <label>Reorder Point</label>
+          <input type="number" id="editReorder" value="10" min="0">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Unit Cost (₹)</label>
+          <input type="number" id="editCost" step="0.01" min="0">
+        </div>
+        <div class="form-group">
+          <label>Location</label>
+          <select id="editLocation">
+            <option>Store Front</option>
+            <option>Back Room</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Update Item</button>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="adjustStockModal">
+  <div class="modal-content">
+    <button class="close-modal" onclick="closeModal()">×</button>
+    <h2>Adjust Stock</h2>
+    <form onsubmit="saveStockAdjustment(event)">
+      <input type="hidden" id="adjustItemId">
+      <input type="hidden" id="adjustItemIds"> <!-- For bulk operations -->
+      <div class="form-group">
+        <label>Current Stock</label>
+        <input type="text" id="currentStock" readonly style="background: var(--light);">
+      </div>
+      <div class="form-group">
+        <label>Adjustment Type</label>
+        <select id="adjustType" onchange="updateAdjustmentType()">
+          <option value="set">Set to Quantity</option>
+          <option value="add">Add Quantity</option>
+          <option value="subtract">Subtract Quantity</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label id="adjustLabel">New Quantity</label>
+        <input type="number" id="adjustQty" min="0" required>
+      </div>
+      <div class="form-group">
+        <label>Reason (Optional)</label>
+        <textarea id="adjustReason" rows="3" placeholder="e.g., Received shipment, Sold items, Damaged items..."></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Save Adjustment</button>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="importModal">
+  <div class="modal-content">
+    <button class="close-modal" onclick="closeModal()">×</button>
+    <h2>Import CSV</h2>
+    <div class="form-group">
+      <input type="file" accept=".csv" id="csvFile">
+    </div>
+    <button class="btn btn-success" onclick="showToast('CSV import functionality coming soon!');closeModal()">Import Now</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="common.js"></script>
+<script>
+  let inventory = JSON.parse(localStorage.getItem('retailer_inventory') || '[]');
+  if(inventory.length === 0){
+    inventory = [
+      {id:1,sku:"SKU-001",name:"Laptop Dell XPS",category:"Electronics",qty:8,reorder:20,location:"Store Front",cost:999.99},
+      {id:2,sku:"SKU-002",name:"Wireless Mouse",category:"Accessories",qty:5,reorder:15,location:"Store Front",cost:24.99},
+      {id:3,sku:"SKU-003",name:"USB-C Hub",category:"Accessories",qty:87,reorder:30,location:"Back Room",cost:45.00},
+      {id:4,sku:"SKU-004",name:"Mechanical Keyboard",category:"Electronics",qty:33,reorder:25,location:"Store Front",cost:129.99}
+    ];
+    localStorage.setItem('retailer_inventory', JSON.stringify(inventory));
+  }
+  
+  let editingItemId = null;
+  let adjustingItemIds = [];
+
+  function renderTable(){
+    const tbody = document.getElementById('inventoryBody');
+    tbody.innerHTML = inventory.map(item => `
+      <tr class="${item.qty === 0 ? 'out-of-stock' : item.qty < item.reorder ? 'low-stock' : ''}">
+        <td><input type="checkbox" class="row-check" data-item-id="${item.id}" onchange="updateBulk()"></td>
+        <td><strong>${item.sku}</strong></td>
+        <td>${item.name}</td>
+        <td>${item.category}</td>
+        <td>${item.qty}</td>
+        <td>${item.reorder}</td>
+        <td>${item.location}</td>
+        <td>₹${item.cost.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+        <td>₹${(item.qty * item.cost).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+        <td>
+          <button class="btn btn-sm btn-primary" onclick="editItem(${item.id})">Edit</button>
+          <button class="btn btn-sm btn-success" onclick="adjustStock(${item.id})">Adjust</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteItem(${item.id})">Delete</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function filterTable(){
+    const term = document.getElementById('searchInput').value.toLowerCase();
+    const cat = document.getElementById('categoryFilter').value;
+    const loc = document.getElementById('locationFilter').value;
+    const rows = document.querySelectorAll('#inventoryBody tr');
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      const match = text.includes(term) && 
+        (cat === '' || row.cells[3].textContent === cat) &&
+        (loc === '' || row.cells[6].textContent === loc);
+      row.style.display = match ? '' : 'none';
+    });
+  }
+
+  function clearFilters(){
+    document.getElementById('searchInput').value = '';
+    document.getElementById('categoryFilter').value = '';
+    document.getElementById('locationFilter').value = '';
+    filterTable();
+  }
+
+  function updateBulk(){
+    const checked = document.querySelectorAll('.row-check:checked').length;
+    document.getElementById('selectedCount').textContent = checked;
+    document.getElementById('bulkBar').classList.toggle('show', checked > 0);
+  }
+
+  function toggleAll(cb){
+    document.querySelectorAll('.row-check').forEach(c => {
+      c.checked = cb.checked;
+      // Only toggle visible rows
+      if(c.closest('tr').style.display !== 'none') {
+        c.checked = cb.checked;
+      }
+    });
+    updateBulk();
+  }
+
+  function addItem(e){
+    e.preventDefault();
+    const form = e.target;
+    const newItem = {
+      id: Date.now(),
+      sku: form.sku.value,
+      name: form.name.value,
+      category: form.category.value,
+      qty: parseInt(form.qty.value) || 0,
+      reorder: parseInt(form.reorder.value) || 10,
+      location: form.location.value,
+      cost: parseFloat(form.cost.value) || 0
+    };
+    inventory.push(newItem);
+    localStorage.setItem('retailer_inventory', JSON.stringify(inventory));
+    renderTable();
+    showToast('Item added!');
+    closeModal();
+    form.reset();
+  }
+
+  function editItem(id){
+    const item = inventory.find(i => i.id === id);
+    if(!item) return;
+    
+    editingItemId = id;
+    document.getElementById('editItemId').value = id;
+    document.getElementById('editSku').value = item.sku;
+    document.getElementById('editName').value = item.name;
+    document.getElementById('editCategory').value = item.category;
+    document.getElementById('editQty').value = item.qty;
+    document.getElementById('editReorder').value = item.reorder;
+    document.getElementById('editCost').value = item.cost;
+    document.getElementById('editLocation').value = item.location;
+    openModal('editItemModal');
+  }
+
+  function updateItem(e){
+    e.preventDefault();
+    const item = inventory.find(i => i.id === editingItemId);
+    if(!item) return;
+    
+    item.sku = document.getElementById('editSku').value;
+    item.name = document.getElementById('editName').value;
+    item.category = document.getElementById('editCategory').value;
+    item.qty = parseInt(document.getElementById('editQty').value) || 0;
+    item.reorder = parseInt(document.getElementById('editReorder').value) || 10;
+    item.cost = parseFloat(document.getElementById('editCost').value) || 0;
+    item.location = document.getElementById('editLocation').value;
+    
+    localStorage.setItem('retailer_inventory', JSON.stringify(inventory));
+    renderTable();
+    showToast('Item updated!');
+    closeModal();
+    editingItemId = null;
+  }
+
+  function deleteItem(id){
+    const item = inventory.find(i => i.id === id);
+    if(!item) return;
+    
+    if(confirm(`Are you sure you want to delete "${item.name}"?`)){
+      inventory = inventory.filter(i => i.id !== id);
+      localStorage.setItem('retailer_inventory', JSON.stringify(inventory));
+      renderTable();
+      showToast('Item deleted!');
+    }
+  }
+
+  function adjustStock(id){
+    const item = inventory.find(i => i.id === id);
+    if(!item) return;
+    
+    adjustingItemIds = [id];
+    document.getElementById('adjustItemId').value = id;
+    document.getElementById('adjustItemIds').value = '';
+    document.getElementById('currentStock').value = item.qty;
+    document.getElementById('adjustQty').value = item.qty;
+    document.getElementById('adjustType').value = 'set';
+    document.getElementById('adjustReason').value = '';
+    updateAdjustmentType();
+    openModal('adjustStockModal');
+  }
+
+  function bulkAdjustStock(){
+    const selected = getSelectedItems();
+    if(selected.length === 0){
+      showToast('Please select items to adjust');
+      return;
+    }
+    
+    adjustingItemIds = selected.map(id => parseInt(id));
+    document.getElementById('adjustItemId').value = '';
+    document.getElementById('adjustItemIds').value = adjustingItemIds.join(',');
+    document.getElementById('currentStock').value = `${selected.length} items selected`;
+    document.getElementById('adjustQty').value = '';
+    document.getElementById('adjustType').value = 'add';
+    document.getElementById('adjustReason').value = '';
+    updateAdjustmentType();
+    openModal('adjustStockModal');
+  }
+
+  function updateAdjustmentType(){
+    const type = document.getElementById('adjustType').value;
+    const label = document.getElementById('adjustLabel');
+    const input = document.getElementById('adjustQty');
+    
+    if(type === 'set'){
+      label.textContent = 'New Quantity';
+      input.min = '0';
+    } else if(type === 'add'){
+      label.textContent = 'Quantity to Add';
+      input.min = '1';
+    } else {
+      label.textContent = 'Quantity to Subtract';
+      input.min = '1';
+    }
+  }
+
+  function saveStockAdjustment(e){
+    e.preventDefault();
+    const type = document.getElementById('adjustType').value;
+    const qty = parseInt(document.getElementById('adjustQty').value);
+    const reason = document.getElementById('adjustReason').value;
+    
+    if(adjustingItemIds.length > 0){
+      // Bulk adjustment
+      let adjusted = 0;
+      adjustingItemIds.forEach(id => {
+        const item = inventory.find(i => i.id === id);
+        if(item){
+          if(type === 'set') item.qty = qty;
+          else if(type === 'add') item.qty += qty;
+          else if(type === 'subtract') item.qty = Math.max(0, item.qty - qty);
+          adjusted++;
+        }
+      });
+      localStorage.setItem('retailer_inventory', JSON.stringify(inventory));
+      renderTable();
+      clearSelection();
+      showToast(`${adjusted} item(s) adjusted!`);
+    } else {
+      // Single item adjustment
+      const id = parseInt(document.getElementById('adjustItemId').value);
+      const item = inventory.find(i => i.id === id);
+      if(item){
+        if(type === 'set') item.qty = qty;
+        else if(type === 'add') item.qty += qty;
+        else if(type === 'subtract') item.qty = Math.max(0, item.qty - qty);
+        localStorage.setItem('retailer_inventory', JSON.stringify(inventory));
+        renderTable();
+        showToast('Stock adjusted!');
+      }
+    }
+    closeModal();
+    adjustingItemIds = [];
+  }
+
+  function bulkDelete(){
+    const selected = getSelectedItems();
+    if(selected.length === 0){
+      showToast('Please select items to delete');
+      return;
+    }
+    
+    if(confirm(`Are you sure you want to delete ${selected.length} item(s)?`)){
+      inventory = inventory.filter(i => !selected.includes(i.id.toString()));
+      localStorage.setItem('retailer_inventory', JSON.stringify(inventory));
+      renderTable();
+      clearSelection();
+      showToast(`${selected.length} item(s) deleted!`);
+    }
+  }
+
+  function getSelectedItems(){
+    const checked = document.querySelectorAll('.row-check:checked');
+    return Array.from(checked).map(cb => cb.getAttribute('data-item-id'));
+  }
+
+  function clearSelection(){
+    document.querySelectorAll('.row-check').forEach(cb => cb.checked = false);
+    updateBulk();
+  }
+
+  function exportInventory(){
+    if(inventory.length === 0){
+      showToast('No inventory to export');
+      return;
+    }
+    
+    // Create CSV content
+    const headers = ['SKU', 'Name', 'Category', 'Quantity', 'Reorder Point', 'Location', 'Cost', 'Total Value'];
+    const rows = inventory.map(item => [
+      item.sku,
+      item.name,
+      item.category,
+      item.qty,
+      item.reorder,
+      item.location,
+      item.cost,
+      (item.qty * item.cost).toFixed(2)
+    ]);
+    
+    const csv = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+    
+    // Download CSV
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `inventory_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    showToast('Inventory exported!');
+  }
+
+  // Use global search for filtering
+  document.getElementById('globalSearch')?.addEventListener('keyup', function(){
+    filterTable();
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderTable();
+  });
+</script>
+</body>
+</html>
+

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reports - Retailer Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="auth.js"></script>
+  <style>
+    .report-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+    .report-card {
+      background: var(--card);
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      text-align: center;
+    }
+    .report-card h3 {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    .report-card .value {
+      font-size: 2.4rem;
+      font-weight: bold;
+      color: var(--dark);
+      margin: 10px 0;
+    }
+    .report-card .change {
+      color: var(--success);
+      font-size: 0.9rem;
+    }
+    .chart-card {
+      background: var(--card);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin-bottom: 25px;
+    }
+    .chart-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--dark);
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <h2>InventoryPro</h2>
+    <div class="role-label">RETAILERS</div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">MENU</div>
+      <ul>
+        <li><a href="index.html">Dashboard</a></li>
+        <li><a href="marketspace.html">Market Space</a></li>
+        <li><a href="inventory.html">Inventory</a></li>
+      </ul>
+    </div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">PROCUREMENT</div>
+      <ul>
+        <li><a href="cart.html">My Cart<span class="nav-badge cart-badge" style="display: none;">0</span></a></li>
+        <li><a href="orders.html">My Orders</a></li>
+        <li><a href="invoices.html">Invoices</a></li>
+        <li><a href="quotes.html">Active Quotes</a></li>
+      </ul>
+    </div>
+    
+    <div class="nav-section">
+      <div class="nav-section-title">ACCOUNT</div>
+      <ul>
+        <li><a href="settings.html">Settings</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h1>Reports & Analytics</h1>
+      <input type="text" placeholder="Search by SKU, Product or Brand..." class="global-search" id="globalSearch">
+      <div class="user-info">
+        <select id="themeSelect" onchange="changeTheme(this.value)">
+          <option value="">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+        <div class="user" id="userDisplay">
+          <div class="user-name">Retailer Admin</div>
+          <div class="user-role">Retailer</div>
+        </div>
+        <div class="user-avatar" id="userAvatar">RA</div>
+        <button onclick="logout()" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); cursor: pointer; margin-left: 10px; font-size: 0.9rem;">Logout</button>
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="page-header">
+        <h1>Analytics Overview</h1>
+        <div>
+          <button class="btn btn-primary" onclick="showToast('Report exported as PDF')">Export Report</button>
+        </div>
+      </div>
+
+      <div class="report-grid">
+        <div class="report-card">
+          <h3>Total Inventory Value</h3>
+          <div class="value" id="totalValue">$0</div>
+          <div class="change">+12.5% from last month</div>
+        </div>
+        <div class="report-card">
+          <h3>Items in Stock</h3>
+          <div class="value" id="totalItems">0</div>
+          <div class="change">Across all categories</div>
+        </div>
+        <div class="report-card">
+          <h3>Low Stock Items</h3>
+          <div class="value" id="lowStock">0</div>
+          <div class="change" style="color: var(--warning)">Requires attention</div>
+        </div>
+        <div class="report-card">
+          <h3>Out of Stock</h3>
+          <div class="value" id="outOfStock" style="color: var(--danger)">0</div>
+          <div class="change">Critical</div>
+        </div>
+        <div class="report-card">
+          <h3>Total Orders</h3>
+          <div class="value" id="totalOrders">0</div>
+          <div class="change">This month</div>
+        </div>
+        <div class="report-card">
+          <h3>Active Suppliers</h3>
+          <div class="value" id="activeSuppliers">0</div>
+          <div class="change">Total suppliers</div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">Stock Value Trend (Last 6 Months)</div>
+        <svg viewBox="0 0 600 250" style="width:100%;height:250px">
+          <polyline fill="none" stroke="var(--primary)" stroke-width="4" points="50,200 150,160 250,120 350,100 450,80 550,110"/>
+          <text x="50" y="220" fill="#666">Jul</text>
+          <text x="150" y="220" fill="#666">Aug</text>
+          <text x="250" y="220" fill="#666">Sep</text>
+          <text x="350" y="220" fill="#666">Oct</text>
+          <text x="450" y="220" fill="#666">Nov</text>
+          <text x="550" y="220" fill="#666">Dec</text>
+        </svg>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">Stock by Category</div>
+        <svg viewBox="0 0 600 300" style="width:100%;height:300px">
+          <circle cx="300" cy="150" r="100" fill="none" stroke="var(--primary)" stroke-width="80" stroke-dasharray="200 628"/>
+          <circle cx="300" cy="150" r="100" fill="none" stroke="var(--success)" stroke-width="80" stroke-dasharray="150 628" transform="rotate(90 300 150)"/>
+          <circle cx="300" cy="150" r="100" fill="none" stroke="var(--warning)" stroke-width="80" stroke-dasharray="100 628" transform="rotate(180 300 150)"/>
+          <text x="300" y="140" text-anchor="middle" font-size="18">Electronics 32%</text>
+          <text x="300" y="170" text-anchor="middle" font-size="18">Accessories 48%</text>
+          <text x="200" y="150" text-anchor="middle" font-size="16">Cables 20%</text>
+        </svg>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="common.js"></script>
+<script>
+  function loadReportData(){
+    const inventory = JSON.parse(localStorage.getItem('retailer_inventory') || '[]');
+    const orders = JSON.parse(localStorage.getItem('retailer_orders') || '[]');
+    const suppliers = JSON.parse(localStorage.getItem('retailer_suppliers') || '[]');
+    
+    const totalValue = inventory.reduce((sum, item) => sum + (item.qty * item.cost), 0);
+    const totalItems = inventory.reduce((sum, item) => sum + item.qty, 0);
+    const lowStock = inventory.filter(item => item.qty < item.reorder && item.qty > 0).length;
+    const outOfStock = inventory.filter(item => item.qty === 0).length;
+    const activeSuppliers = suppliers.filter(s => s.status === 'Active').length;
+    
+    document.getElementById('totalValue').textContent = '$' + totalValue.toFixed(2);
+    document.getElementById('totalItems').textContent = totalItems;
+    document.getElementById('lowStock').textContent = lowStock;
+    document.getElementById('outOfStock').textContent = outOfStock;
+    document.getElementById('totalOrders').textContent = orders.length;
+    document.getElementById('activeSuppliers').textContent = activeSuppliers;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadReportData();
+  });
+</script>
+</body>
+</html>
+

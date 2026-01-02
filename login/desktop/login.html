@@ -461,6 +461,7 @@
         roleOptions.forEach(opt => opt.classList.remove('selected'));
         option.classList.add('selected');
         selectedRole = option.dataset.role;
+        console.log('Role selected:', selectedRole);
         updateSwitchRoleText();
       });
     });
@@ -552,15 +553,23 @@
 
         // Redirect based on role and screen size
         setTimeout(() => {
+          console.log('Redirecting with role:', selectedRole);
           if (selectedRole === 'wholesaler') {
             if (window.innerWidth <= 768) {
               window.location.href = '../../wholesaler-dashboard/mobile/index.html';
             } else {
               window.location.href = '../../wholesaler-dashboard/desktop/index.html';
             }
+          } else if (selectedRole === 'retailer') {
+            // Retailer dashboard
+            if (window.innerWidth <= 768) {
+              window.location.href = '../../retailer-dashboard/mobile/index.html';
+            } else {
+              window.location.href = '../../retailer-dashboard/desktop/index.html';
+            }
           } else {
-            // Retailer dashboard (to be created)
-            window.location.href = '../../retailer-dashboard/index.html';
+            console.error('Unknown role:', selectedRole);
+            showError('Invalid role selected');
           }
         }, 1000);
       }, 1500);
@@ -581,8 +590,12 @@
         } else {
           window.location.href = '../../wholesaler-dashboard/desktop/index.html';
         }
-      } else {
-        window.location.href = '../../retailer-dashboard/index.html';
+      } else if (userRole === 'retailer') {
+        if (window.innerWidth <= 768) {
+          window.location.href = '../../retailer-dashboard/mobile/index.html';
+        } else {
+          window.location.href = '../../retailer-dashboard/desktop/index.html';
+        }
       }
     }
 
