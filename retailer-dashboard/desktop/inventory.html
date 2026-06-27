@@ -4,165 +4,110 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Inventory - Retailer Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="glass.css">
   <script src="auth.js"></script>
 </head>
-<body>
+<body data-page="inventory" data-title="Inventory">
 
 <div class="app">
-  <aside class="sidebar">
-    <h2>InventoryPro</h2>
-    <div class="role-label">RETAILERS</div>
-    
-    <div class="nav-section">
-      <div class="nav-section-title">MENU</div>
-      <ul>
-        <li><a href="index.html">Dashboard</a></li>
-        <li><a href="marketspace.html">Market Space</a></li>
-        <li class="active"><a href="inventory.html">Inventory</a></li>
-      </ul>
-    </div>
-    
-    <div class="nav-section">
-      <div class="nav-section-title">PROCUREMENT</div>
-      <ul>
-        <li><a href="cart.html">My Cart<span class="nav-badge cart-badge" style="display: none;">0</span></a></li>
-        <li><a href="orders.html">My Orders</a></li>
-        <li><a href="invoices.html">Invoices</a></li>
-        <li><a href="quotes.html">Active Quotes</a></li>
-      </ul>
-    </div>
-    
-    <div class="nav-section">
-      <div class="nav-section-title">ACCOUNT</div>
-      <ul>
-        <li><a href="settings.html">Settings</a></li>
-      </ul>
-    </div>
-  </aside>
-
   <main class="main">
-    <header class="topbar">
-      <h1>Inventory Management</h1>
-      <input type="text" placeholder="Search by SKU, Product or Brand..." class="global-search" id="globalSearch">
-      <div class="user-info">
-        <select id="themeSelect" onchange="changeTheme(this.value)">
-          <option value="">Light</option>
-          <option value="dark">Dark</option>
-        </select>
-        <div class="user" id="userDisplay">
-          <div class="user-name">Retailer Admin</div>
-          <div class="user-role">Retailer</div>
-        </div>
-        <div class="user-avatar" id="userAvatar">RA</div>
-        <button onclick="logout()" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); cursor: pointer; margin-left: 10px; font-size: 0.9rem;">Logout</button>
-      </div>
-    </header>
+    <section class="kpis">
+      <div class="kpi"><span class="glyph">▦</span><span class="label">Total SKUs</span><span class="value" id="kpiSkus">0</span><span class="delta">Active products</span></div>
+      <div class="kpi success"><span class="glyph">₹</span><span class="label">Inventory Value</span><span class="value" id="kpiValue">₹0</span><span class="delta up">Total stock value</span></div>
+      <div class="kpi warn"><span class="glyph">!</span><span class="label">Low Stock</span><span class="value" id="kpiLow">0</span><span class="delta down">Needs attention</span></div>
+      <div class="kpi danger"><span class="glyph">∅</span><span class="label">Out of Stock</span><span class="value" id="kpiOut">0</span><span class="delta down">Reorder required</span></div>
+    </section>
 
-    <section class="content">
-      <div class="page-header">
-        <h1>Inventory</h1>
-        <div>
+    <section class="card">
+      <div class="card-head">
+        <h3>Product Inventory</h3>
+        <div class="filters">
           <button class="btn btn-primary" onclick="openModal('addItemModal')">+ Add Item</button>
-          <button class="btn" onclick="openModal('importModal')">Import CSV</button>
+          <button class="btn btn-ghost" onclick="openModal('importModal')">Import CSV</button>
         </div>
       </div>
-
-      <div class="filters">
-        <input type="text" placeholder="Search by name/SKU..." id="searchInput" class="search-bar" onkeyup="filterTable()">
-        <select id="categoryFilter" onchange="filterTable()">
-          <option value="">All Categories</option>
-          <option>Electronics</option>
-          <option>Accessories</option>
-          <option>Cables</option>
-        </select>
-        <select id="locationFilter" onchange="filterTable()">
-          <option value="">All Locations</option>
-          <option>Store Front</option>
-          <option>Back Room</option>
-        </select>
-        <button class="btn" onclick="clearFilters()">Clear Filters</button>
-      </div>
-
-      <div class="bulk-bar" id="bulkBar">
-        <span><strong id="selectedCount">0</strong> items selected</span>
-        <div>
-          <button class="btn btn-sm" onclick="exportInventory()">Export</button>
-          <button class="btn btn-sm btn-success" onclick="bulkAdjustStock()">Adjust Stock</button>
-          <button class="btn btn-sm btn-danger" onclick="bulkDelete()">Delete</button>
+      <div class="card-body">
+        <div class="filters filters-bar">
+          <div class="search-wrap"><input type="text" placeholder="Search by name/SKU..." id="searchInput" class="search" onkeyup="filterTable()"></div>
+          <select id="categoryFilter" onchange="filterTable()">
+            <option value="">All Categories</option>
+            <option>Electronics</option>
+            <option>Accessories</option>
+            <option>Cables</option>
+          </select>
+          <select id="locationFilter" onchange="filterTable()">
+            <option value="">All Locations</option>
+            <option>Store Front</option>
+            <option>Back Room</option>
+          </select>
+          <button class="btn btn-ghost" onclick="clearFilters()">Clear Filters</button>
         </div>
-      </div>
 
-      <div class="table-container">
-        <table id="inventoryTable">
-          <thead>
-            <tr>
-              <th><input type="checkbox" onclick="toggleAll(this)"></th>
-              <th>SKU</th>
-              <th>Name</th>
-              <th>Category</th>
-              <th>Qty</th>
-              <th>Reorder</th>
-              <th>Location</th>
-              <th>Cost</th>
-              <th>Value</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="inventoryBody">
-          </tbody>
-        </table>
+        <div class="bulk-bar" id="bulkBar">
+          <span><strong id="selectedCount">0</strong> items selected</span>
+          <div class="flex-gap">
+            <button class="btn-sm" onclick="exportInventory()">Export</button>
+            <button class="btn-sm success" onclick="bulkAdjustStock()">Adjust Stock</button>
+            <button class="btn-sm danger" onclick="bulkDelete()">Delete</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table id="inventoryTable">
+            <thead>
+              <tr>
+                <th><input type="checkbox" onclick="toggleAll(this)"></th>
+                <th>SKU</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Qty</th>
+                <th>Reorder</th>
+                <th>Location</th>
+                <th>Cost</th>
+                <th>Value</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryBody"></tbody>
+          </table>
+        </div>
       </div>
     </section>
   </main>
 </div>
 
-<!-- Modals -->
 <div class="modal" id="addItemModal">
   <div class="modal-content">
     <button class="close-modal" onclick="closeModal()">×</button>
     <h2>Add New Item</h2>
     <form onsubmit="addItem(event)">
-      <div class="form-group">
-        <label>SKU</label>
-        <input type="text" name="sku" required>
-      </div>
-      <div class="form-group">
-        <label>Name</label>
-        <input type="text" name="name" required>
-      </div>
-      <div class="form-group">
-        <label>Category</label>
-        <select name="category">
-          <option>Electronics</option>
-          <option>Accessories</option>
-          <option>Cables</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Quantity</label>
-          <input type="number" name="qty" value="0" min="0">
+      <div class="form-grid">
+        <div class="form-group"><label>SKU</label><input type="text" name="sku" required></div>
+        <div class="form-group"><label>Category</label>
+          <select name="category">
+            <option>Electronics</option>
+            <option>Accessories</option>
+            <option>Cables</option>
+          </select>
         </div>
-        <div class="form-group">
-          <label>Reorder Point</label>
-          <input type="number" name="reorder" value="10" min="0">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Unit Cost (₹)</label>
-          <input type="number" name="cost" step="0.01" min="0">
-        </div>
-        <div class="form-group">
-          <label>Location</label>
+        <div class="form-group full"><label>Name</label><input type="text" name="name" required></div>
+        <div class="form-group"><label>Quantity</label><input type="number" name="qty" value="0" min="0"></div>
+        <div class="form-group"><label>Reorder Point</label><input type="number" name="reorder" value="10" min="0"></div>
+        <div class="form-group"><label>Unit Cost (₹)</label><input type="number" name="cost" step="0.01" min="0"></div>
+        <div class="form-group"><label>Location</label>
           <select name="location">
             <option>Store Front</option>
             <option>Back Room</option>
           </select>
         </div>
       </div>
-      <button type="submit" class="btn btn-primary">Save Item</button>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Item</button>
+      </div>
     </form>
   </div>
 </div>
@@ -173,46 +118,30 @@
     <h2>Edit Item</h2>
     <form onsubmit="updateItem(event)">
       <input type="hidden" id="editItemId">
-      <div class="form-group">
-        <label>SKU</label>
-        <input type="text" id="editSku" required>
-      </div>
-      <div class="form-group">
-        <label>Name</label>
-        <input type="text" id="editName" required>
-      </div>
-      <div class="form-group">
-        <label>Category</label>
-        <select id="editCategory">
-          <option>Electronics</option>
-          <option>Accessories</option>
-          <option>Cables</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Quantity</label>
-          <input type="number" id="editQty" value="0" min="0">
+      <div class="form-grid">
+        <div class="form-group"><label>SKU</label><input type="text" id="editSku" required></div>
+        <div class="form-group"><label>Category</label>
+          <select id="editCategory">
+            <option>Electronics</option>
+            <option>Accessories</option>
+            <option>Cables</option>
+          </select>
         </div>
-        <div class="form-group">
-          <label>Reorder Point</label>
-          <input type="number" id="editReorder" value="10" min="0">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Unit Cost (₹)</label>
-          <input type="number" id="editCost" step="0.01" min="0">
-        </div>
-        <div class="form-group">
-          <label>Location</label>
+        <div class="form-group full"><label>Name</label><input type="text" id="editName" required></div>
+        <div class="form-group"><label>Quantity</label><input type="number" id="editQty" value="0" min="0"></div>
+        <div class="form-group"><label>Reorder Point</label><input type="number" id="editReorder" value="10" min="0"></div>
+        <div class="form-group"><label>Unit Cost (₹)</label><input type="number" id="editCost" step="0.01" min="0"></div>
+        <div class="form-group"><label>Location</label>
           <select id="editLocation">
             <option>Store Front</option>
             <option>Back Room</option>
           </select>
         </div>
       </div>
-      <button type="submit" class="btn btn-primary">Update Item</button>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Update Item</button>
+      </div>
     </form>
   </div>
 </div>
@@ -223,28 +152,23 @@
     <h2>Adjust Stock</h2>
     <form onsubmit="saveStockAdjustment(event)">
       <input type="hidden" id="adjustItemId">
-      <input type="hidden" id="adjustItemIds"> <!-- For bulk operations -->
-      <div class="form-group">
-        <label>Current Stock</label>
-        <input type="text" id="currentStock" readonly style="background: var(--light);">
+      <input type="hidden" id="adjustItemIds">
+      <div class="form-grid">
+        <div class="form-group full"><label>Current Stock</label><input type="text" id="currentStock" readonly></div>
+        <div class="form-group"><label>Adjustment Type</label>
+          <select id="adjustType" onchange="updateAdjustmentType()">
+            <option value="set">Set to Quantity</option>
+            <option value="add">Add Quantity</option>
+            <option value="subtract">Subtract Quantity</option>
+          </select>
+        </div>
+        <div class="form-group"><label id="adjustLabel">New Quantity</label><input type="number" id="adjustQty" min="0" required></div>
+        <div class="form-group full"><label>Reason (Optional)</label><textarea id="adjustReason" rows="3" placeholder="e.g., Received shipment, Sold items, Damaged items..."></textarea></div>
       </div>
-      <div class="form-group">
-        <label>Adjustment Type</label>
-        <select id="adjustType" onchange="updateAdjustmentType()">
-          <option value="set">Set to Quantity</option>
-          <option value="add">Add Quantity</option>
-          <option value="subtract">Subtract Quantity</option>
-        </select>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Adjustment</button>
       </div>
-      <div class="form-group">
-        <label id="adjustLabel">New Quantity</label>
-        <input type="number" id="adjustQty" min="0" required>
-      </div>
-      <div class="form-group">
-        <label>Reason (Optional)</label>
-        <textarea id="adjustReason" rows="3" placeholder="e.g., Received shipment, Sold items, Damaged items..."></textarea>
-      </div>
-      <button type="submit" class="btn btn-primary">Save Adjustment</button>
     </form>
   </div>
 </div>
@@ -253,15 +177,17 @@
   <div class="modal-content">
     <button class="close-modal" onclick="closeModal()">×</button>
     <h2>Import CSV</h2>
-    <div class="form-group">
-      <input type="file" accept=".csv" id="csvFile">
+    <div class="form-group"><input type="file" accept=".csv" id="csvFile"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-success" onclick="showToast('CSV import functionality coming soon!');closeModal()">Import Now</button>
     </div>
-    <button class="btn btn-success" onclick="showToast('CSV import functionality coming soon!');closeModal()">Import Now</button>
   </div>
 </div>
 
 <div id="toast" class="toast"></div>
 
+<script src="shell.js"></script>
 <script src="common.js"></script>
 <script>
   let inventory = JSON.parse(localStorage.getItem('retailer_inventory') || '[]');
@@ -278,23 +204,34 @@
   let editingItemId = null;
   let adjustingItemIds = [];
 
+  function renderKPIs(){
+    const totalValue = inventory.reduce((s,i)=>s+(i.qty*i.cost),0);
+    document.getElementById('kpiSkus').textContent = inventory.length;
+    document.getElementById('kpiValue').textContent = '₹' + totalValue.toLocaleString('en-IN');
+    document.getElementById('kpiLow').textContent = inventory.filter(i=>i.qty>0 && i.qty<i.reorder).length;
+    document.getElementById('kpiOut').textContent = inventory.filter(i=>i.qty===0).length;
+  }
+
   function renderTable(){
+    renderKPIs();
     const tbody = document.getElementById('inventoryBody');
     tbody.innerHTML = inventory.map(item => `
       <tr class="${item.qty === 0 ? 'out-of-stock' : item.qty < item.reorder ? 'low-stock' : ''}">
         <td><input type="checkbox" class="row-check" data-item-id="${item.id}" onchange="updateBulk()"></td>
-        <td><strong>${item.sku}</strong></td>
-        <td>${item.name}</td>
+        <td><span class="sku">${item.sku}</span></td>
+        <td><div class="product"><div class="thumb">📦</div><div><div class="name">${item.name}</div><div class="meta">${item.category}</div></div></div></td>
         <td>${item.category}</td>
-        <td>${item.qty}</td>
+        <td><b>${item.qty}</b></td>
         <td>${item.reorder}</td>
         <td>${item.location}</td>
         <td>₹${item.cost.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-        <td>₹${(item.qty * item.cost).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+        <td><b>₹${(item.qty * item.cost).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b></td>
         <td>
-          <button class="btn btn-sm btn-primary" onclick="editItem(${item.id})">Edit</button>
-          <button class="btn btn-sm btn-success" onclick="adjustStock(${item.id})">Adjust</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteItem(${item.id})">Delete</button>
+          <div class="row-actions">
+            <button class="btn-sm primary" onclick="editItem(${item.id})">Edit</button>
+            <button class="btn-sm success" onclick="adjustStock(${item.id})">Adjust</button>
+            <button class="btn-sm danger" onclick="deleteItem(${item.id})">Delete</button>
+          </div>
         </td>
       </tr>
     `).join('');
@@ -330,7 +267,6 @@
   function toggleAll(cb){
     document.querySelectorAll('.row-check').forEach(c => {
       c.checked = cb.checked;
-      // Only toggle visible rows
       if(c.closest('tr').style.display !== 'none') {
         c.checked = cb.checked;
       }
@@ -464,7 +400,6 @@
     const reason = document.getElementById('adjustReason').value;
     
     if(adjustingItemIds.length > 0){
-      // Bulk adjustment
       let adjusted = 0;
       adjustingItemIds.forEach(id => {
         const item = inventory.find(i => i.id === id);
@@ -480,7 +415,6 @@
       clearSelection();
       showToast(`${adjusted} item(s) adjusted!`);
     } else {
-      // Single item adjustment
       const id = parseInt(document.getElementById('adjustItemId').value);
       const item = inventory.find(i => i.id === id);
       if(item){
@@ -528,7 +462,6 @@
       return;
     }
     
-    // Create CSV content
     const headers = ['SKU', 'Name', 'Category', 'Quantity', 'Reorder Point', 'Location', 'Cost', 'Total Value'];
     const rows = inventory.map(item => [
       item.sku,
@@ -546,7 +479,6 @@
       ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
     ].join('\n');
     
-    // Download CSV
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -557,8 +489,8 @@
     showToast('Inventory exported!');
   }
 
-  // Use global search for filtering
   document.getElementById('globalSearch')?.addEventListener('keyup', function(){
+    document.getElementById('searchInput').value = this.value;
     filterTable();
   });
 
@@ -568,4 +500,3 @@
 </script>
 </body>
 </html>
-

@@ -4,95 +4,57 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Suppliers - Retailer Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="glass.css">
   <script src="auth.js"></script>
 </head>
-<body>
+<body data-page="suppliers" data-title="Suppliers">
 
 <div class="app">
-  <aside class="sidebar">
-    <h2>InventoryPro</h2>
-    <div class="role-label">RETAILERS</div>
-    
-    <div class="nav-section">
-      <div class="nav-section-title">MENU</div>
-      <ul>
-        <li><a href="index.html">Dashboard</a></li>
-        <li><a href="marketspace.html">Market Space</a></li>
-        <li><a href="inventory.html">Inventory</a></li>
-      </ul>
-    </div>
-    
-    <div class="nav-section">
-      <div class="nav-section-title">PROCUREMENT</div>
-      <ul>
-        <li><a href="cart.html">My Cart<span class="nav-badge cart-badge" style="display: none;">0</span></a></li>
-        <li><a href="orders.html">My Orders</a></li>
-        <li><a href="invoices.html">Invoices</a></li>
-        <li><a href="quotes.html">Active Quotes</a></li>
-      </ul>
-    </div>
-    
-    <div class="nav-section">
-      <div class="nav-section-title">ACCOUNT</div>
-      <ul>
-        <li><a href="settings.html">Settings</a></li>
-      </ul>
-    </div>
-  </aside>
-
   <main class="main">
-    <header class="topbar">
-      <h1>Suppliers</h1>
-      <input type="text" placeholder="Search by SKU, Product or Brand..." class="global-search" id="globalSearch">
-      <div class="user-info">
-        <select id="themeSelect" onchange="changeTheme(this.value)">
-          <option value="">Light</option>
-          <option value="dark">Dark</option>
-        </select>
-        <div class="user" id="userDisplay">
-          <div class="user-name">Retailer Admin</div>
-          <div class="user-role">Retailer</div>
-        </div>
-        <div class="user-avatar" id="userAvatar">RA</div>
-        <button onclick="logout()" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); cursor: pointer; margin-left: 10px; font-size: 0.9rem;">Logout</button>
-      </div>
-    </header>
+    <section class="kpis">
+      <div class="kpi"><span class="glyph">🏭</span><span class="label">Total Suppliers</span><span class="value" id="kpiTotal">0</span><span class="delta">Registered vendors</span></div>
+      <div class="kpi success"><span class="glyph">✓</span><span class="label">Active</span><span class="value" id="kpiActive">0</span><span class="delta up">Currently trading</span></div>
+      <div class="kpi warn"><span class="glyph">⏸</span><span class="label">Inactive</span><span class="value" id="kpiInactive">0</span><span class="delta">Paused accounts</span></div>
+      <div class="kpi purple"><span class="glyph">📧</span><span class="label">With Email</span><span class="value" id="kpiEmail">0</span><span class="delta">Contactable</span></div>
+    </section>
 
-    <section class="content">
-      <div class="page-header">
-        <h1>Suppliers</h1>
-        <div>
+    <section class="card">
+      <div class="card-head">
+        <h3>Suppliers</h3>
+        <div class="filters">
           <button class="btn btn-primary" onclick="openModal('supplierModal')">+ Add Supplier</button>
         </div>
       </div>
+      <div class="card-body">
+        <div class="filters filters-bar">
+          <div class="search-wrap"><input type="text" placeholder="Search suppliers..." id="searchInput" class="search" onkeyup="filterTable()"></div>
+          <select id="statusFilter" onchange="filterTable()">
+            <option value="">All Status</option>
+            <option>Active</option>
+            <option>Inactive</option>
+          </select>
+          <button class="btn btn-ghost" onclick="clearFilters()">Clear Filters</button>
+        </div>
 
-      <div class="filters">
-        <input type="text" placeholder="Search suppliers..." id="searchInput" class="search-bar" onkeyup="filterTable()">
-        <select id="statusFilter" onchange="filterTable()">
-          <option value="">All Status</option>
-          <option>Active</option>
-          <option>Inactive</option>
-        </select>
-        <button class="btn" onclick="clearFilters()">Clear Filters</button>
-      </div>
-
-      <div class="table-container">
-        <table id="suppliersTable">
-          <thead>
-            <tr>
-              <th>Company Name</th>
-              <th>Contact Person</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Address</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="suppliersBody">
-          </tbody>
-        </table>
+        <div class="table-wrap">
+          <table id="suppliersTable">
+            <thead>
+              <tr>
+                <th>Company Name</th>
+                <th>Contact Person</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="suppliersBody"></tbody>
+          </table>
+        </div>
       </div>
     </section>
   </main>
@@ -104,60 +66,62 @@
     <h2 id="modalTitle">Add Supplier</h2>
     <form onsubmit="saveSupplier(event)">
       <input type="hidden" id="editId">
-      <div class="form-group">
-        <label>Company Name *</label>
-        <input type="text" id="companyName" required>
-      </div>
-      <div class="form-group">
-        <label>Contact Person</label>
-        <input type="text" id="contactPerson">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Email *</label>
-          <input type="email" id="email" required>
-        </div>
-        <div class="form-group">
-          <label>Phone *</label>
-          <input type="tel" id="phone" required>
+      <div class="form-grid">
+        <div class="form-group full"><label>Company Name *</label><input type="text" id="companyName" required></div>
+        <div class="form-group full"><label>Contact Person</label><input type="text" id="contactPerson"></div>
+        <div class="form-group"><label>Email *</label><input type="email" id="email" required></div>
+        <div class="form-group"><label>Phone *</label><input type="tel" id="phone" required></div>
+        <div class="form-group full"><label>Address</label><textarea id="address" rows="3"></textarea></div>
+        <div class="form-group"><label>Status</label>
+          <select id="status">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
         </div>
       </div>
-      <div class="form-group">
-        <label>Address</label>
-        <textarea id="address" rows="3"></textarea>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Supplier</button>
       </div>
-      <div class="form-group">
-        <label>Status</label>
-        <select id="status">
-          <option value="Active">Active</option>
-          <option value="Inactive">Inactive</option>
-        </select>
-      </div>
-      <button type="submit" class="btn btn-primary">Save Supplier</button>
     </form>
   </div>
 </div>
 
 <div id="toast" class="toast"></div>
 
+<script src="shell.js"></script>
 <script src="common.js"></script>
 <script>
   let suppliers = JSON.parse(localStorage.getItem('retailer_suppliers') || '[]');
   let editId = null;
 
+  function pillClass(status) {
+    return status === 'Active' ? 'ready' : 'out';
+  }
+
+  function renderKPIs(){
+    document.getElementById('kpiTotal').textContent = suppliers.length;
+    document.getElementById('kpiActive').textContent = suppliers.filter(s=>s.status==='Active').length;
+    document.getElementById('kpiInactive').textContent = suppliers.filter(s=>s.status==='Inactive').length;
+    document.getElementById('kpiEmail').textContent = suppliers.filter(s=>s.email).length;
+  }
+
   function renderTable(){
+    renderKPIs();
     const tbody = document.getElementById('suppliersBody');
     tbody.innerHTML = suppliers.map(s => `
       <tr>
-        <td><strong>${s.name}</strong></td>
+        <td><span class="sku">${s.name}</span></td>
         <td>${s.contact || '-'}</td>
         <td>${s.email}</td>
         <td>${s.phone}</td>
         <td>${(s.address || '-').substring(0, 30)}${(s.address || '').length > 30 ? '...' : ''}</td>
-        <td><span class="status-badge status-${s.status.toLowerCase()}">${s.status}</span></td>
+        <td><span class="pill ${pillClass(s.status)}"><span class="dot"></span>${s.status}</span></td>
         <td>
-          <button class="btn btn-sm btn-primary" onclick="editSupplier(${s.id})">Edit</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteSupplier(${s.id})">Delete</button>
+          <div class="row-actions">
+            <button class="btn-sm primary" onclick="editSupplier(${s.id})">Edit</button>
+            <button class="btn-sm danger" onclick="deleteSupplier(${s.id})">Delete</button>
+          </div>
         </td>
       </tr>
     `).join('');
@@ -169,7 +133,7 @@
     const rows = document.querySelectorAll('#suppliersBody tr');
     rows.forEach(row => {
       const text = row.textContent.toLowerCase();
-      const rowStatus = row.cells[5].textContent.trim();
+      const rowStatus = row.cells[5]?.textContent.trim();
       const match = text.includes(term) && (status === '' || rowStatus === status);
       row.style.display = match ? '' : 'none';
     });
@@ -244,4 +208,3 @@
 </script>
 </body>
 </html>
-

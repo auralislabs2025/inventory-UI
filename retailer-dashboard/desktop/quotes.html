@@ -4,151 +4,124 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Active Quotes - Retailer Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="glass.css">
   <script src="auth.js"></script>
 </head>
-<body>
+<body data-page="quotes" data-title="Active Quotes">
 
 <div class="app">
-  <aside class="sidebar">
-    <h2>InventoryPro</h2>
-    <div class="role-label">RETAILERS</div>
-    
-    <div class="nav-section">
-      <div class="nav-section-title">MENU</div>
-      <ul>
-        <li><a href="index.html">Dashboard</a></li>
-        <li><a href="marketspace.html">Market Space</a></li>
-        <li><a href="inventory.html">Inventory</a></li>
-      </ul>
-    </div>
-    
-    <div class="nav-section">
-      <div class="nav-section-title">PROCUREMENT</div>
-      <ul>
-        <li><a href="cart.html">My Cart<span class="nav-badge cart-badge" style="display: none;">0</span></a></li>
-        <li><a href="orders.html">My Orders</a></li>
-        <li><a href="invoices.html">Invoices</a></li>
-        <li class="active"><a href="quotes.html">Active Quotes</a></li>
-      </ul>
-    </div>
-    
-    <div class="nav-section">
-      <div class="nav-section-title">ACCOUNT</div>
-      <ul>
-        <li><a href="settings.html">Settings</a></li>
-      </ul>
-    </div>
-  </aside>
-
   <main class="main">
-    <header class="topbar">
-      <h1>Active Quotes</h1>
-      <input type="text" placeholder="Search by SKU, Product or Brand..." class="global-search" id="globalSearch" onkeyup="filterQuotes()">
-      <div class="user-info">
-        <select id="themeSelect" onchange="changeTheme(this.value)">
-          <option value="">Light</option>
-          <option value="dark">Dark</option>
-        </select>
-        <div class="user" id="userDisplay">
-          <div class="user-name">Retailer Admin</div>
-          <div class="user-role">Retailer</div>
-        </div>
-        <div class="user-avatar" id="userAvatar">RA</div>
-        <button onclick="logout()" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); cursor: pointer; margin-left: 10px; font-size: 0.9rem;">Logout</button>
-      </div>
-    </header>
+    <section class="kpis">
+      <div class="kpi"><span class="glyph">💬</span><span class="label">Total Quotes</span><span class="value" id="kpiTotal">0</span><span class="delta">All requests</span></div>
+      <div class="kpi warn"><span class="glyph">⏱</span><span class="label">Pending</span><span class="value" id="kpiPending">0</span><span class="delta">Awaiting response</span></div>
+      <div class="kpi success"><span class="glyph">✓</span><span class="label">Accepted</span><span class="value" id="kpiAccepted">0</span><span class="delta up">Confirmed</span></div>
+      <div class="kpi purple"><span class="glyph">₹</span><span class="label">Quoted Value</span><span class="value" id="kpiValue">₹0</span><span class="delta">Active quotes</span></div>
+    </section>
 
-    <section class="content">
-      <div class="page-header">
-        <h1>Active Quotes</h1>
-        <div>
-          <button class="btn" onclick="exportQuotes()">Export</button>
+    <section class="card">
+      <div class="card-head">
+        <h3>Active Quotes</h3>
+        <div class="filters">
+          <button class="btn btn-ghost" onclick="exportQuotes()">Export</button>
         </div>
       </div>
+      <div class="card-body">
+        <div class="filters filters-bar">
+          <select id="statusFilter" onchange="filterQuotes()">
+            <option value="">All Status</option>
+            <option>Pending</option>
+            <option>Quoted</option>
+            <option>Accepted</option>
+            <option>Rejected</option>
+            <option>Expired</option>
+          </select>
+          <button class="btn btn-ghost" onclick="clearFilters()">Clear Filters</button>
+        </div>
 
-      <div class="filters">
-        <select id="statusFilter" onchange="filterQuotes()">
-          <option value="">All Status</option>
-          <option>Pending</option>
-          <option>Quoted</option>
-          <option>Accepted</option>
-          <option>Rejected</option>
-          <option>Expired</option>
-        </select>
-        <button class="btn" onclick="clearFilters()">Clear Filters</button>
-      </div>
-
-      <div class="table-container">
-        <table id="quotesTable">
-          <thead>
-            <tr>
-              <th>Quote ID</th>
-              <th>Product</th>
-              <th>Quantity</th>
-              <th>Requested Date</th>
-              <th>Quoted Price</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="quotesBody">
-          </tbody>
-        </table>
+        <div class="table-wrap">
+          <table id="quotesTable">
+            <thead>
+              <tr>
+                <th>Quote ID</th>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Requested Date</th>
+                <th>Quoted Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="quotesBody"></tbody>
+          </table>
+        </div>
       </div>
     </section>
   </main>
 </div>
 
-<!-- Quote Details Modal -->
 <div class="modal" id="quoteDetailsModal">
   <div class="modal-content">
     <button class="close-modal" onclick="closeModal()">×</button>
     <h2>Quote Details</h2>
-    <div id="quoteDetails">
-      <!-- Filled by JS -->
-    </div>
-    <div style="margin-top: 20px;" id="quoteActions">
-      <!-- Filled by JS -->
-    </div>
+    <div id="quoteDetails"></div>
+    <div class="modal-actions" id="quoteActions"></div>
   </div>
 </div>
 
 <div id="toast" class="toast"></div>
 
+<script src="shell.js"></script>
 <script src="common.js"></script>
 <script>
   let quotes = getQuotes();
   let selectedQuoteId = null;
   let products = JSON.parse(localStorage.getItem('retailer_products') || '[]');
 
+  function pillClass(status) {
+    if (status === 'Accepted') return 'ready';
+    if (status === 'Rejected') return 'out';
+    if (status === 'Quoted') return 'processing';
+    return 'pending';
+  }
+
+  function renderKPIs(){
+    document.getElementById('kpiTotal').textContent = quotes.length;
+    document.getElementById('kpiPending').textContent = quotes.filter(q=>q.status==='Pending').length;
+    document.getElementById('kpiAccepted').textContent = quotes.filter(q=>q.status==='Accepted').length;
+    const val = quotes.filter(q=>q.quotedPrice).reduce((s,q)=>s+q.quotedPrice,0);
+    document.getElementById('kpiValue').textContent = '₹' + val.toLocaleString('en-IN');
+  }
+
   function renderQuotes() {
+    renderKPIs();
     const tbody = document.getElementById('quotesBody');
     if(quotes.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--muted);">No quotes found. Raise a quote from Market Space to get started.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="table-empty">No quotes found. Raise a quote from Market Space to get started.</td></tr>';
       return;
     }
 
     tbody.innerHTML = quotes.map(quote => {
       const product = products.find(p => p.id === quote.productId);
       const productName = product ? product.name : 'Product #' + quote.productId;
-      const statusClass = quote.status === 'Accepted' ? 'status-approved' :
-                         quote.status === 'Rejected' ? 'status-cancelled' :
-                         quote.status === 'Quoted' ? 'status-ready' : 'status-pending';
       const quotedPrice = quote.quotedPrice ? '₹' + quote.quotedPrice.toLocaleString() : '-';
       
       return `
         <tr>
-          <td><strong>#QT-${quote.id}</strong></td>
+          <td><span class="sku">#QT-${quote.id}</span></td>
           <td>${productName}</td>
           <td>${quote.quantity}</td>
           <td>${new Date(quote.createdAt).toLocaleDateString()}</td>
           <td>${quotedPrice}</td>
-          <td><span class="status-badge ${statusClass}">${quote.status}</span></td>
+          <td><span class="pill ${pillClass(quote.status)}"><span class="dot"></span>${quote.status}</span></td>
           <td>
-            <button class="btn btn-sm btn-primary" onclick="viewQuote(${quote.id})">View</button>
-            ${quote.status === 'Quoted' ? `<button class="btn btn-sm btn-success" onclick="acceptQuote(${quote.id})">Accept</button>` : ''}
-            ${quote.status === 'Quoted' || quote.status === 'Pending' ? `<button class="btn btn-sm btn-danger" onclick="rejectQuote(${quote.id})">Reject</button>` : ''}
+            <div class="row-actions">
+              <button class="btn-sm primary" onclick="viewQuote(${quote.id})">View</button>
+              ${quote.status === 'Quoted' ? `<button class="btn-sm success" onclick="acceptQuote(${quote.id})">Accept</button>` : ''}
+              ${quote.status === 'Quoted' || quote.status === 'Pending' ? `<button class="btn-sm danger" onclick="rejectQuote(${quote.id})">Reject</button>` : ''}
+            </div>
           </td>
         </tr>
       `;
@@ -156,7 +129,7 @@
   }
 
   function filterQuotes() {
-    const term = document.getElementById('globalSearch').value.toLowerCase();
+    const term = document.getElementById('globalSearch')?.value.toLowerCase() || '';
     const status = document.getElementById('statusFilter').value;
     const rows = document.querySelectorAll('#quotesBody tr');
     
@@ -169,7 +142,8 @@
   }
 
   function clearFilters() {
-    document.getElementById('globalSearch').value = '';
+    const gs = document.getElementById('globalSearch');
+    if (gs) gs.value = '';
     document.getElementById('statusFilter').value = '';
     filterQuotes();
   }
@@ -181,27 +155,25 @@
     selectedQuoteId = id;
     const product = products.find(p => p.id === quote.productId);
     const productName = product ? product.name : 'Product #' + quote.productId;
-    const details = document.getElementById('quoteDetails');
-    const actions = document.getElementById('quoteActions');
     
-    details.innerHTML = `
-      <div style="margin-bottom: 20px;">
+    document.getElementById('quoteDetails').innerHTML = `
+      <div class="modal-details">
         <p><strong>Quote ID:</strong> #QT-${quote.id}</p>
         <p><strong>Product:</strong> ${productName}</p>
         <p><strong>Quantity:</strong> ${quote.quantity}</p>
         <p><strong>Requested Date:</strong> ${new Date(quote.createdAt).toLocaleDateString()}</p>
-        <p><strong>Status:</strong> ${quote.status}</p>
+        <p><strong>Status:</strong> <span class="pill ${pillClass(quote.status)}"><span class="dot"></span>${quote.status}</span></p>
         ${quote.quotedPrice ? `<p><strong>Quoted Price:</strong> ₹${quote.quotedPrice.toLocaleString()}</p>` : '<p><strong>Quoted Price:</strong> Pending</p>'}
         ${quote.notes ? `<p><strong>Notes:</strong> ${quote.notes}</p>` : ''}
       </div>
     `;
     
-    actions.innerHTML = quote.status === 'Quoted' ? `
+    document.getElementById('quoteActions').innerHTML = quote.status === 'Quoted' ? `
       <button class="btn btn-success" onclick="acceptQuote(${quote.id}); closeModal();">Accept Quote</button>
-      <button class="btn btn-danger" onclick="rejectQuote(${quote.id}); closeModal();" style="margin-left: 10px;">Reject Quote</button>
-      <button class="btn" onclick="closeModal()" style="margin-left: 10px;">Close</button>
+      <button class="btn btn-danger" onclick="rejectQuote(${quote.id}); closeModal();">Reject Quote</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Close</button>
     ` : `
-      <button class="btn" onclick="closeModal()">Close</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Close</button>
     `;
     
     openModal('quoteDetailsModal');
@@ -219,7 +191,6 @@
     renderQuotes();
     showToast('Quote accepted!');
     
-    // Optionally add to cart or create order
     const product = products.find(p => p.id === quote.productId);
     if(product) {
       addToCart({
@@ -244,7 +215,6 @@
 
   function exportQuotes() {
     showToast('Exporting quotes...');
-    // In real app, this would export to CSV/Excel
   }
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -253,4 +223,3 @@
 </script>
 </body>
 </html>
-

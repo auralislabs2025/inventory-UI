@@ -4,163 +4,137 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Orders - Retailer Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="glass.css">
   <script src="auth.js"></script>
 </head>
-<body>
+<body data-page="orders" data-title="My Orders">
 
 <div class="app">
-  <aside class="sidebar">
-    <h2>InventoryPro</h2>
-    <div class="role-label">RETAILERS</div>
-    
-    <div class="nav-section">
-      <div class="nav-section-title">MENU</div>
-      <ul>
-        <li><a href="index.html">Dashboard</a></li>
-        <li><a href="marketspace.html">Market Space</a></li>
-        <li><a href="inventory.html">Inventory</a></li>
-      </ul>
-    </div>
-    
-    <div class="nav-section">
-      <div class="nav-section-title">PROCUREMENT</div>
-      <ul>
-        <li><a href="cart.html">My Cart<span class="nav-badge cart-badge" style="display: none;">0</span></a></li>
-        <li class="active"><a href="orders.html">My Orders</a></li>
-        <li><a href="invoices.html">Invoices</a></li>
-        <li><a href="quotes.html">Active Quotes</a></li>
-      </ul>
-    </div>
-    
-    <div class="nav-section">
-      <div class="nav-section-title">ACCOUNT</div>
-      <ul>
-        <li><a href="settings.html">Settings</a></li>
-      </ul>
-    </div>
-  </aside>
-
   <main class="main">
-    <header class="topbar">
-      <h1>My Orders</h1>
-      <input type="text" placeholder="Search by SKU, Product or Brand..." class="global-search" id="globalSearch">
-      <div class="user-info">
-        <select id="themeSelect" onchange="changeTheme(this.value)">
-          <option value="">Light</option>
-          <option value="dark">Dark</option>
-        </select>
-        <div class="user" id="userDisplay">
-          <div class="user-name">Retailer Admin</div>
-          <div class="user-role">Retailer</div>
-        </div>
-        <div class="user-avatar" id="userAvatar">RA</div>
-        <button onclick="logout()" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); cursor: pointer; margin-left: 10px; font-size: 0.9rem;">Logout</button>
-      </div>
-    </header>
+    <section class="kpis">
+      <div class="kpi"><span class="glyph">⌘</span><span class="label">Total Orders</span><span class="value" id="kpiTotal">0</span><span class="delta up">All time</span></div>
+      <div class="kpi warn"><span class="glyph">⏱</span><span class="label">Pending / Processing</span><span class="value" id="kpiPending">0</span><span class="delta">Action needed</span></div>
+      <div class="kpi success"><span class="glyph">✓</span><span class="label">Delivered</span><span class="value" id="kpiDelivered">0</span><span class="delta up">Completed</span></div>
+      <div class="kpi purple"><span class="glyph">₹</span><span class="label">Pipeline Value</span><span class="value" id="kpiValue">₹0</span><span class="delta">Open orders</span></div>
+    </section>
 
-    <section class="content">
-      <div class="page-header">
-        <h1>Orders</h1>
-        <div>
+    <section class="card">
+      <div class="card-head">
+        <h3>Orders</h3>
+        <div class="filters">
           <button class="btn btn-primary" onclick="openModal('newOrderModal')">+ New Order</button>
         </div>
       </div>
+      <div class="card-body">
+        <div class="filters filters-bar">
+          <div class="search-wrap"><input type="text" placeholder="Search orders..." id="searchInput" class="search" onkeyup="filterTable()"></div>
+          <select id="statusFilter" onchange="filterTable()">
+            <option value="">All Status</option>
+            <option>Pending</option>
+            <option>Processing</option>
+            <option>Shipped</option>
+            <option>Delivered</option>
+            <option>Cancelled</option>
+          </select>
+          <button class="btn btn-ghost" onclick="clearFilters()">Clear Filters</button>
+        </div>
 
-      <div class="filters">
-        <input type="text" placeholder="Search orders..." id="searchInput" class="search-bar" onkeyup="filterTable()">
-        <select id="statusFilter" onchange="filterTable()">
-          <option value="">All Status</option>
-          <option>Pending</option>
-          <option>Processing</option>
-          <option>Shipped</option>
-          <option>Delivered</option>
-          <option>Cancelled</option>
-        </select>
-        <button class="btn" onclick="clearFilters()">Clear Filters</button>
-      </div>
-
-      <div class="table-container">
-        <table id="ordersTable">
-          <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Source</th>
-              <th>Items</th>
-              <th>Total</th>
-              <th>Status</th>
-              <th>Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="ordersBody">
-          </tbody>
-        </table>
+        <div class="table-wrap">
+          <table id="ordersTable">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Source</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ordersBody"></tbody>
+          </table>
+        </div>
       </div>
     </section>
   </main>
 </div>
 
-<!-- Modals -->
 <div class="modal" id="newOrderModal">
   <div class="modal-content">
     <button class="close-modal" onclick="closeModal()">×</button>
     <h2>Create New Order</h2>
     <form onsubmit="createOrder(event)">
-      <div class="form-group">
-        <label>Customer Name</label>
-        <input type="text" name="customer" required>
+      <div class="form-grid">
+        <div class="form-group full"><label>Customer Name</label><input type="text" name="customer" required></div>
+        <div class="form-group"><label>Number of Items</label><input type="number" name="items" value="1" min="1" required></div>
+        <div class="form-group"><label>Total Amount (₹)</label><input type="number" name="total" step="0.01" min="0" required></div>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Number of Items</label>
-          <input type="number" name="items" value="1" min="1" required>
-        </div>
-        <div class="form-group">
-          <label>Total Amount (₹)</label>
-          <input type="number" name="total" step="0.01" min="0" required>
-        </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create Order</button>
       </div>
-      <button type="submit" class="btn btn-primary">Create Order</button>
     </form>
   </div>
 </div>
 
 <div id="toast" class="toast"></div>
 
+<script src="shell.js"></script>
 <script src="common.js"></script>
 <script>
   let orders = JSON.parse(localStorage.getItem('retailer_orders') || '[]');
 
+  function pillClass(status) {
+    const s = (status || 'Pending').toLowerCase();
+    if (s === 'delivered') return 'ready';
+    if (s === 'shipped') return 'shipped';
+    if (s === 'processing') return 'processing';
+    if (s === 'cancelled') return 'out';
+    return 'pending';
+  }
+
+  function renderKPIs(){
+    const pending = orders.filter(o=>['Pending','Processing','Shipped'].includes(o.status||'Pending')).length;
+    const delivered = orders.filter(o=>o.status==='Delivered').length;
+    const pipeline = orders.filter(o=>o.status!=='Delivered'&&o.status!=='Cancelled').reduce((s,o)=>s+(parseFloat(o.total)||0),0);
+    document.getElementById('kpiTotal').textContent = orders.length;
+    document.getElementById('kpiPending').textContent = pending;
+    document.getElementById('kpiDelivered').textContent = delivered;
+    document.getElementById('kpiValue').textContent = '₹' + pipeline.toLocaleString('en-IN');
+  }
+
   function renderTable(){
+    renderKPIs();
     const tbody = document.getElementById('ordersBody');
     if(orders.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--muted);">No orders found. Create a new order or checkout from cart.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="table-empty">No orders found. Create a new order or checkout from cart.</td></tr>';
       return;
     }
     
     tbody.innerHTML = orders.map(order => {
-      // Handle items - can be array (from cart) or number (manual order)
       const itemCount = Array.isArray(order.items) ? order.items.length : order.items;
       const itemDisplay = Array.isArray(order.items) ? `${order.items.length} item${order.items.length !== 1 ? 's' : ''}` : `${order.items} item${order.items !== 1 ? 's' : ''}`;
-      
-      // Handle source - can be customer (manual) or "Market Space" (from cart)
       const source = order.customer || 'Market Space';
-      
-      // Handle total - ensure it's a number
       const total = typeof order.total === 'number' ? order.total : parseFloat(order.total) || 0;
+      const status = order.status || 'Pending';
       
       return `
         <tr>
-          <td><strong>${order.orderId || 'N/A'}</strong></td>
+          <td><span class="sku">${order.orderId || 'N/A'}</span></td>
           <td>${source}</td>
           <td>${itemDisplay}</td>
-          <td>₹${total.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-          <td><span class="status-badge status-${(order.status || 'Pending').toLowerCase()}">${order.status || 'Pending'}</span></td>
+          <td><b>₹${total.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b></td>
+          <td><span class="pill ${pillClass(status)}"><span class="dot"></span>${status}</span></td>
           <td>${order.date || 'N/A'}</td>
           <td>
-            <button class="btn btn-sm btn-primary" onclick="updateStatus(${order.id}, '${order.status || 'Pending'}')">Update</button>
-            <button class="btn btn-sm btn-danger" onclick="deleteOrder(${order.id})">Delete</button>
+            <div class="row-actions">
+              <button class="btn-sm primary" onclick="updateStatus(${order.id}, '${status}')">Update</button>
+              <button class="btn-sm danger" onclick="deleteOrder(${order.id})">Delete</button>
+            </div>
           </td>
         </tr>
       `;
@@ -173,7 +147,7 @@
     const rows = document.querySelectorAll('#ordersBody tr');
     rows.forEach(row => {
       const text = row.textContent.toLowerCase();
-      const rowStatus = row.cells[4].textContent.trim();
+      const rowStatus = row.cells[4]?.textContent.trim();
       const match = text.includes(term) && (status === '' || rowStatus === status);
       row.style.display = match ? '' : 'none';
     });
@@ -233,4 +207,3 @@
 </script>
 </body>
 </html>
-

@@ -4,94 +4,46 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>My Cart - Retailer Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="glass.css">
   <script src="auth.js"></script>
 </head>
-<body>
+<body data-page="cart" data-title="My Cart">
 
 <div class="app">
-  <aside class="sidebar">
-    <h2>InventoryPro</h2>
-    <div class="role-label">RETAILERS</div>
-    
-    <div class="nav-section">
-      <div class="nav-section-title">MENU</div>
-      <ul>
-        <li><a href="index.html">Dashboard</a></li>
-        <li><a href="marketspace.html">Market Space</a></li>
-        <li><a href="inventory.html">Inventory</a></li>
-      </ul>
-    </div>
-    
-    <div class="nav-section">
-      <div class="nav-section-title">PROCUREMENT</div>
-      <ul>
-        <li class="active"><a href="cart.html">My Cart<span class="nav-badge cart-badge" style="display: none;">0</span></a></li>
-        <li><a href="orders.html">My Orders</a></li>
-        <li><a href="invoices.html">Invoices</a></li>
-        <li><a href="quotes.html">Active Quotes</a></li>
-      </ul>
-    </div>
-    
-    <div class="nav-section">
-      <div class="nav-section-title">ACCOUNT</div>
-      <ul>
-        <li><a href="settings.html">Settings</a></li>
-      </ul>
-    </div>
-  </aside>
-
   <main class="main">
-    <header class="topbar">
-      <h1>My Cart</h1>
-      <input type="text" placeholder="Search by SKU, Product or Brand..." class="global-search" id="globalSearch">
-      <div class="user-info">
-        <select id="themeSelect" onchange="changeTheme(this.value)">
-          <option value="">Light</option>
-          <option value="dark">Dark</option>
-        </select>
-        <div class="user" id="userDisplay">
-          <div class="user-name">Retailer Admin</div>
-          <div class="user-role">Retailer</div>
-        </div>
-        <div class="user-avatar" id="userAvatar">RA</div>
-        <button onclick="logout()" style="padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); cursor: pointer; margin-left: 10px; font-size: 0.9rem;">Logout</button>
-      </div>
-    </header>
+    <section class="kpis">
+      <div class="kpi"><span class="glyph">🛒</span><span class="label">Cart Items</span><span class="value" id="kpiItems">0</span><span class="delta">In your cart</span></div>
+      <div class="kpi success"><span class="glyph">₹</span><span class="label">Subtotal</span><span class="value" id="kpiSubtotal">₹0</span><span class="delta">Before tax</span></div>
+      <div class="kpi warn"><span class="glyph">%</span><span class="label">GST (18%)</span><span class="value" id="kpiTax">₹0</span><span class="delta">Estimated tax</span></div>
+      <div class="kpi purple"><span class="glyph">⌘</span><span class="label">Total</span><span class="value" id="kpiTotal">₹0</span><span class="delta up">Checkout amount</span></div>
+    </section>
 
-    <section class="content">
-      <div class="page-header">
-        <h1>Shopping Cart</h1>
-        <div>
-          <button class="btn" onclick="clearCart()" style="display: none;" id="clearCartBtn">Clear Cart</button>
+    <section class="card">
+      <div class="card-head">
+        <h3>Shopping Cart</h3>
+        <div class="filters">
+          <button class="btn btn-ghost is-hidden" onclick="clearCart(); renderCart();" id="clearCartBtn">Clear Cart</button>
         </div>
       </div>
+      <div class="card-body">
+        <div id="cartItems"></div>
 
-      <div id="cartItems">
-        <!-- Filled by JS -->
-      </div>
+        <div class="cart-summary is-hidden" id="cartSummary">
+          <div class="cart-summary-row"><span>Subtotal</span><span id="cartSubtotal">₹0</span></div>
+          <div class="cart-summary-row"><span>Tax (GST)</span><span id="cartTax">₹0</span></div>
+          <div class="cart-summary-row total"><span>Total</span><span id="cartTotal">₹0</span></div>
+          <button class="btn btn-primary btn-block" onclick="checkout()">Proceed to Checkout</button>
+        </div>
 
-      <div class="cart-summary" id="cartSummary" style="display: none;">
-        <div class="cart-summary-row">
-          <span>Subtotal</span>
-          <span id="cartSubtotal">₹0</span>
+        <div id="emptyCart" class="empty-state">
+          <div class="empty-icon">🛒</div>
+          <h3>Your cart is empty</h3>
+          <p>Add items from Market Space to get started</p>
+          <button class="btn btn-primary" onclick="window.location.href='marketspace.html'">Browse Market Space</button>
         </div>
-        <div class="cart-summary-row">
-          <span>Tax (GST)</span>
-          <span id="cartTax">₹0</span>
-        </div>
-        <div class="cart-summary-row">
-          <span>Total</span>
-          <span id="cartTotal">₹0</span>
-        </div>
-        <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="checkout()">Proceed to Checkout</button>
-      </div>
-
-      <div id="emptyCart" style="text-align: center; padding: 60px 20px;">
-        <div style="font-size: 4rem; margin-bottom: 20px;">🛒</div>
-        <h2 style="color: var(--muted); margin-bottom: 10px;">Your cart is empty</h2>
-        <p style="color: var(--muted); margin-bottom: 30px;">Add items from Market Space to get started</p>
-        <button class="btn btn-primary" onclick="window.location.href='marketspace.html'">Browse Market Space</button>
       </div>
     </section>
   </main>
@@ -99,6 +51,7 @@
 
 <div id="toast" class="toast"></div>
 
+<script src="shell.js"></script>
 <script src="common.js"></script>
 <script>
   function renderCart() {
@@ -110,23 +63,25 @@
 
     if(cart.length === 0) {
       container.innerHTML = '';
-      summary.style.display = 'none';
-      emptyCart.style.display = 'block';
-      clearBtn.style.display = 'none';
+      summary.classList.add('is-hidden');
+      emptyCart.classList.remove('is-hidden');
+      clearBtn.classList.add('is-hidden');
+      document.getElementById('kpiItems').textContent = '0';
+      document.getElementById('kpiSubtotal').textContent = '₹0';
+      document.getElementById('kpiTax').textContent = '₹0';
+      document.getElementById('kpiTotal').textContent = '₹0';
       return;
     }
 
-    emptyCart.style.display = 'none';
-    clearBtn.style.display = 'block';
-    summary.style.display = 'block';
+    emptyCart.classList.add('is-hidden');
+    clearBtn.classList.remove('is-hidden');
+    summary.classList.remove('is-hidden');
 
     container.innerHTML = cart.map(item => `
       <div class="cart-item">
         <div class="cart-item-info">
           <div class="cart-item-name">${item.name || 'Product'}</div>
-          <div class="cart-item-details">
-            Category: ${item.category || 'N/A'} | ₹${(item.price || 0).toLocaleString()} per unit
-          </div>
+          <div class="cart-item-details">Category: ${item.category || 'N/A'} | ₹${(item.price || 0).toLocaleString()} per unit</div>
         </div>
         <div class="cart-item-quantity">
           <div class="quantity-control">
@@ -136,14 +91,18 @@
           </div>
         </div>
         <div class="cart-item-price">₹${((item.price || 0) * (item.quantity || 1)).toLocaleString()}</div>
-        <button class="btn btn-sm btn-danger" onclick="removeFromCart(${item.id}); renderCart();">Remove</button>
+        <button class="btn-sm danger" onclick="removeFromCart(${item.id}); renderCart();">Remove</button>
       </div>
     `).join('');
 
-    // Update summary
     const subtotal = cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
-    const tax = subtotal * 0.18; // 18% GST
+    const tax = subtotal * 0.18;
     const total = subtotal + tax;
+
+    document.getElementById('kpiItems').textContent = cart.reduce((s,i)=>s+(i.quantity||1),0);
+    document.getElementById('kpiSubtotal').textContent = '₹' + subtotal.toLocaleString();
+    document.getElementById('kpiTax').textContent = '₹' + tax.toLocaleString();
+    document.getElementById('kpiTotal').textContent = '₹' + total.toLocaleString();
 
     document.getElementById('cartSubtotal').textContent = '₹' + subtotal.toLocaleString();
     document.getElementById('cartTax').textContent = '₹' + tax.toLocaleString();
@@ -162,7 +121,6 @@
       return;
     }
     
-    // Create order from cart
     const orders = JSON.parse(localStorage.getItem('retailer_orders') || '[]');
     const newOrder = {
       id: Date.now(),
@@ -189,4 +147,3 @@
 </script>
 </body>
 </html>
-

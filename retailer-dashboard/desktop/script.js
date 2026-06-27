@@ -27,10 +27,10 @@ if (!checkAuth()) {
 // Load dashboard data from localStorage
 function loadDashboardData() {
   // Load inventory data
-  const inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
+  const inventory = JSON.parse(localStorage.getItem('retailer_inventory') || '[]');
   
   // Load orders data
-  const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+  const orders = JSON.parse(localStorage.getItem('retailer_orders') || '[]');
   
   // Calculate KPIs
   updateKPIs(inventory, orders);
@@ -78,7 +78,7 @@ function updateRecentSales(orders) {
   const recentOrders = orders.slice(-5).reverse();
   
   if (recentOrders.length === 0) {
-    container.innerHTML = '<p style="color: var(--muted); text-align: center; padding: 20px;">No recent sales</p>';
+    container.innerHTML = '<p class="empty-inline">No recent sales</p>';
     return;
   }
   
@@ -105,7 +105,7 @@ function updateLowStockAlerts(inventory) {
   }).slice(0, 5);
   
   if (lowStock.length === 0) {
-    container.innerHTML = '<p style="color: var(--muted); text-align: center; padding: 20px;">No low stock items</p>';
+    container.innerHTML = '<p class="empty-inline">No low stock items</p>';
     return;
   }
   
